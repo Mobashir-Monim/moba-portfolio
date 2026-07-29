@@ -26,3 +26,35 @@ export const FILE_TYPE: Record<Kind, string> = {
 
 /** Every item claims the same permissions. It is a portfolio, nothing here is writable. */
 export const PERMISSIONS = '644';
+
+/**
+ * The owner every item reports. A handle rather than a display name, because `644` and
+ * `Mobashir Monim` in the same table are two different jokes; `644` and `mobashir` are one.
+ */
+export const OWNER = 'mobashir';
+
+/**
+ * What the info sidebar shows for a node whose content carries no date of its own, as `YYYY-MM`.
+ *
+ * ponytail: a constant, bumped by hand. The honest version reads the build timestamp, but that
+ * has to be injected at build time to avoid a server and a client disagreeing about `now` and
+ * failing hydration. Task 4.5, System Info, needs exactly that injection, so this becomes its
+ * caller rather than growing its own.
+ */
+export const SITE_MODIFIED = '2026-07';
+
+/**
+ * The POST sequence. Lives here with the name it opens on, so the boot screen, the styleguide,
+ * and System Info cannot drift into describing three different machines.
+ */
+export const BOOT_LINES = [
+	`${OS_NAME} ${OS_VERSION} (c) Mobashir Monim`,
+	'Checking memory ......... 640K OK',
+	'Detecting storage devices ... OK',
+	'Mounting /projects ...... OK',
+	'Mounting /experience .... OK',
+	'Starting window server .. OK'
+];
+
+/** How long each POST line waits before the next, in milliseconds. */
+export const BOOT_STEP_MS = 260;

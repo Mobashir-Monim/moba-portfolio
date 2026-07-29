@@ -1,3 +1,7 @@
+// Vite's ambient declarations, for the `?raw` imports that carry the content prose. Our
+// `tsconfig.json` replaces the inherited `types` array, so this reference is how they arrive.
+/// <reference types="vite/client" />
+
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
