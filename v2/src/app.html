@@ -1,9 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-skin="modern" data-theme="ferrite">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="text-scale" content="scale" />
+		<!--
+			Resolve all three display axes before the first paint. The attributes above are the
+			defaults, so the page is correctly dressed with JavaScript off; this script only
+			replaces them with the saved choice. The old site hardcoded a theme and applied the
+			saved one after mount, so every non-default visitor saw a flash.
+
+			The allowed values, the storage keys, and the defaults are duplicated from
+			src/lib/appearance.svelte.ts. A pre-paint script cannot import. Change one, change
+			the other.
+		-->
+		<script>
+			(() => {
+				const pick = (key, allowed, fallback) => {
+					try {
+						const v = localStorage.getItem(key);
+						return allowed.includes(v) ? v : fallback;
+					} catch {
+						return fallback;
+					}
+				};
+				const el = document.documentElement;
+				el.dataset.skin = pick('mnemos.skin', ['modern', 'retro', 'glass'], 'modern');
+				el.dataset.theme = pick(
+					'mnemos.theme',
+					['ferrite', 'phosphor', 'halide', 'selenium'],
+					'ferrite'
+				);
+				const appearance = pick('mnemos.appearance', ['light', 'dark', 'auto'], 'auto');
+				const dark =
+					appearance === 'auto'
+						? matchMedia('(prefers-color-scheme: dark)').matches
+						: appearance === 'dark';
+				el.classList.toggle('dark', dark);
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

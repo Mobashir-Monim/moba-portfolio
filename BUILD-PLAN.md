@@ -113,16 +113,17 @@ expensive part and does not care what the colours are.
 
 **Order of work for this task:**
 
-1. Token contract in `app.css`. Every token named and split theme-owned vs skin-owned before any
-   component consumes one.
-2. Four theme blocks across dark and light, three skin blocks.
-3. Minimal pre-paint inline script in `app.html` for all three attributes. This is properly 2.8's
-   job, pulled forward because nothing above is verifiable without it.
-4. `/styleguide` at swatch and scale level only, no components yet, with skin, theme, and mode
-   switchers. Fills out through 1.6.
-5. A `bun test` that parses the token values and asserts WCAG AA on every foreground/background
-   pair across all 24 combinations. Roughly forty lines, and it turns the non-negotiable in
-   `CLAUDE.md` into something enforced rather than eyeballed 24 times.
+- [x] 1. Token contract in `app.css`. Every token named and split theme-owned vs skin-owned before
+      any component consumes one.
+- [x] 2. Four theme blocks across dark and light, three skin blocks. Palettes are authored in OKLCH
+      by `v2/scripts/gen-palette.ts` and flattened to hex; revise a hue there, not in `app.css`.
+- [x] 3. Minimal pre-paint inline script in `app.html` for all three attributes. This is properly
+      2.8's job, pulled forward because nothing above is verifiable without it.
+- [x] 4. `/styleguide` at swatch and scale level only, no components yet, with skin, theme, and mode
+      switchers. Fills out through 1.6.
+- [x] 5. A `bun test` that parses the token values and asserts WCAG AA on every foreground/background
+      pair across all 24 combinations. Turns the non-negotiable in `CLAUDE.md` into something
+      enforced rather than eyeballed 24 times.
 
 ### 1.4 Typography
 
