@@ -15,6 +15,7 @@ import { contrast } from './contrast';
 
 const css = await Bun.file(new URL('../app.css', import.meta.url)).text();
 const html = await Bun.file(new URL('../app.html', import.meta.url)).text();
+const boot = await Bun.file(new URL('./components/Boot.svelte', import.meta.url)).text();
 const staticDir = new URL('../../static/', import.meta.url);
 
 const SKINS = ['modern', 'retro', 'glass'] as const;
@@ -187,6 +188,31 @@ describe('accent budget across all 24 combinations', () => {
 		expect(failures).toEqual([]);
 	});
 
+	/**
+	 * The info sidebar's heading is the one place outside the title bar where a skin may spend
+	 * accent on text, so it is the one place that can quietly drop below the text threshold.
+	 * `--c-accent` is only guaranteed 3:1 against a surface by the pair table above.
+	 */
+	test('the info sidebar heading reaches 4.5:1 on the panel it sits on', () => {
+		const failures: string[] = [];
+		for (const skin of SKINS) {
+			const fg = flat(skinTokens(skin)['--sidebar-title-fg']);
+			expect(fg).toBeDefined();
+			for (const theme of THEMES) {
+				for (const mode of MODES) {
+					const ramp = palette(theme, mode);
+					const ratio = contrast(ramp[fg!], ramp['--c-surface-2']);
+					if (ratio < 4.5) {
+						failures.push(
+							`${skin}/${theme}/${mode}: --sidebar-title-fg is ${ratio.toFixed(2)}:1, needs 4.5:1`
+						);
+					}
+				}
+			}
+		}
+		expect(failures).toEqual([]);
+	});
+
 	test('title bar text reaches 4.5:1 on its own background', () => {
 		const failures: string[] = [];
 		const skipped: string[] = [];
@@ -221,6 +247,27 @@ describe('accent budget across all 24 combinations', () => {
 		// Only glass is allowed to be unresolvable. If another skin shows up here, the accent
 		// budget has grown a hole the test cannot see.
 		expect(skipped.every((s) => s.startsWith('glass'))).toBe(true);
+	});
+});
+
+/**
+ * The pre-paint script decides three display axes and, now, whether the boot sequence runs at
+ * all. It cannot import, so its storage key and its attribute are copies of the ones
+ * `Boot.svelte` reads and writes. A drift is invisible in the worst way: the boot screen would
+ * simply play on every single load, forever, and nothing would error.
+ */
+describe('the boot flag crosses the pre-paint boundary intact', () => {
+	test('the session key is the same string on both sides', () => {
+		const inHtml = html.match(/sessionStorage\.getItem\('([^']+)'\)/)?.[1];
+		const inComponent = boot.match(/const KEY = '([^']+)'/)?.[1];
+		expect(inHtml).toBeDefined();
+		expect(inComponent).toBe(inHtml);
+	});
+
+	test('the attribute set before paint is the one the component shows and clears on', () => {
+		expect(html).toContain('el.dataset.boot');
+		expect(boot).toContain(':global(html[data-boot])');
+		expect(boot).toContain("removeAttribute('data-boot')");
 	});
 });
 

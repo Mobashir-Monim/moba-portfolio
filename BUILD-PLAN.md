@@ -227,68 +227,165 @@ failures get caught, not the launch audit.
 contrast passing in all 24 skin/theme/mode combinations, and no component branching on skin where
 a token or a scoped rule would do.
 
----
+### 1.8 Composition conformance
 
-## Phase 2: Shell rebuild
+**Opened after the fact, and it runs before anything else.**
 
-**~4 to 6 days. Goal: the OS works, and works without a mouse or a script.**
+1.1 was decided against three drawn mockups, all rendering the same scene: `/projects` open with
+`lightsaml` selected, three icons down the left edge, a dock, and a boot screen. 1.3 through 1.7
+then built the tokens and the components correctly and drew them in the styleguide, which is
+where the mistake hid: every component passed on its own, and nothing checked that the desktop
+they compose into matches the picture the direction was chosen from.
 
-2.1 Window state module (`.svelte.ts`, runes). Flat array, array order is stacking order, focus
-moves a record to the end. History as a string-id stack per window, never object references.
+It does not. The tokens are right and the skins are right; the arrangement is not. Nine deltas,
+found by putting the shipped `/` beside the 1.1 artifact.
 
-2.2 Unit tests for every mutator, written alongside. Defect #1 in the ledger was a `===` typo in
-exactly this code, shipped because nothing tested it.
+Two of these are spec disagreements rather than build defects, and are resolved here rather than
+left to drift: the artifact's desktop carries no masthead where the concept spec in `CLAUDE.md`
+asks for "logo and name", and no mockup implies anything is open on load.
 
-2.3 Open, close, focus, minimize, restore. Enter and exit via Svelte `transition:` directives,
-keyed `{#each}`. Delete the `justOpened`/`justClosed`/`setTimeout` mechanism entirely.
+- [x] 1. **Desktop icons are a list, not a grid.** The artifact stacks them down the left edge with
+      the label beside the glyph. `IconGrid` and `DesktopIcon` do a grid with the label below.
+      Folders keep the grid; the desktop takes the list, and the difference is a variant, not a
+      second component.
 
-2.4 Drag via Pointer Events with `setPointerCapture`. One code path for mouse, touch, and pen.
-`translate3d()`, never `left`/`top`. Position in component-local state during the gesture,
-committed to the store once on pointerup.
+- [x] 2. **Title bar is inverted.** Artifact: window controls left, title, nav chevrons right.
+      `TitleBar.svelte` has the nav first and the controls last.
 
-2.5 Responsive: one markup tree, Tailwind variants. No duplicated mobile branch, no
-`MediaQuery` component, no user-agent sniffing.
+- [x] 3. **Folder windows have a path row** under the title bar, `~/projects` in modern's mono and
+      `Projects` in the other two. Not built at all.
 
-2.6 Routing and dual render. Content routes emit complete semantic HTML; the shell renders the
-same components inside window chrome. Verify with JavaScript disabled.
+- [x] 4. **Info sidebar header and field set.** Artifact leads with the filename as accent text,
+      then Kind, Size, Perms, Owner, Modified. Built leads with a 40px glyph and a centred name,
+      spells out Permissions and Author, and adds a Contains row.
 
-2.7 Head and SEO: per-route title, description, canonical, Open Graph, Twitter card, JSON-LD.
-`sitemap.xml`, `robots.txt`.
+- [x] 5. **Dock is missing its apps button and its words.** Artifact reads `3 DOCUMENTS` and
+      `1 FOLDER`. Built renders a glyph and a bare numeral, with the word only in screen-reader
+      text, and hides apps entirely.
 
-2.8 Skin, theme, and appearance all applied pre-paint by an inline script in `app.html` reading
-localStorage. No flash. Switching skin at runtime re-dresses the running desktop in place: no
-reload, open windows keep their position and stacking order.
+- [x] 6. **Boot screen is unwired.** `BootScreen.svelte` shipped in 1.6 and nothing mounts it. It
+      is in all three mockups and it is the first impression the direction was picked on.
 
-2.9 Accessibility pass against the contract in `CLAUDE.md`: no nested interactives, accessible
-names on every icon-only control, arrow-key grid navigation, Escape closes, focus moves into a
-window on open and returns on close, visible `:focus-visible` everywhere.
+- [x] 7. **Modern's desktop is flat.** The mockup carries a faint graph-paper grid;
+      `--desktop-bg` is `var(--c-surface-0)`. Glass wants re-checking against its mockup too,
+      though its cyan-to-violet reads as `halide` and `selenium` rather than a fourth palette,
+      because the artifact predates the named themes.
 
-2.10 `prefers-reduced-motion` honoured throughout. Reduced motion means instant, not slower.
+- [x] 8. **Masthead.** Resolved toward the artifact: the corner block goes, and `/` keeps a
+      visually hidden `<h1>` so the page still has its heading. The boot screen carries the name
+      instead, which is what "logo and name" was reaching for.
 
-**Exit criteria:** fully operable by keyboard alone; readable and navigable with JS off; no
-ledger defect reintroduced.
+- [x] 9. **Nothing opens on load.** Resolved toward the artifact as well: the boot screen is the
+      first impression, so the desktop behind it stays empty and the first window is the
+      visitor's own click.
+
+**Exit criteria:** `/` beside the 1.1 artifact, in all three skins, with no arrangement
+difference left that is not a deliberate, written-down decision. The styleguide gains a desktop
+composition section, so this cannot hide there again.
+
+**Status: not met.** All nine changes shipped and the result was rejected on sight as worse than
+what it replaced. So the delta list was not the problem, or not the whole problem, and closing
+nine gaps against a still photograph did not produce the thing the photograph is of.
+
+What is missing is a statement of what is actually wrong, in the reviewer's words rather than in
+a diff against a mockup. Until that exists, another pass would be guessing at a target twice.
+Deferred at the reviewer's call; do not reopen this by proposing more changes to the same nine
+items.
 
 ---
 
 ## Phase 3: Content layer
 
-**~2 to 3 days.**
+**~2 to 3 days. Runs second.**
 
-3.1 Types in `src/lib/types/`. Plain objects, no model classes.
+Numbered 3, executed second. The numbers are stable identifiers, not an order: `CLAUDE.md` and
+eight comments in the source point at them, and renumbering would churn all of that to say the
+same thing twice.
 
-3.2 Content collections in `src/lib/content/`, ported from the old site's `src/lib/data/`.
-Every item gets a stable `slug`.
+Tasks 2.1 and 2.2, the window state module and its tests, shipped ahead of this phase because
+the store has no content dependency. Everything from 2.3 down does. A window opens a node, and
+with no tree to open, 2.3 would be wired against a placeholder that this phase then deletes.
 
-3.3 Directory tree derived from the collections, not maintained beside them.
+- [x] 3.1 Types in `src/lib/types/`. Plain objects, no model classes. A date is `YYYY-MM`, not
+      `{ month: 'Nov', year: '2022' }`: the tree needs to compare dates, and a string that sorts
+      with `<` removes the month lookup table that shape would need.
 
-3.4 Content components: about, company, experience, project, degree, publication,
-certification. Each renders standalone on its route and inside a window.
+- [x] 3.2 Content collections in `src/lib/content/`, ported from the old site's `src/lib/data/`.
+      Every item gets a stable `slug`. Companies and projects are keyed by slug with the slug
+      repeated in the record, which buys `projects.busso` with no lookup helper; experiences are
+      an array, because theirs is the only order that carries meaning.
 
-3.5 Move long prose out of TypeScript. The old site's `src/lib/data/projects.ts` was 642 lines
-compiled into the bundle.
+- [x] 3.3 Directory tree in `src/lib/tree.ts`, derived from the collections. A flat record, since
+      a window addresses nodes by id every render and that has to be a key access. Size and
+      modified date are derived too: bytes of the item's own copy, and the end date of the job
+      it was built under.
 
-3.6 Port the assets the content needs: fonts, company logos, icons. See the porting table in
-`CLAUDE.md`.
+- [x] 3.4 Content components in `src/lib/components/content/`, plus `NodeContent`, the one
+      dispatcher that stands between the content and how it is being looked at. The tree carries
+      a discriminated body, so `NodeContent` switches on `node.type` and gets `node.data`
+      narrowed; a route renders it and gets a document, a window renders the same call and gets
+      the same document inside chrome.
+
+- [x] 3.5 Prose moved to `src/lib/content/prose/*.md`, five files keyed by `## slug`. Only two
+      pieces of markdown are honoured, the key line and the blank line between paragraphs, so no
+      markdown dependency is added to read them. `prose()` throws on a missing key at import
+      time and a test catches prose that nothing claims.
+
+- [x] 3.6 Assets ported: five company logos, downscaled 1500px to 256px with `sips`, 316 KB to
+      54 KB, no toolchain added. Fonts landed in 1.4 and icons were redrawn in 1.5.
+
+---
+
+## Phase 2: Shell rebuild
+
+**~4 to 6 days. Runs third. Goal: the OS works, and works without a mouse or a script.**
+
+- [x] 2.1 Window state module (`.svelte.ts`, runes). Flat array, array order is stacking order,
+      focus moves a record to the end. History as a string-id stack per window, never object
+      references.
+
+- [x] 2.2 Unit tests for every mutator, written alongside. Defect #1 in the ledger was a `===`
+      typo in exactly this code, shipped because nothing tested it.
+
+- [x] 2.3 Open, close, focus, minimize, restore, wired through `WindowLayer` and `WindowFrame`.
+      Keyed `{#each}` over the store, array order is stacking order, so no z-index bookkeeping
+      exists to go wrong. Enter and exit are one `transition:scale`, which plays its outro before
+      removal; the `justOpened`/`justClosed`/`setTimeout(500)` mechanism is not carried across.
+      Raising happens on `pointerdown` and on `focusin`, so a pointer and a Tab key agree about
+      what is in front, and both land on the window `<section>` rather than making it a button.
+
+- [ ] 2.4 Drag via Pointer Events with `setPointerCapture`. One code path for mouse, touch, and
+      pen. `translate3d()`, never `left`/`top`. Position in component-local state during the
+      gesture, committed to the store once on pointerup.
+
+- [x] 2.5 Responsive: one markup tree, Tailwind variants. The window is full-screen below 40rem
+      through a media query that drops the transform, which is why position is a custom property
+      and not an inline `transform` with an `!important` fighting it.
+
+- [x] 2.6 Routing and dual render. One `[...path]` catch-all instead of thirteen route files:
+      every content path is a node and every node knows its own href, so the route table is the
+      tree. 36 content pages prerender with complete semantic HTML; `/about` alone carries the
+      full prose, which is the whole of ledger #12. Load returns the node id, not the node, so
+      the payload does not ship copy the client's tree module already has.
+
+- [ ] 2.7 Head and SEO: canonical, Open Graph, Twitter card, JSON-LD. `sitemap.xml`. Per-route
+      title and description already land with 2.6, off `tree.summary()`. `robots.txt` shipped in
+      phase 0.
+
+- [ ] 2.8 Skin, theme, and appearance all applied pre-paint by an inline script in `app.html`
+      reading localStorage. Landed in 1.3; what is left is the `matchMedia` listener that follows
+      a live OS colour-scheme change while appearance is `auto`.
+
+- [ ] 2.9 Accessibility pass against the contract in `CLAUDE.md`: arrow-key grid navigation,
+      Escape closes the focused window and the settings modal, focus moves into a window on open
+      and returns to its icon on close, focus trapping in `Modal`. The rest of the contract, no
+      nested interactives and accessible names on every icon-only control, holds already.
+
+- [ ] 2.10 `prefers-reduced-motion` honoured throughout. The global CSS rule and the window
+      transition already are; the remaining animations arrive with the apps.
+
+**Exit criteria:** fully operable by keyboard alone; readable and navigable with JS off; no
+ledger defect reintroduced.
 
 ---
 
@@ -399,9 +496,10 @@ alone, which misses most of what matters here.
 
 ## Sequencing notes
 
-- Phase 1 gates everything. Do not start Phase 2 before the styleguide is signed off, or the
+- Phase 1 gates everything. Do not start the shell before the styleguide is signed off, or the
   reskin gets relitigated inside feature work.
-- Phases 2 and 3 can overlap once the state module is stable.
+- Running order is 0, 1, 3, 2, 4, 5, 6. Phase 3 comes before the shell because the shell opens
+  windows onto content, and content built after the shell means building it twice.
 - Phase 4 apps are independent of each other and can be built in any order or in parallel.
 - Phase 5 is genuinely optional and can slip past launch without harm.
 - Deploy at the end of every phase. The pipeline exists from Phase 0 precisely so this is free.

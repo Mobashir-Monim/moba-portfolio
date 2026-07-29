@@ -270,12 +270,29 @@
 	/* Chrome recipes. A slight frost over whatever the window sits on, which is what a native
 	   systems panel does, at the 12px blur above. */
 	--window-bg: color-mix(in oklab, var(--c-surface-1) 92%, transparent);
-	--desktop-bg: var(--c-surface-0);
+	/* Graph paper at 32px. The technical detailing the direction was picked for, and the reason
+	   the ground is a token: retro dithers here, glass washes, modern rules a grid. */
+	--desktop-bg:
+		repeating-linear-gradient(
+			to right,
+			color-mix(in oklab, var(--c-line) 55%, transparent) 0 1px,
+			transparent 1px 32px
+		),
+		repeating-linear-gradient(
+			to bottom,
+			color-mix(in oklab, var(--c-line) 55%, transparent) 0 1px,
+			transparent 1px 32px
+		),
+		var(--c-surface-0);
 	--sidebar-w: 13rem;
 	--titlebar-pattern: none;
 	--title-align: start;
 	--bevel-out: none;
 	--bevel-in: none;
+	/* The path row's prefix, and the only place the three skins disagree about it. A shell path
+	   belongs to a systems tool; System 7 and a glass panel name the folder and stop. */
+	--path-prefix: '~/';
+	--sidebar-title-fg: var(--c-accent);
 
 	/* Accent budget: everywhere. */
 	--titlebar-bg: var(--c-surface-2);
@@ -357,6 +374,10 @@
 	--title-align: center;
 	--bevel-out: inset 1px 1px 0 0 var(--c-surface-3), inset -1px -1px 0 0 var(--c-line-strong);
 	--bevel-in: inset 1px 1px 0 0 var(--c-line-strong), inset -1px -1px 0 0 var(--c-surface-3);
+	--path-prefix: '';
+	/* Greyscale, because a coloured sidebar heading would be a third place retro spends an
+	   accent budget that stops at the title bar and the selection. */
+	--sidebar-title-fg: var(--c-fg-1);
 
 	/* Accent budget: title bar and selection only, the rest stays greyscale. */
 	--titlebar-bg: var(--c-surface-1);
@@ -420,6 +441,8 @@
 	--title-align: center;
 	--bevel-out: none;
 	--bevel-in: none;
+	--path-prefix: '';
+	--sidebar-title-fg: var(--c-accent);
 
 	/* Accent budget: gradient stops. */
 	--titlebar-bg: linear-gradient(

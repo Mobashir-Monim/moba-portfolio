@@ -41,6 +41,24 @@
 						: appearance === 'dark';
 				el.classList.toggle('dark', dark);
 
+				// The boot sequence runs once per tab, and the decision is made here for the same
+				// reason the three axes above are: deciding after hydration means either a flash
+				// of the desktop before the boot screen or a flash of the boot screen before the
+				// desktop, depending on which way the default falls. Reduced motion is part of the
+				// same decision, because the boot screen is the animation, and instant means not
+				// playing it rather than playing it faster. Storage unavailable means no boot,
+				// which is the harmless direction.
+				try {
+					if (
+						!sessionStorage.getItem('mnemos.booted') &&
+						!matchMedia('(prefers-reduced-motion: reduce)').matches
+					) {
+						el.dataset.boot = '';
+					}
+				} catch {
+					/* Private mode. The desktop is the whole site; the boot screen is the flourish. */
+				}
+
 				// Skins absent from this map are on system stacks and need no request.
 				const SKIN_FONT = { glass: '/fonts/montserrat-latin-var.woff2' };
 				const href = SKIN_FONT[el.dataset.skin];
