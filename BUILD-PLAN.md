@@ -196,6 +196,26 @@ The boot screen is the sharpest test: it has to read as a POST sequence in `retr
 tool in `modern`, and as something other than a soft gradient in `glass`. If glass cannot carry
 it, that is worth knowing in Phase 1 rather than Phase 6.
 
+- [x] 1. Chrome recipe tokens in `app.css`: `--window-bg`, `--desktop-bg`, `--sidebar-w`,
+      `--titlebar-pattern`, `--title-align`, `--bevel-out`, `--bevel-in`. Every one of the five
+      things this file budgeted a scoped `[data-skin]` rule for turned out to be a token, so the
+      shipped stylesheet still contains no scoped skin rules at all.
+- [x] 2. Window chrome: `Window.svelte`, `TitleBar.svelte`, `InfoSidebar.svelte`. Section with an
+      accessible name, title bar as a div, controls as the only buttons in the tree, body height
+      from flex rather than `calc()`. Ledger #4, #17, #24, and #27 all live here.
+- [x] 3. Desktop: `Desktop.svelte`, `DesktopIcon.svelte`. Icons are plain links, so Enter and
+      JavaScript-off both work without a keydown handler. Rest, hover, selected, and open.
+- [x] 4. `Dock.svelte`: apps, settings, and one group per kind of open window with its count.
+- [x] 5. `BootScreen.svelte`: logo, thermometer, POST lines, skip. Draws over content that already
+      exists rather than standing in for it.
+- [x] 6. `SettingsPanel.svelte` and `SkinPreview.svelte`. Skin is the headline control and gets
+      live previews rendered under a nested `data-skin`, which is the token split proving itself:
+      three skins on screen at once from one markup tree. Click mode joins the persisted settings.
+- [x] 7. `Modal.svelte`: labelled `role="dialog"` shell. Focus trapping and Escape are phase 2.
+- [x] 8. `src/lib/fs.ts` plus its test, for the invented filesystem sizes. Ledger #7 was an
+      unbounded lookup in exactly this function.
+- [x] 9. Every component in `/styleguide`, every state visible, driven by the real settings panel.
+
 ### 1.7 Styleguide route
 
 A prerendered `/styleguide` rendering every token and every component state, with skin, theme,

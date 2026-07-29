@@ -1,16 +1,14 @@
 <script lang="ts">
-	import {
-		APPEARANCES,
-		SKINS,
-		THEMES,
-		isDark,
-		settings,
-		update,
-		type Appearance,
-		type Skin,
-		type Theme
-	} from '$lib/appearance.svelte';
+	import { isDark, settings, update } from '$lib/appearance.svelte';
+	import BootScreen from '$lib/components/BootScreen.svelte';
+	import Desktop from '$lib/components/Desktop.svelte';
+	import DesktopIcon from '$lib/components/DesktopIcon.svelte';
+	import Dock from '$lib/components/Dock.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import InfoSidebar from '$lib/components/InfoSidebar.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
+	import Window from '$lib/components/Window.svelte';
 	import { BRAND_NAMES, CHROME_NAMES } from '$lib/icons';
 	import { OS_NAME, OS_VERSION } from '$lib/os';
 
@@ -46,6 +44,16 @@
 	];
 	const MOTION = ['--dur-fast', '--dur-base', '--dur-slow', '--ez-standard', '--ez-out'];
 	const TEXT_META = ['--lh-tight', '--lh-normal', '--tracking-ui'];
+	/** The recipes that replaced the scoped skin rules CLAUDE.md budgeted for. */
+	const CHROME = [
+		'--window-bg',
+		'--desktop-bg',
+		'--sidebar-w',
+		'--titlebar-pattern',
+		'--title-align',
+		'--bevel-out',
+		'--bevel-in'
+	];
 
 	const ALL = [
 		...COLOURS,
@@ -55,7 +63,8 @@
 		...WIDTHS,
 		...METRICS,
 		...MOTION,
-		...TEXT_META
+		...TEXT_META,
+		...CHROME
 	];
 
 	/** Resolved values, re-read whenever any axis changes. Empty with JavaScript off, which
@@ -69,6 +78,23 @@
 		const style = getComputedStyle(document.documentElement);
 		resolved = Object.fromEntries(ALL.map((t) => [t, style.getPropertyValue(t).trim()]));
 	});
+
+	/** Every icon state at once. Nothing here is the real store; phase 2 is. */
+	const DESKTOP = [
+		{ name: 'Experience', kind: 'folder', selected: false, open: false },
+		{ name: 'Projects', kind: 'folder', selected: true, open: false },
+		{ name: 'Attainments', kind: 'folder', selected: false, open: true },
+		{ name: 'About', kind: 'document', selected: false, open: false },
+		{ name: 'Resume.pdf', kind: 'document', selected: true, open: true }
+	] as const;
+
+	const POST = [
+		`${OS_NAME} ${OS_VERSION} (c) Mobashir Monim`,
+		'Checking memory ......... 640K OK',
+		'Mounting /Projects ...... OK',
+		'Mounting /Experience .... OK',
+		'Starting window server .. OK'
+	];
 </script>
 
 <svelte:head>
@@ -86,68 +112,21 @@
 	</header>
 
 	<section aria-labelledby="axes" class="mb-12">
-		<h2 id="axes" class="mb-4 text-xl font-semibold">Axes</h2>
-		<div class="flex flex-wrap gap-8">
-			<fieldset>
-				<legend class="mb-2 text-sm text-fg-3">Skin (shape)</legend>
-				<div class="flex flex-col gap-1">
-					{#each SKINS as skin (skin)}
-						<label class="flex items-center gap-2">
-							<input
-								type="radio"
-								name="skin"
-								value={skin}
-								checked={settings.skin === skin}
-								onchange={() => update({ skin: skin as Skin })}
-							/>
-							{skin}
-						</label>
-					{/each}
-				</div>
-			</fieldset>
-
-			<fieldset>
-				<legend class="mb-2 text-sm text-fg-3">Theme (colour)</legend>
-				<div class="flex flex-col gap-1">
-					{#each THEMES as theme (theme)}
-						<label class="flex items-center gap-2">
-							<input
-								type="radio"
-								name="theme"
-								value={theme}
-								checked={settings.theme === theme}
-								onchange={() => update({ theme: theme as Theme })}
-							/>
-							<span
-								data-theme={theme}
-								class:dark={isDark()}
-								class="size-4 shrink-0 rounded-full border border-line-strong"
-								style="background: var(--c-accent)"
-							></span>
-							{theme}
-						</label>
-					{/each}
-				</div>
-			</fieldset>
-
-			<fieldset>
-				<legend class="mb-2 text-sm text-fg-3">Appearance</legend>
-				<div class="flex flex-col gap-1">
-					{#each APPEARANCES as appearance (appearance)}
-						<label class="flex items-center gap-2">
-							<input
-								type="radio"
-								name="appearance"
-								value={appearance}
-								checked={settings.appearance === appearance}
-								onchange={() => update({ appearance: appearance as Appearance })}
-							/>
-							{appearance}
-						</label>
-					{/each}
-				</div>
-			</fieldset>
-		</div>
+		<h2 id="axes" class="mb-4 text-xl font-semibold">Axes, and the settings panel</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			This is the real <code>SettingsPanel</code>, not a switcher built for the styleguide. Every
+			section below re-dresses as you change it, which is the only honest way to check that a skin
+			swap is a token swap. The skin tiles are live previews rendered under a nested
+			<code>data-skin</code>, so three skins are on screen at once.
+		</p>
+		<SettingsPanel
+			skin={settings.skin}
+			theme={settings.theme}
+			appearance={settings.appearance}
+			clickMode={settings.clickMode}
+			dark={isDark()}
+			onchange={update}
+		/>
 	</section>
 
 	<section aria-labelledby="colour" class="mb-12">
@@ -363,5 +342,145 @@
 				control above to see the focus ring at --ring.
 			</p>
 		</div>
+	</section>
+
+	<section aria-labelledby="chrome" class="mb-12">
+		<h2 id="chrome" class="mb-4 text-xl font-semibold">Chrome recipes, skin-owned</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			The five things <code>CLAUDE.md</code> budgeted a scoped
+			<code>[data-skin]</code> rule for, and which all turned out to be tokens: retro's pinstripe,
+			its dithered desktop, its bevels, its selection by inversion, and glass's blur. There are no
+			scoped skin rules in <code>app.css</code> yet.
+		</p>
+		<dl class="grid grid-cols-[auto_1fr] gap-x-4 text-sm">
+			{#each CHROME as token (token)}
+				<dt><code class="text-xs text-fg-3">{token}</code></dt>
+				<dd class="truncate">{resolved[token] ?? ''}</dd>
+			{/each}
+		</dl>
+	</section>
+
+	<section aria-labelledby="window" class="mb-12">
+		<h2 id="window" class="mb-4 text-xl font-semibold">Window chrome</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			A <code>&lt;section&gt;</code> with an accessible name, a title bar that is a
+			<code>&lt;div&gt;</code>, and controls that are the only buttons in the tree. Ledger #17 was
+			three buttons nested inside each other. Body height comes from flex, not from
+			<code>calc(100% - 30px)</code>, which is ledger #4. Folder windows carry nav and the info
+			panel; document windows carry neither.
+		</p>
+
+		<div class="mb-4 h-80">
+			<Window
+				title="Projects"
+				focused
+				nav
+				canBack
+				onback={() => {}}
+				onforward={() => {}}
+				onminimize={() => {}}
+				onclose={() => {}}
+				class="h-full"
+			>
+				{#snippet sidebar()}
+					<InfoSidebar
+						name="Projects"
+						kind="folder"
+						size={412_734}
+						items={12}
+						modified="12 Mar 2026"
+						author="Mobashir Monim"
+					/>
+				{/snippet}
+				<h3 class="mb-2 text-lg font-semibold">Focused, folder</h3>
+				<p class="text-fg-2">
+					Nav pair, info panel, elevation at <code>--elev-2</code>. The panel sits beside the
+					content above 32rem of window width and stacks under it below, from one container query
+					and one markup tree. Ledger #27 was a second copy of all of this for mobile.
+				</p>
+			</Window>
+		</div>
+
+		<div class="h-56">
+			<Window title="About.mdoc" onminimize={() => {}} onclose={() => {}} class="h-full">
+				<h3 class="mb-2 text-lg font-semibold">Unfocused, document</h3>
+				<p class="text-fg-2">
+					Idle title bar, no pinstripes in retro, elevation drops to <code>--elev-1</code>. No nav,
+					no info panel.
+				</p>
+			</Window>
+		</div>
+	</section>
+
+	<section aria-labelledby="desktop" class="mb-12">
+		<h2 id="desktop" class="mb-4 text-xl font-semibold">Desktop and icon states</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			Icons are plain links, which is what makes them work with JavaScript off and what gives them
+			Enter for free. Ledger #20 was a bare <code>on:keydown</code> on a div, so Tab selected and nothing
+			opened. Left to right: rest, selected, open, rest, selected and open. Hover the first one; selection
+			reads as an inversion in retro only because its radius is 0.
+		</p>
+		<Desktop class="rounded-md border border-line">
+			{#each DESKTOP as item (item.name)}
+				<DesktopIcon
+					name={item.name}
+					href="#desktop"
+					kind={item.kind}
+					open={item.open}
+					selected={item.selected}
+				/>
+			{/each}
+		</Desktop>
+	</section>
+
+	<section aria-labelledby="dock" class="mb-12">
+		<h2 id="dock" class="mb-4 text-xl font-semibold">Dock</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			Apps, settings, then one group per kind of open window with its count. A group at zero is
+			absent rather than empty. Every control is icon-only and every one carries a name.
+		</p>
+		<div class="flex flex-wrap items-end gap-6">
+			<Dock folders={3} documents={2} />
+			<Dock />
+		</div>
+	</section>
+
+	<section aria-labelledby="boot" class="mb-12">
+		<h2 id="boot" class="mb-4 text-xl font-semibold">Boot screen</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			The sharpest skin test in phase 1: a POST sequence in retro, a systems tool in modern, and
+			something other than a soft gradient in glass. The thermometer is a recessed well in retro and
+			a flat track elsewhere, from <code>--bevel-in</code> resolving to <code>none</code>.
+		</p>
+		<BootScreen progress={62} lines={POST} onskip={() => {}} />
+	</section>
+
+	<section aria-labelledby="modal" class="mb-12">
+		<h2 id="modal" class="mb-4 text-xl font-semibold">Modal shell</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			<code>role="dialog"</code> with <code>aria-modal</code> and a heading it points at. The backdrop
+			is not a click target: an escape route that only a mouse can reach is not an escape route. Focus
+			trapping and Escape arrive with the state that mounts this, in phase 2.
+		</p>
+		<Modal title="Open on one click?" onclose={() => {}}>
+			{#snippet actions()}
+				<button
+					type="button"
+					class="rounded-sm border border-line-strong bg-surface-1 px-3 py-1 text-sm"
+				>
+					Two clicks
+				</button>
+				<button
+					type="button"
+					class="rounded-sm border border-line-strong bg-accent px-3 py-1 text-sm text-on-accent"
+				>
+					One click
+				</button>
+			{/snippet}
+			<p>
+				{OS_NAME} can open an item on a single click, or select on one and open on two, the way a desktop
+				usually does. You can change this later in Settings.
+			</p>
+		</Modal>
 	</section>
 </div>

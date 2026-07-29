@@ -11,14 +11,36 @@ export const SKINS = ['modern', 'retro', 'glass'] as const;
 export const THEMES = ['ferrite', 'phosphor', 'halide', 'selenium'] as const;
 export const APPEARANCES = ['light', 'dark', 'auto'] as const;
 
+/**
+ * Whether a desktop icon opens on one click or two. Persisted like the rest, but absent from
+ * the pre-paint script above, because nothing about it is visible before the first paint.
+ */
+export const CLICK_MODES = ['single', 'double'] as const;
+
 export type Skin = (typeof SKINS)[number];
 export type Theme = (typeof THEMES)[number];
 export type Appearance = (typeof APPEARANCES)[number];
+export type ClickMode = (typeof CLICK_MODES)[number];
 
-export type Settings = { skin: Skin; theme: Theme; appearance: Appearance };
+export type Settings = {
+	skin: Skin;
+	theme: Theme;
+	appearance: Appearance;
+	clickMode: ClickMode;
+};
 
-const KEY = { skin: 'mnemos.skin', theme: 'mnemos.theme', appearance: 'mnemos.appearance' };
-const DEFAULT: Settings = { skin: 'modern', theme: 'ferrite', appearance: 'auto' };
+const KEY = {
+	skin: 'mnemos.skin',
+	theme: 'mnemos.theme',
+	appearance: 'mnemos.appearance',
+	clickMode: 'mnemos.click-mode'
+};
+const DEFAULT: Settings = {
+	skin: 'modern',
+	theme: 'ferrite',
+	appearance: 'auto',
+	clickMode: 'double'
+};
 
 function pick<T extends string>(
 	value: string | null | undefined,
@@ -56,7 +78,8 @@ function initial(): Settings {
 	return {
 		skin: pick(el.dataset.skin, SKINS, DEFAULT.skin),
 		theme: pick(el.dataset.theme, THEMES, DEFAULT.theme),
-		appearance: pick(read(KEY.appearance), APPEARANCES, DEFAULT.appearance)
+		appearance: pick(read(KEY.appearance), APPEARANCES, DEFAULT.appearance),
+		clickMode: pick(read(KEY.clickMode), CLICK_MODES, DEFAULT.clickMode)
 	};
 }
 

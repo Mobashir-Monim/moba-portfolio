@@ -267,6 +267,16 @@
 	--ez-standard: cubic-bezier(0.2, 0, 0, 1);
 	--ez-out: cubic-bezier(0.16, 1, 0.3, 1);
 
+	/* Chrome recipes. A slight frost over whatever the window sits on, which is what a native
+	   systems panel does, at the 12px blur above. */
+	--window-bg: color-mix(in oklab, var(--c-surface-1) 92%, transparent);
+	--desktop-bg: var(--c-surface-0);
+	--sidebar-w: 13rem;
+	--titlebar-pattern: none;
+	--title-align: start;
+	--bevel-out: none;
+	--bevel-in: none;
+
 	/* Accent budget: everywhere. */
 	--titlebar-bg: var(--c-surface-2);
 	--titlebar-fg: var(--c-fg-1);
@@ -319,6 +329,29 @@
 	--ez-standard: steps(1, end);
 	--ez-out: steps(1, end);
 
+	/* Chrome recipes. Opaque, because System 7 had no translucency at all.
+
+	   The desktop is a two-by-two ordered dither at 4px, which is how a 1-bit display faked a
+	   grey. The title bar's pinstripe is the six horizontal hairlines of an active System 7
+	   window; an inactive one drops them, which is why it is a separate token from
+	   `--titlebar-bg` rather than folded into it.
+
+	   The bevels are the whole System 7 depth model: one light edge, one dark edge, no blur.
+	   `out` reads as a raised control, `in` as a recessed well. Both reference theme tokens, so
+	   they follow the palette without the skin knowing a single colour. */
+	--window-bg: var(--c-surface-1);
+	--desktop-bg: repeating-conic-gradient(var(--c-surface-0) 0% 25%, var(--c-line) 0% 50%) 0 0 / 4px
+		4px;
+	--sidebar-w: 11rem;
+	--titlebar-pattern: repeating-linear-gradient(
+		180deg,
+		color-mix(in oklab, var(--c-fg-1) 60%, transparent) 0 1px,
+		transparent 1px 2px
+	);
+	--title-align: center;
+	--bevel-out: inset 1px 1px 0 0 var(--c-surface-3), inset -1px -1px 0 0 var(--c-line-strong);
+	--bevel-in: inset 1px 1px 0 0 var(--c-line-strong), inset -1px -1px 0 0 var(--c-surface-3);
+
 	/* Accent budget: title bar and selection only, the rest stays greyscale. */
 	--titlebar-bg: var(--c-surface-1);
 	--titlebar-fg: var(--c-fg-1);
@@ -367,6 +400,21 @@
 	--ez-standard: cubic-bezier(0.32, 0.72, 0, 1);
 	--ez-out: cubic-bezier(0.22, 1, 0.36, 1);
 
+	/* Chrome recipes. The window is genuinely see-through and leans on the 24px blur above;
+	   the desktop gives it something worth seeing through, an accent wash falling off into the
+	   ground so the translucency reads as depth rather than as a flat tint. */
+	--window-bg: color-mix(in oklab, var(--c-surface-1) 68%, transparent);
+	--desktop-bg: radial-gradient(
+		130% 100% at 50% 0%,
+		color-mix(in oklab, var(--c-accent) 20%, var(--c-surface-0)) 0%,
+		var(--c-surface-0) 62%
+	);
+	--sidebar-w: 14rem;
+	--titlebar-pattern: none;
+	--title-align: center;
+	--bevel-out: none;
+	--bevel-in: none;
+
 	/* Accent budget: gradient stops. */
 	--titlebar-bg: linear-gradient(
 		180deg,
@@ -378,6 +426,29 @@
 	--titlebar-fg-idle: var(--c-fg-3);
 	--ring: var(--c-focus);
 }
+
+/* --------------------------------------------------------------------------
+   Scoped skin rules: none, so far, and that is the point.
+
+   CLAUDE.md budgets for a handful of rules scoped to `[data-skin="..."]` for
+   the things tokens genuinely cannot express: retro's pinstripe title bar,
+   dithered desktop, inset bevels, and selection by inversion, and glass's
+   backdrop blur. Every one of them turned out to be a token:
+
+   - pinstripe   -> `--titlebar-pattern`, layered over `--titlebar-bg`. `none`
+                    in the skins that have no pattern, which is a legal image
+                    layer, so nothing branches.
+   - dither      -> `--desktop-bg`, a repeating conic gradient.
+   - bevels      -> `--bevel-out` / `--bevel-in`, box-shadow recipes that
+                    reference theme tokens and resolve to `none` elsewhere.
+   - inversion   -> `--c-select` / `--c-on-select`, which retro already spends
+                    its accent budget on, plus `--r-sm: 0`.
+   - glass blur  -> `--bl-chrome`, applied by every chrome surface. Retro's
+                    `0px` is the opt-out.
+
+   If a rule does land here later, it belongs in this section with a note on
+   which token was tried first.
+   -------------------------------------------------------------------------- */
 
 /* --------------------------------------------------------------------------
    Tailwind bridge. `inline` so utilities emit `var(--c-surface-1)` directly
