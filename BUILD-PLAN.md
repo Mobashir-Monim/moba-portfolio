@@ -385,9 +385,35 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       full prose, which is the whole of ledger #12. Load returns the node id, not the node, so
       the payload does not ship copy the client's tree module already has.
 
-- [ ] 2.7 Head and SEO: canonical, Open Graph, Twitter card, JSON-LD. `sitemap.xml`. Per-route
+- [x] 2.7 Head and SEO: canonical, Open Graph, Twitter card, JSON-LD. `sitemap.xml`. Per-route
       title and description already land with 2.6, off `tree.summary()`. `robots.txt` shipped in
       phase 0.
+
+      One `Head.svelte` over `src/lib/seo.ts`, used by both renders of the site, so a route cannot
+      ship half a head. `SITE_URL` is the only place the origin is written, and moving to
+      mobashirmonim.com is that one line.
+
+      Kept a constant rather than an env var, and not derived from the request, because there is
+      no request: the site prerenders, `url.origin` during prerender is `http://sveltekit-prerender`,
+      and a crawler never runs the JavaScript that could read `location`. An env var would work,
+      being build-time, but it moves the value somewhere the repo cannot see it, and unset in CI
+      means every canonical on the site is quietly wrong.
+
+      `robots.txt` became an endpoint for the same reason, since its `Sitemap:` line has no
+      relative form and a file in `static/` cannot import a constant. That was the only other
+      place the origin was written down.
+
+      Structured data covers the types that are things: `Person` on `/` and `/about`,
+      `CreativeWork` per project, `ScholarlyArticle` per publication. Degrees and certifications
+      are credentials rather than works and index folders are furniture, so both get none rather
+      than a claim about a page that is not one. The JSON goes out with every `<` escaped, because
+      `</script>` inside a quoted string still closes the tag.
+
+      `sitemap.xml` is a prerendered endpoint built from the same tree the route table is (2.6),
+      so the two cannot drift; the body lives in `seo.ts` because a route handler is not testable.
+
+      No `og:image`. Nothing here has art yet, and `summary` beats `summary_large_image` pointing
+      at a placeholder. It becomes worth doing when there is something to put in it.
 
 - [ ] 2.8 Skin, theme, and appearance all applied pre-paint by an inline script in `app.html`
       reading localStorage. Landed in 1.3; what is left is the `matchMedia` listener that follows
@@ -417,6 +443,55 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       parent map by design: a project is listed under both its experience and under Projects. Gallery
       previews the item's own write-up through a new `NodeBody`, split out of `NodeContent` so a
       preview cannot recurse into the previewed item's children.
+
+- [ ] 2.12 Structured data as a graph, and the answer engines. Opened after 2.7, which shipped the
+      mechanical head and nothing that describes the site as a set of connected entities. That
+      description is what a rich result and an LLM citation are both reading.
+
+      **The graph.** Every page currently asserts its own anonymous `Person` for `author`, so a
+      crawler is looking at thirty people who happen to share a name. One `Person` at
+      `{SITE_URL}/#person` and one `WebSite` at `/#website`, with every other node referencing them
+      by `@id`. Highest value item here and close to the cheapest.
+
+      **`BreadcrumbList`** per content page, which needs no new data: an href is a path, and
+      `byHref` turns each prefix of it back into a node. The tree deliberately has no parent map
+      (2.11), but a URL is one.
+
+      **`CollectionPage` with an `ItemList`** on the four index folders, which carry no structured
+      data at all today and are exactly the pages that tell a machine the shape of the site.
+
+      **`EducationalOccupationalCredential`** for degrees and certifications. 2.7 gave them nothing
+      on the grounds that a credential is not a `CreativeWork`, which was right about
+      `CreativeWork` and wrong about there being no correct type.
+
+      **Employment.** Experience nodes get an `Organization` and the Person gets `worksFor` and
+      `alumniOf`, so the CV reads as employment history rather than as prose that mentions dates.
+
+      **`datePublished` and `dateModified`** from `node.modified`, which the tree already derives
+      per node and the head currently drops on the floor.
+
+      **AEO and GEO, honestly scoped.** Most of what is sold under those two names is either SEO
+      with a new label or unmeasurable. Three things are real and are ours to control:
+
+      1. Extractable lead sentences. An answer engine quotes the first sentence that answers the
+         implied question, and `summary()` takes `description[0]` verbatim. So this is a copy edit
+         in `content/prose/*.md` and not code: every document's opening sentence has to stand alone
+         as an answer to "what is this".
+      2. Semantic HTML, short sentences, one fact each. The dual render already gives the first,
+         and this is the actual mechanism behind most GEO advice.
+      3. Crawler policy, decided and written down here so it does not get "hardened" later by
+         reflex: `robots()` allows everything including the AI crawlers, because a portfolio wants
+         to be quoted.
+
+      Deliberately skipped: `llms.txt`, which no major crawler has been shown to read, and
+      `FAQPage`, whose rich result Google retired for non-government sites in 2023. Both stay cheap
+      if either grows teeth.
+
+      **Three things nothing else claims.** `/styleguide` is prerendered, linkable, and in no
+      sitemap, so it needs `noindex`. No `404` route exists, so a wrong URL gets SvelteKit's bare
+      error page, which reads as a soft 404 and is also the one place `CLAUDE.md` asks for a voice
+      and no task builds it. And `og:image` is still absent: the trigger is art existing, the boot
+      screen is the obvious source, and one static 1200x630 covering every page beats none.
 
 **Exit criteria:** fully operable by keyboard alone; readable and navigable with JS off; no
 ledger defect reintroduced.
@@ -525,6 +600,12 @@ alone, which misses most of what matters here.
 6.6 Redirects from any old site URLs worth preserving.
 
 6.7 Ledger review: walk all 35 items in `CLAUDE.md` and confirm none returned.
+
+6.8 Structured data and index verification, which can only happen against the live host: Rich
+Results Test on one page of each JSON-LD type, Search Console connected with the sitemap
+submitted, and a check that the canonical host in the served HTML matches the host serving it.
+That last one is the failure `SITE_URL` is a constant to make loud, and it is the one to run
+first on the day mobashirmonim.com is pointed at the Worker.
 
 ---
 

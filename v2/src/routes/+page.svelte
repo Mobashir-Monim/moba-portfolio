@@ -3,22 +3,28 @@
 	import Desktop from '$lib/components/Desktop.svelte';
 	import DesktopIcon from '$lib/components/DesktopIcon.svelte';
 	import Dock from '$lib/components/Dock.svelte';
+	import Head from '$lib/components/Head.svelte';
 	import WindowLayer from '$lib/components/WindowLayer.svelte';
 	import { about } from '$lib/content/about';
 	import { SETTINGS_ID } from '$lib/os';
+	import { jsonLd, PERSON as person } from '$lib/seo';
 	import { nodes, root, summary } from '$lib/tree';
 	import { windows } from '$lib/windows.svelte';
 
 	/** Desktop selection. Purely a view state, and the desktop has no sidebar to feed. */
 	let selected = $state<string | undefined>();
 
-	const person = `${about.person.first} ${about.person.last}`;
+	const aboutNode = nodes[about.slug];
 </script>
 
-<svelte:head>
-	<title>{person}, {about.title}</title>
-	<meta name="description" content={summary(nodes[about.slug])} />
-</svelte:head>
+<!-- The home page is the person, so it carries the `Person` graph and `/about` carries it too:
+     they are the two URLs anyone links to when they mean me rather than a piece of work. -->
+<Head
+	title="{person}, {about.title}"
+	description={summary(aboutNode)}
+	path="/"
+	jsonld={jsonLd(aboutNode)}
+/>
 
 <!--
 	The shell. Everything it opens is a real route with its own server-rendered HTML, so this page

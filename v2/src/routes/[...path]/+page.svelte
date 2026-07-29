@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { about } from '$lib/content/about';
+	import Head from '$lib/components/Head.svelte';
 	import NodeContent from '$lib/components/content/NodeContent.svelte';
+	import { jsonLd, PERSON as person } from '$lib/seo';
 	import { nodes, summary } from '$lib/tree';
 	import { resolve } from '$app/paths';
 	import type { PageProps } from './$types';
@@ -8,13 +9,15 @@
 	let { data }: PageProps = $props();
 
 	const node = $derived(nodes[data.id]);
-	const person = $derived(`${about.person.first} ${about.person.last}`);
 </script>
 
-<svelte:head>
-	<title>{node.name} | {person}</title>
-	<meta name="description" content={summary(node)} />
-</svelte:head>
+<Head
+	title="{node.name} | {person}"
+	description={summary(node)}
+	path={node.href}
+	type="article"
+	jsonld={jsonLd(node)}
+/>
 
 <!--
 	The document on its own, which is what a crawler, a link preview, and a visitor with no
