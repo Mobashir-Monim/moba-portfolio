@@ -469,8 +469,67 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       the desktop list and a five-column grid, Enter into a window, Escape deselecting then closing,
       focus landing back on `/projects`, and Tab cycling inside the modal.
 
-- [ ] 2.10 `prefers-reduced-motion` honoured throughout. The global CSS rule and the window
+- [x] 2.10 `prefers-reduced-motion` honoured throughout. The global CSS rule and the window
       transition already are; the remaining animations arrive with the apps.
+
+      **The apps arrived and brought one animation between them**, the case study reader's scroll
+      progress, and 4.2 had already settled it: a bar that moves only as far as the reader has
+      already scrolled is a position readout, not motion, so it stays and the component puts back
+      the duration the blanket rule takes away. Nothing else in phases 4 and 5 animates. So the
+      audit found no violation to fix, which is the answer this task was owed either way, and the
+      work became making that answer hold rather than making it true.
+
+      **Two properties were missing from the blanket rule**, both delays. Reduced motion means
+      instant, and a 300ms wait before an instant change is still 300ms of the page doing something
+      the visitor asked it not to. Nothing sets one today; the two lines are what keeps that true.
+
+      **What a blanket rule provably cannot reach is the part worth testing.** It is a stylesheet,
+      so it governs anything the engine drives from a stylesheet and nothing else, and there are
+      exactly two ways out of it in a Svelte app:
+
+      1. A `transition:` directive, which has two compilations. Returning a `css` function makes a
+         real CSS animation and the rule does reach it; returning a `tick` function runs in script
+         and the rule reaches nothing. The call site cannot tell you which, so the only safe rule
+         is that a component with a directive also asks `prefersReducedMotion`.
+      2. `scrollIntoView({ behavior: 'smooth' })`, which is the sharper of the two because it looks
+         like it obeys CSS and does not: the option overrides `scroll-behavior` rather than
+         deferring to it, so the `scroll-behavior: auto !important` in the rule buys nothing against
+         it. `Terminal.svelte` already calls `scrollIntoView`, one argument away from being wrong.
+
+      `src/lib/motion.test.ts` holds both, plus the rule's own declarations. It also fails if no
+      directive is left anywhere, because the first check would then pass while guarding nothing,
+      and a test that cannot fail should be deleted rather than trusted. Both checks were mutated to
+      confirm they bite.
+
+      Verified by driving headless Chrome over CDP against the preview build, in all three skins,
+      with the media feature emulated and a control run without it. The measurement is Chrome's own
+      Animation domain rather than computed styles, because a stylesheet says what would animate and
+      only the engine says what did: under the preference every animation started came back at 1ms,
+      without it the same interactions started 120ms ones. The boot screen never paints and never
+      sets its attribute; the progress bar still reads 0 at the top and 1 at the bottom.
+
+      **One thing found on the way that is not this task's**, recorded as 2.14.
+
+- [ ] 2.14 The window's open and close transition does not play. Found while building 2.10's
+      control run, which needed a case where something visibly animates and could not get one out
+      of `transition:scale` on the window frame.
+
+      Chrome's Animation domain reports no animation object created for the frame on open or on
+      close, in either motion preference, on the preview build. Not a slow one, not a capped one:
+      none. The only animations the page starts around a window opening are the desktop icon's own
+      `background-color` and `color` transitions.
+
+      Three things are already ruled out. The parameters are not it: the value was exaggerated to
+      `duration: 1600` with `start: 0.5`, rebuilt, and confirmed present in the shipped chunk, and
+      the result was unchanged. The preference is not it: `matchMedia` reports no preference in the
+      control run and the boot screen plays, which is the same signal read the same way. And it is
+      not the reduced-motion branch introduced by 2.10, since it reproduces identically before it.
+
+      What still stands is the window itself: it opens, it closes, it leaves the DOM, and 2.13's
+      behaviour is unaffected. So this is the flourish missing, not the mechanism. Worth checking
+      first is whether Svelte plays an intro for a block that is already true on its component's
+      first render, since the `{#if}` in `WindowFrame` is created with the component the each block
+      adds, which would explain the intro and leaves the outro still to account for.
 
 - [x] 2.11 Folder views: icon, list, column, gallery, switched from a segmented control at the
       right of the path row. Asked for after the fact, and built as one dispatcher over one set of

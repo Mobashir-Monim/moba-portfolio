@@ -569,14 +569,25 @@
 }
 
 /* Reduced motion means instant, not slower. 1ms rather than 0 so transitionend
-   still fires for anything that waits on it. */
+   still fires for anything that waits on it.
+
+   The delays are zeroed alongside the durations, because a 300ms wait before an
+   instant change is still 300ms of the page doing something the visitor asked it
+   not to. Nothing here currently sets one; this is what keeps that true.
+
+   What this rule provably cannot reach is motion driven from JavaScript: a Svelte
+   `transition:` directive animates in script and never reads the query, and
+   `scrollIntoView({ behavior: 'smooth' })` overrides `scroll-behavior` rather than
+   obeying it. Both are held by src/lib/motion.test.ts instead. */
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
 	*::after {
 		animation-duration: 1ms !important;
+		animation-delay: 0ms !important;
 		animation-iteration-count: 1 !important;
 		transition-duration: 1ms !important;
+		transition-delay: 0ms !important;
 		scroll-behavior: auto !important;
 	}
 }
