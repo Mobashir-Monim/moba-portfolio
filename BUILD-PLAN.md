@@ -80,8 +80,7 @@ Defined as CSS custom properties in `app.css`. Two independent sets, and the spl
 is the architecture:
 
 **Theme tokens (colour), one block per theme, switched by `data-theme`:** surface ramp, text
-ramp, accent, semantic aliases. Four themes carried over from the old site, but your own
-palettes, not Skeleton presets.
+ramp, accent, semantic aliases.
 
 **Skin tokens (shape), one block per skin, switched by `data-skin`:** font families, type scale,
 radii, border widths, chrome heights, elevation recipes (shadow and blur per depth level, so a
@@ -93,6 +92,37 @@ easing at all, because System 7 did not animate. Named tokens throughout, so not
 
 Build the token contract before any component. Every skin must define every shape token, so a
 missing value is a build-time hole rather than a silent fallback.
+
+**The four themes, decided.** The old site used Skeleton's presets, `skeleton` / `crimson` /
+`wintry` / `modern`. All four are renamed and repalletted. `modern` in particular could not
+survive: it is now a skin name, and `data-skin="modern"` beside `data-theme="modern"` is a trap.
+
+Named for ways of storing or showing an image, which is what Mnemos means and what a portfolio
+does. Hue positions roughly track the old four so nothing feels lost.
+
+| Theme | Accent | Replaces |
+|---|---|---|
+| `ferrite` | warm red, core-memory rust | `crimson` |
+| `phosphor` | CRT green | `skeleton` |
+| `halide` | cool blue, silver-halide film | `wintry` |
+| `selenium` | violet, selenium drum | `modern` |
+
+The names pay off in System Info and in the Terminal's `theme` command, and they cannot collide
+with skin names. Hues are five hex values each and cheap to revise; the token architecture is the
+expensive part and does not care what the colours are.
+
+**Order of work for this task:**
+
+1. Token contract in `app.css`. Every token named and split theme-owned vs skin-owned before any
+   component consumes one.
+2. Four theme blocks across dark and light, three skin blocks.
+3. Minimal pre-paint inline script in `app.html` for all three attributes. This is properly 2.8's
+   job, pulled forward because nothing above is verifiable without it.
+4. `/styleguide` at swatch and scale level only, no components yet, with skin, theme, and mode
+   switchers. Fills out through 1.6.
+5. A `bun test` that parses the token values and asserts WCAG AA on every foreground/background
+   pair across all 24 combinations. Roughly forty lines, and it turns the non-negotiable in
+   `CLAUDE.md` into something enforced rather than eyeballed 24 times.
 
 ### 1.4 Typography
 
