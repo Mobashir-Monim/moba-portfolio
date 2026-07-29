@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { formatSize } from '$lib/fs';
 	import { FILE_TYPE, PERMISSIONS, type Kind } from '$lib/os';
-	import Icon from './Icon.svelte';
 
 	let {
 		name,
@@ -22,21 +21,24 @@
 		items?: number;
 	} = $props();
 
+	// Field names and order are the 1.1 mockups': Kind, Size, Perms, Owner, Modified. `Contains`
+	// is the one addition, because no mockup ever shows a folder selected and a folder with no
+	// item count is a sidebar that has less to say than the icon beside it.
 	const rows = $derived([
 		['Kind', FILE_TYPE[kind]],
 		['Size', formatSize(size)],
 		...(items === undefined ? [] : [['Contains', `${items} item${items === 1 ? '' : 's'}`]]),
-		['Modified', modified],
-		['Permissions', PERMISSIONS],
-		['Author', author]
+		['Perms', PERMISSIONS],
+		['Owner', author],
+		['Modified', modified]
 	] as const);
 </script>
 
 <div class="info">
-	<div class="head">
-		<Icon name={kind} size={40} />
-		<p class="name">{name}</p>
-	</div>
+	<!-- The filename alone, in `--sidebar-title-fg`. No glyph: the icon it describes is already
+	     on screen and selected, so repeating it at 40px spends the panel's best space saying
+	     nothing new. -->
+	<p class="name">{name}</p>
 
 	<dl>
 		{#each rows as [label, value] (label)}
@@ -54,18 +56,11 @@
 		letter-spacing: var(--tracking-ui);
 	}
 
-	.head {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.375rem;
-		padding-bottom: 0.75rem;
-		margin-bottom: 0.75rem;
-		border-bottom: var(--bw) solid var(--c-line);
-		text-align: center;
-	}
-
 	.name {
+		padding-bottom: 0.5rem;
+		margin-bottom: 0.5rem;
+		border-bottom: var(--bw) solid var(--c-line);
+		color: var(--sidebar-title-fg);
 		font-size: var(--fs-sm);
 		font-weight: 600;
 		overflow-wrap: anywhere;

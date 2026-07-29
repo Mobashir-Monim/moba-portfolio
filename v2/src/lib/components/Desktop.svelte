@@ -5,15 +5,19 @@
 </script>
 
 <!--
-	The ground the whole OS sits on. `--desktop-bg` is where the three skins diverge hardest: a
-	flat surface in modern, a two-by-two ordered dither in retro, an accent wash in glass. All
+	The ground the whole OS sits on. `--desktop-bg` is where the three skins diverge hardest:
+	graph paper in modern, a two-by-two ordered dither in retro, an accent wash in glass. All
 	three are one token, so this element never learns which skin it is in.
 
-	No role and no label: in phase 2 the icon list becomes a `role="grid"` with arrow-key
-	navigation, and a role invented now would only have to be replaced then.
+	The root is a list down the left edge, not a field of tiles. It is four places to go, and a
+	column reads as a menu where a grid reads as a folder that happens to be empty. Folders use
+	`IconGrid`; this is the one place that does not.
+
+	No role and no label: 2.9 turns the list into a `role="listbox"` with arrow-key navigation,
+	and a role invented now would only have to be replaced then.
 -->
 <div class="desktop {klass}">
-	<div class="grid">{@render children()}</div>
+	<div class="list">{@render children()}</div>
 </div>
 
 <style>
@@ -21,12 +25,10 @@
 		background: var(--desktop-bg);
 	}
 
-	.grid {
+	.list {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, var(--icon-tile));
-		align-content: start;
-		justify-content: start;
-		gap: 0.5rem;
+		grid-template-columns: max-content;
+		gap: 0.125rem;
 		padding: 1rem;
 	}
 </style>

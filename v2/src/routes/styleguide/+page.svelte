@@ -5,12 +5,13 @@
 	import DesktopIcon from '$lib/components/DesktopIcon.svelte';
 	import Dock from '$lib/components/Dock.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import IconGrid from '$lib/components/IconGrid.svelte';
 	import InfoSidebar from '$lib/components/InfoSidebar.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
 	import Window from '$lib/components/Window.svelte';
 	import { BRAND_NAMES, CHROME_NAMES } from '$lib/icons';
-	import { OS_NAME, OS_VERSION } from '$lib/os';
+	import { BOOT_LINES, OS_NAME, OS_VERSION, OWNER } from '$lib/os';
 
 	const COLOURS = [
 		'--c-surface-0',
@@ -52,7 +53,9 @@
 		'--titlebar-pattern',
 		'--title-align',
 		'--bevel-out',
-		'--bevel-in'
+		'--bevel-in',
+		'--path-prefix',
+		'--sidebar-title-fg'
 	];
 
 	const ALL = [
@@ -79,7 +82,7 @@
 		resolved = Object.fromEntries(ALL.map((t) => [t, style.getPropertyValue(t).trim()]));
 	});
 
-	/** Every icon state at once. Nothing here is the real store; phase 2 is. */
+	/** Every icon state at once. Nothing here is the real store; the desktop route is. */
 	const DESKTOP = [
 		{ name: 'Experience', kind: 'folder', selected: false, open: false },
 		{ name: 'Projects', kind: 'folder', selected: true, open: false },
@@ -88,13 +91,22 @@
 		{ name: 'Resume.pdf', kind: 'document', selected: true, open: true }
 	] as const;
 
-	const POST = [
-		`${OS_NAME} ${OS_VERSION} (c) Mobashir Monim`,
-		'Checking memory ......... 640K OK',
-		'Mounting /Projects ...... OK',
-		'Mounting /Experience .... OK',
-		'Starting window server .. OK'
-	];
+	/** The 1.1 scene, so the arrangement is checkable and not only the parts. */
+	const SCENE_ROOT = [
+		{ name: 'About Me', kind: 'document' },
+		{ name: 'Experience', kind: 'folder' },
+		{ name: 'Projects', kind: 'folder' },
+		{ name: 'Attainments', kind: 'folder' }
+	] as const;
+
+	const SCENE_FOLDER = [
+		'bout',
+		'blober',
+		'lightsaml',
+		'mongol-tori',
+		'busso',
+		'case-studies'
+	] as const;
 </script>
 
 <svelte:head>
@@ -375,6 +387,7 @@
 				title="Projects"
 				focused
 				nav
+				path="Projects"
 				canBack
 				onback={() => {}}
 				onforward={() => {}}
@@ -388,8 +401,8 @@
 						kind="folder"
 						size={412_734}
 						items={12}
-						modified="12 Mar 2026"
-						author="Mobashir Monim"
+						modified="2026-03"
+						author={OWNER}
 					/>
 				{/snippet}
 				<h3 class="mb-2 text-lg font-semibold">Focused, folder</h3>
@@ -413,14 +426,31 @@
 	</section>
 
 	<section aria-labelledby="desktop" class="mb-12">
-		<h2 id="desktop" class="mb-4 text-xl font-semibold">Desktop and icon states</h2>
+		<h2 id="desktop" class="mb-4 text-xl font-semibold">Icon states, both layouts</h2>
 		<p class="mb-4 text-sm text-fg-2">
 			Icons are plain links, which is what makes them work with JavaScript off and what gives them
 			Enter for free. Ledger #20 was a bare <code>on:keydown</code> on a div, so Tab selected and nothing
-			opened. Left to right: rest, selected, open, rest, selected and open. Hover the first one; selection
-			reads as an inversion in retro only because its radius is 0.
+			opened. Rest, selected, open, rest, selected and open. Hover the first one; selection reads as an
+			inversion in retro only because its radius is 0.
 		</p>
-		<Desktop class="rounded-md border border-line">
+		<p class="mb-4 text-sm text-fg-2">
+			Two layouts, one component. <code>row</code> is the desktop's list down the left edge;
+			<code>tile</code> is what every folder draws in an <code>IconGrid</code>. The markup is
+			identical and only the axis changes, so there is no second icon to keep in step.
+		</p>
+		<Desktop class="mb-4 rounded-md border border-line">
+			{#each DESKTOP as item (item.name)}
+				<DesktopIcon
+					name={item.name}
+					href="#desktop"
+					kind={item.kind}
+					layout="row"
+					open={item.open}
+					selected={item.selected}
+				/>
+			{/each}
+		</Desktop>
+		<IconGrid class="rounded-md border border-line bg-surface-1 p-4">
 			{#each DESKTOP as item (item.name)}
 				<DesktopIcon
 					name={item.name}
@@ -430,18 +460,73 @@
 					selected={item.selected}
 				/>
 			{/each}
-		</Desktop>
+		</IconGrid>
+	</section>
+
+	<section aria-labelledby="composition" class="mb-12">
+		<h2 id="composition" class="mb-4 text-xl font-semibold">Desktop composition</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			The whole scene, and the reason this section exists. Every component above passed on its own
+			while the desktop they compose into did not match the drawing the direction was chosen from:
+			the icons were a grid instead of a list, the title bar's controls were on the wrong side, and
+			the path row was missing entirely. A parts list cannot catch an arrangement, so the
+			arrangement is checked here.
+		</p>
+		<div class="relative h-[30rem] overflow-hidden rounded-md border border-line">
+			<Desktop class="h-full">
+				{#each SCENE_ROOT as item (item.name)}
+					<DesktopIcon name={item.name} href="#composition" kind={item.kind} layout="row" />
+				{/each}
+			</Desktop>
+
+			<div class="absolute top-6 left-[26%] h-[21rem] w-[70%]">
+				<Window
+					title="Projects"
+					focused
+					nav
+					path="Projects"
+					onminimize={() => {}}
+					onclose={() => {}}
+					class="h-full"
+				>
+					{#snippet sidebar()}
+						<InfoSidebar
+							name="lightsaml"
+							kind="document"
+							size={18_841}
+							modified="2024-11"
+							author={OWNER}
+						/>
+					{/snippet}
+					<IconGrid>
+						{#each SCENE_FOLDER as name (name)}
+							<DesktopIcon
+								{name}
+								href="#composition"
+								kind={name === 'case-studies' ? 'folder' : 'document'}
+								selected={name === 'lightsaml'}
+							/>
+						{/each}
+					</IconGrid>
+				</Window>
+			</div>
+
+			<div class="absolute inset-x-0 bottom-3 flex justify-center">
+				<Dock folders={1} documents={3} onsettings={() => {}} />
+			</div>
+		</div>
 	</section>
 
 	<section aria-labelledby="dock" class="mb-12">
 		<h2 id="dock" class="mb-4 text-xl font-semibold">Dock</h2>
 		<p class="mb-4 text-sm text-fg-2">
-			Apps, settings, then one group per kind of open window with its count. A group at zero is
-			absent rather than empty. Every control is icon-only and every one carries a name.
+			Apps, settings, then one group per kind of open window with its count, worded. A group at zero
+			is absent rather than empty. Apps is present from the start and disabled until there is a
+			roster behind it, which is the second dock below.
 		</p>
 		<div class="flex flex-wrap items-end gap-6">
-			<Dock folders={3} documents={2} />
-			<Dock />
+			<Dock folders={3} documents={2} onapps={() => {}} onsettings={() => {}} />
+			<Dock onsettings={() => {}} />
 		</div>
 	</section>
 
@@ -452,7 +537,7 @@
 			something other than a soft gradient in glass. The thermometer is a recessed well in retro and
 			a flat track elsewhere, from <code>--bevel-in</code> resolving to <code>none</code>.
 		</p>
-		<BootScreen progress={62} lines={POST} onskip={() => {}} />
+		<BootScreen progress={62} lines={BOOT_LINES.slice(0, 4)} onskip={() => {}} />
 	</section>
 
 	<section aria-labelledby="modal" class="mb-12">

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { settings } from '$lib/appearance.svelte';
 	import type { Kind } from '$lib/os';
 	import Icon from './Icon.svelte';
 
@@ -7,17 +8,53 @@
 		href,
 		kind = 'folder',
 		selected = false,
-		open = false
+		open = false,
+		layout = 'tile',
+		onopen,
+		onselect
 	}: {
 		name: string;
 		href: string;
 		kind?: Kind;
 		selected?: boolean;
+		/**
+		 * `tile` stacks the label under the glyph and sits in a grid, which is every folder.
+		 * `row` puts it beside, which is the desktop's list down the left edge. A variant, not a
+		 * second component: the markup is identical and only the axis changes.
+		 */
+		layout?: 'tile' | 'row';
 		/** The item has a window open. Draws the open glyph and announces it. */
 		open?: boolean;
+		/**
+		 * Open in the shell instead of navigating. Omit both handlers and this stays exactly what
+		 * it is in the markup, a link, which is what the styleguide and a JavaScript-off visitor
+		 * get.
+		 */
+		onopen?: () => void;
+		onselect?: () => void;
 	} = $props();
 
 	const glyph = $derived(open ? (`${kind}-open` as const) : kind);
+
+	/** Anything the browser already has a better answer for: new tab, new window, middle click. */
+	function claimed(event: MouseEvent): boolean {
+		return !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0);
+	}
+
+	function activate(event: MouseEvent): void {
+		if (!onopen || !claimed(event)) return;
+		event.preventDefault();
+		onopen();
+	}
+
+	function click(event: MouseEvent): void {
+		// Enter on a link fires a click with no pointer behind it. That is an activation in either
+		// mode, so double-click mode must not swallow it into a selection.
+		if (settings.clickMode === 'single' || event.detail === 0) return activate(event);
+		if (!onselect || !claimed(event)) return;
+		event.preventDefault();
+		onselect();
+	}
 </script>
 
 <!--
@@ -30,16 +67,27 @@
 	`aria-current` is the selection, because a link cannot be `aria-selected`.
 -->
 <!--
-	`href` arrives resolved. The tree these icons render comes from the content collections in
-	phase 3, and resolving a route inside a leaf component would mean this one knowing the route
-	table.
+	`href` arrives already built. It comes off the node in `$lib/tree`, which is the route table,
+	so resolving it again inside a leaf component would mean this one knowing about routes. The
+	site deploys at the root and has no `base` for `resolve()` to prepend.
 -->
-<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-<a {href} class="tile" class:selected class:open aria-current={selected ? 'true' : undefined}>
-	<Icon name={glyph} size={40} />
+<!-- eslint-disable svelte/no-navigation-without-resolve -->
+<a
+	{href}
+	class="tile"
+	class:row={layout === 'row'}
+	class:selected
+	class:open
+	aria-current={selected ? 'true' : undefined}
+	onclick={click}
+	ondblclick={activate}
+>
+	<Icon name={glyph} size={layout === 'row' ? 20 : 40} />
 	<span class="label">{name}</span>
 	{#if open}<span class="sr-only">, open</span>{/if}
 </a>
+
+<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 <style>
 	.tile {
@@ -59,6 +107,16 @@
 		transition:
 			background-color var(--dur-fast) var(--ez-standard),
 			color var(--dur-fast) var(--ez-standard);
+	}
+
+	/* The row. Width shrinks to the label so the hit area is the item and not the column. */
+	.tile.row {
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+		width: auto;
+		padding: 0.25rem 0.5rem;
+		text-align: start;
 	}
 
 	.tile:hover {

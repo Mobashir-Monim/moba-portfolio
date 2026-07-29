@@ -32,7 +32,32 @@
 	handlers land on this element in phase 2.4; nothing about it needs to be interactive to be
 	draggable.
 -->
+<!--
+	Controls left, title, navigation right. That is the arrangement the 1.1 mockups were drawn
+	in, in all three skins, and DOM order matches visual order so a screen reader and a pointer
+	read the bar the same way.
+-->
 <div class="titlebar" class:focused>
+	<div class="group">
+		{#if onclose}
+			<button type="button" class="control" onclick={onclose}>
+				<Icon name="close" size={14} />
+				<span class="sr-only">Close {title}</span>
+			</button>
+		{/if}
+		{#if onminimize}
+			<button type="button" class="control" onclick={onminimize}>
+				<Icon name="minimize" size={14} />
+				<span class="sr-only">Minimize {title}</span>
+			</button>
+		{/if}
+	</div>
+
+	<!-- The chip repaints the bar's own background behind the text, which is what keeps retro's
+	     pinstripes from running through the title. In the other two skins it is the same paint as
+	     the bar and therefore invisible. -->
+	<h2 class="title"><span class="chip">{title}</span></h2>
+
 	{#if nav}
 		<div class="group">
 			<button type="button" class="control back" disabled={!canBack} onclick={onback}>
@@ -45,26 +70,6 @@
 			</button>
 		</div>
 	{/if}
-
-	<!-- The chip repaints the bar's own background behind the text, which is what keeps retro's
-	     pinstripes from running through the title. In the other two skins it is the same paint as
-	     the bar and therefore invisible. -->
-	<h2 class="title"><span class="chip">{title}</span></h2>
-
-	<div class="group">
-		{#if onminimize}
-			<button type="button" class="control" onclick={onminimize}>
-				<Icon name="minimize" size={14} />
-				<span class="sr-only">Minimize {title}</span>
-			</button>
-		{/if}
-		{#if onclose}
-			<button type="button" class="control" onclick={onclose}>
-				<Icon name="close" size={14} />
-				<span class="sr-only">Close {title}</span>
-			</button>
-		{/if}
-	</div>
 </div>
 
 <style>

@@ -31,7 +31,12 @@
 </script>
 
 <nav class="dock" aria-label="Dock">
-	<button type="button" class="slot" onclick={onapps}>
+	<!-- The launcher appears when there is a roster to launch, in phase 4. A button that opens
+	     nothing is what the old site shipped, as a full-screen "No apps installed yet" overlay. -->
+	<!-- Present from the start, because it is part of the composition, and disabled until there
+	     is a roster behind it in phase 4. The old site's answer was a full-screen overlay reading
+	     "No apps installed yet", which is a worse way to say the same thing. -->
+	<button type="button" class="slot" onclick={onapps} disabled={!onapps}>
 		<Icon name="apps" size={20} />
 		<span class="sr-only">Apps</span>
 	</button>
@@ -44,14 +49,12 @@
 		<span class="rule" aria-hidden="true"></span>
 	{/if}
 
+	<!-- The word is on screen, not only in the accessibility layer. The mockups read
+	     `3 DOCUMENTS`, `1 FOLDER`, and a glyph beside a bare numeral does not say that. -->
 	{#each groups as [key, count, onclick] (key)}
 		<button type="button" class="slot" {onclick}>
 			<Icon name={key} size={20} />
-			<span class="count" aria-hidden="true">{count}</span>
-			<span class="sr-only">
-				Show {count}
-				{key}{count === 1 ? '' : 's'}
-			</span>
+			<span class="count">{count} {key}{count === 1 ? '' : 's'}</span>
 		</button>
 	{/each}
 </nav>
@@ -85,17 +88,23 @@
 		transition: background-color var(--dur-fast) var(--ez-standard);
 	}
 
-	.slot:hover {
+	.slot:hover:not(:disabled) {
 		background: color-mix(in oklab, var(--c-fg-1) 8%, transparent);
 	}
 
-	.slot:active {
+	.slot:active:not(:disabled) {
 		box-shadow: var(--bevel-in);
+	}
+
+	.slot:disabled {
+		opacity: 0.4;
+		cursor: default;
 	}
 
 	.count {
 		font-variant-numeric: tabular-nums;
 		line-height: 1;
+		text-transform: capitalize;
 	}
 
 	.rule {

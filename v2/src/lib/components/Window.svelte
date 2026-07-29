@@ -6,12 +6,15 @@
 		title,
 		focused = false,
 		nav = false,
+		path,
 		canBack = false,
 		canForward = false,
 		onback,
 		onforward,
 		onminimize,
 		onclose,
+		onpointerdown,
+		onfocusin,
 		sidebar,
 		children,
 		class: klass = ''
@@ -19,12 +22,24 @@
 		title: string;
 		focused?: boolean;
 		nav?: boolean;
+		/**
+		 * The trail of folder names this window has walked, already joined. The `~/` that turns it
+		 * into a shell path is `--path-prefix`, so only modern wears one.
+		 */
+		path?: string;
 		canBack?: boolean;
 		canForward?: boolean;
 		onback?: () => void;
 		onforward?: () => void;
 		onminimize?: () => void;
 		onclose?: () => void;
+		/**
+		 * Raising the window. `CLAUDE.md` allows exactly this: a handler on a non-interactive
+		 * element, rather than the old site's window-as-a-button (ledger #17). Both are here
+		 * because a pointer and a Tab key have to agree about what is in front.
+		 */
+		onpointerdown?: (event: PointerEvent) => void;
+		onfocusin?: (event: FocusEvent) => void;
 		/** Folder windows carry the info panel. Document windows leave it out. */
 		sidebar?: Snippet;
 		children: Snippet;
@@ -39,7 +54,7 @@
 	positions it with `translate3d()` from the store, so nothing here writes `left` or `top`
 	(ledger #24) and there is no second markup tree for mobile (ledger #27).
 -->
-<section class="window {klass}" class:focused aria-label={title}>
+<section class="window {klass}" class:focused aria-label={title} {onpointerdown} {onfocusin}>
 	<TitleBar
 		{title}
 		{focused}
@@ -51,6 +66,10 @@
 		{onminimize}
 		{onclose}
 	/>
+
+	{#if path}
+		<p class="path">{path}</p>
+	{/if}
 
 	<div class="body">
 		<div class="content">{@render children()}</div>
@@ -81,6 +100,26 @@
 
 	.window.focused {
 		box-shadow: var(--elev-2);
+	}
+
+	/* Where you are, under the bar that says what you are looking at. `--path-prefix` is the one
+	   token that differs: `~/` in modern, nothing in the other two, which is the difference
+	   between a systems tool and a folder window without a branch in the markup. */
+	.path {
+		flex: none;
+		padding: 0.25rem 0.75rem;
+		background: var(--c-surface-1);
+		border-bottom: var(--bw) solid var(--c-line);
+		color: var(--c-fg-3);
+		font-family: var(--ff-mono);
+		font-size: var(--fs-xs);
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	.path::before {
+		content: var(--path-prefix);
 	}
 
 	/* Ledger #4: the old site set the toolbar to one height and the content to
