@@ -293,12 +293,17 @@
 	--ff-body: Geneva, Verdana, Tahoma, sans-serif;
 	--ff-mono: Monaco, 'Courier New', monospace;
 
-	--fs-xs: 0.625rem;
-	--fs-sm: 0.6875rem;
-	--fs-base: 0.75rem;
-	--fs-lg: 0.875rem;
-	--fs-xl: 1.125rem;
-	--fs-2xl: 1.5rem;
+	/* System 7's own size was 12px Geneva, which was legible because it was 12px on a 512x342
+	   or 640x480 panel. Reproducing the number on a modern display reproduces the ratio wrong
+	   and lands unreadably small, so the ramp sits at parity with `modern` instead. Retro's
+	   character is the face, the zero radius, the bevels, and the pinstripes; none of it was
+	   ever carried by the point size. */
+	--fs-xs: 0.75rem;
+	--fs-sm: 0.8125rem;
+	--fs-base: 0.875rem;
+	--fs-lg: 1rem;
+	--fs-xl: 1.25rem;
+	--fs-2xl: 1.75rem;
 	--lh-tight: 1.1;
 	--lh-normal: 1.4;
 	--tracking-ui: 0em;
@@ -309,9 +314,10 @@
 	--bw: 1px;
 	--bw-strong: 2px;
 
-	--chrome-h: 22px;
-	--dock-h: 44px;
-	--icon-tile: 64px;
+	/* Chrome follows the type. A 22px title bar around 14px text clips the descenders. */
+	--chrome-h: 26px;
+	--dock-h: 48px;
+	--icon-tile: 72px;
 	--icon-stroke: 1;
 	/* Butt caps and mitred corners: a hairline that ends square and turns square. */
 	--icon-cap: butt;
