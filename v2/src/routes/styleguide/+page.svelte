@@ -10,6 +10,8 @@
 		type Skin,
 		type Theme
 	} from '$lib/appearance.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import { BRAND_NAMES, CHROME_NAMES } from '$lib/icons';
 	import { OS_NAME, OS_VERSION } from '$lib/os';
 
 	const COLOURS = [
@@ -34,7 +36,14 @@
 	const FAMILIES = ['--ff-ui', '--ff-body', '--ff-mono'];
 	const RADII = ['--r-sm', '--r-md', '--r-lg'];
 	const WIDTHS = ['--bw', '--bw-strong'];
-	const METRICS = ['--chrome-h', '--dock-h', '--icon-tile', '--icon-stroke'];
+	const METRICS = [
+		'--chrome-h',
+		'--dock-h',
+		'--icon-tile',
+		'--icon-stroke',
+		'--icon-cap',
+		'--icon-join'
+	];
 	const MOTION = ['--dur-fast', '--dur-base', '--dur-slow', '--ez-standard', '--ez-out'];
 	const TEXT_META = ['--lh-tight', '--lh-normal', '--tracking-ui'];
 
@@ -239,6 +248,56 @@
 				<dd>{resolved[token] ?? ''}</dd>
 			{/each}
 		</dl>
+	</section>
+
+	<section aria-labelledby="icons" class="mb-12">
+		<h2 id="icons" class="mb-4 text-xl font-semibold">Icons, chrome is skin-owned</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			Chrome glyphs carry one path per skin, stroked in <code>currentColor</code> at
+			<code>--icon-stroke</code>. All three ship in the markup and CSS picks, so switching skin
+			redraws them with no script and they are still correct with JavaScript off. Retro's close and
+			collapse boxes are System 7's, which is why neither of them is an X.
+		</p>
+
+		<ul class="mb-8 flex flex-wrap gap-3">
+			{#each CHROME_NAMES as name (name)}
+				<li
+					class="flex w-28 flex-col items-center gap-2 rounded-md border border-line bg-surface-1 p-3"
+				>
+					<Icon {name} size={32} />
+					<code class="text-xs text-fg-3">{name}</code>
+				</li>
+			{/each}
+		</ul>
+
+		<p class="mb-2 text-sm text-fg-2">
+			The same glyph down the sizes it is actually used at: dock and title bar at 16, sidebar at 20,
+			desktop tile at 48.
+		</p>
+		<ul class="mb-8 flex flex-wrap items-end gap-6">
+			{#each [16, 20, 32, 48] as size (size)}
+				<li class="flex flex-col items-center gap-2">
+					<Icon name="folder" {size} />
+					<code class="text-xs text-fg-3">{size}</code>
+				</li>
+			{/each}
+		</ul>
+
+		<h3 class="mb-2 text-lg font-semibold">Brand marks, one variant</h3>
+		<p class="mb-4 text-sm text-fg-2">
+			Filled, on the grid each was drawn on. A logo stroked at a hairline stops being the logo, so
+			these do not follow the skin.
+		</p>
+		<ul class="flex flex-wrap gap-3">
+			{#each BRAND_NAMES as name (name)}
+				<li
+					class="flex w-28 flex-col items-center gap-2 rounded-md border border-line bg-surface-1 p-3"
+				>
+					<Icon {name} size={32} />
+					<code class="text-xs text-fg-3">{name}</code>
+				</li>
+			{/each}
+		</ul>
 	</section>
 
 	<section aria-labelledby="elevation" class="mb-12">

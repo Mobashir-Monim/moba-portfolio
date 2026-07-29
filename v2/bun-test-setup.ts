@@ -9,6 +9,13 @@ const transpiler = new Bun.Transpiler({ loader: 'ts' });
 plugin({
 	name: 'svelte-runes',
 	setup(build) {
+		// SvelteKit's virtual modules only exist inside its build. `browser` is the one a
+		// `.svelte.ts` module reads, and under `bun test` there is no browser.
+		build.module('$app/environment', () => ({
+			contents: 'export const browser = false;',
+			loader: 'js'
+		}));
+
 		build.onLoad({ filter: /\.svelte\.(ts|js)$/ }, async ({ path }) => {
 			const source = await Bun.file(path).text();
 			const js = path.endsWith('.ts') ? transpiler.transformSync(source) : source;

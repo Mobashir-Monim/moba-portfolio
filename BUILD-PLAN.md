@@ -170,6 +170,20 @@ One `<Icon>` component over a path map keyed by skin. Chrome glyphs carry three 
 document, their open states, window controls, chevron, apps, cog. Brand and social icons carry
 one. The old site had a separate 31-line component per icon and no variants at all.
 
+- [x] 1. `src/lib/icons.ts`: `CHROME`, nine glyphs by three skins, stroked on a 24-unit grid, and
+      `BRAND`, six filled marks each on the grid it was drawn on. The cog is named `settings`,
+      because retro draws System 7's control-panel sliders rather than a gear.
+- [x] 2. `src/lib/components/Icon.svelte`. All three variants render and CSS picks by `data-skin`,
+      so the skin switches with no script, never flashes, and is still right with JavaScript off.
+      Stroke width, cap, and join come from `--icon-*` skin tokens; `--icon-cap` and `--icon-join`
+      are new and defined by every skin.
+- [x] 3. `src/lib/icons.test.ts`: every glyph defines every skin, no two skins share a path, path
+      syntax is legal, no absolute coordinate leaves the grid, and the component still lists every
+      skin. That last one matters because Svelte prunes CSS it cannot match, so the variants are
+      literal elements rather than a loop.
+- [x] 4. Icon section in `/styleguide`: every chrome glyph, the size ramp it is used at, and the
+      brand marks.
+
 ### 1.6 Static components
 
 Window chrome (title bar, controls, info sidebar, focused and unfocused states), desktop grid

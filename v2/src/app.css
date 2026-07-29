@@ -254,6 +254,8 @@
 	--dock-h: 56px;
 	--icon-tile: 72px;
 	--icon-stroke: 1.5;
+	--icon-cap: round;
+	--icon-join: round;
 
 	--elev-1: 0 1px 2px rgb(0 0 0 / 0.1), 0 8px 24px rgb(0 0 0 / 0.12);
 	--elev-2: 0 2px 4px rgb(0 0 0 / 0.14), 0 16px 48px rgb(0 0 0 / 0.22);
@@ -301,6 +303,9 @@
 	--dock-h: 44px;
 	--icon-tile: 64px;
 	--icon-stroke: 1;
+	/* Butt caps and mitred corners: a hairline that ends square and turns square. */
+	--icon-cap: butt;
+	--icon-join: miter;
 
 	/* Hard drop shadow, no blur. */
 	--elev-1: 2px 2px 0 0 var(--c-fg-1);
@@ -349,6 +354,8 @@
 	--dock-h: 68px;
 	--icon-tile: 80px;
 	--icon-stroke: 1.75;
+	--icon-cap: round;
+	--icon-join: round;
 
 	--elev-1: 0 8px 32px rgb(0 0 0 / 0.18);
 	--elev-2: 0 16px 64px rgb(0 0 0 / 0.28);
