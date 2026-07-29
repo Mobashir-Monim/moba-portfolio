@@ -6,7 +6,7 @@ export const about: About = {
 	slug: 'about',
 	name: 'About Me',
 	person: { first: 'Mobashir', last: 'Monim' },
-	title: 'Full Stack Web Developer',
+	title: 'Senior Full Stack Engineer',
 	description: prose('about'),
 	location: { city: 'Remote', country: 'USA' },
 

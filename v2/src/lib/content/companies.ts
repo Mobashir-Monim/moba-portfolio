@@ -39,6 +39,14 @@ export const companies = {
 		industry: 'Software Development',
 		website: 'linkedin.com/company/techynaf-technologies'
 	},
+	krodev: {
+		slug: 'krodev',
+		name: 'KroDev',
+		description: prose('krodev'),
+		// No mark in the repo, so the card drops the logo rather than inventing one.
+		location: { city: 'Remote', state: 'FL', country: 'USA' },
+		industry: 'Software Development'
+	},
 	eveneer: {
 		slug: 'eveneer',
 		name: 'Eveneer Solutions',

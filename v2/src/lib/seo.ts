@@ -229,6 +229,34 @@ function entity(node: Node): object | undefined {
 		case 'about':
 			return undefined;
 
+		/**
+		 * A CV is a page about a person, which is exactly what `ProfilePage` is for, and the person
+		 * it is about is the one node every page already carries rather than a second copy of him.
+		 * There is no `Resume` type in schema.org, and `CreativeWork` would claim the career is a
+		 * work I authored.
+		 */
+		case 'resume':
+			return {
+				'@type': 'ProfilePage',
+				'@id': canonical(node.href),
+				url: canonical(node.href),
+				name: `${PERSON} ${node.name}`,
+				description: summary(node),
+				isPartOf: ref(SITE_ID),
+				mainEntity: ref(PERSON_ID),
+				dateModified: node.modified,
+				// The same document as a file. Without `encodingFormat` a crawler is told there is
+				// an associated URL and not that following it hands back a PDF.
+				associatedMedia: {
+					'@type': 'DigitalDocument',
+					'@id': canonical(node.data.file),
+					url: canonical(node.data.file),
+					name: node.data.filename,
+					encodingFormat: 'application/pdf',
+					author: ref(PERSON_ID)
+				}
+			};
+
 		case 'index':
 			return {
 				'@type': 'CollectionPage',

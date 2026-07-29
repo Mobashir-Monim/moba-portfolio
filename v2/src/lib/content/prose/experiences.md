@@ -6,6 +6,12 @@ Prose for the experience records. Keys match `Experience.slug`.
 
 Eveneer is my own consultancy, through which I work as a technology consultant and build software on contract. This role has entailed providing nuanced expertise to the Managing Director of a prominent conglomerate situated in Bangladesh. Simultaneously, my repertoire extends to encompass diverse software development undertakings for a varied spectrum of entities, spanning non-profit organizations, research institutions, and universities. Among the prominent projects are a School Management System, a Faculty Evaluation Collection, Analysis, and Distribution System, a Course Management System, Single Sign-On, a SQL Assessment Platform, an Organizational Voting System, and a Content Management System (CMS), among others. This dynamic and diversified portfolio underscores my steadfast commitment to channeling my expertise for substantial contributions across a range of sectors.
 
+## krodev-senior-software-engineer
+
+I was a senior software engineer at KroDev from 2023 to 2024, shipping client-facing platforms and the web properties around them. The two largest were a task management and hour-tracking platform built around day-to-day usability rather than reporting, and a requirement-gathering and project-tracking platform written from scratch for clients to use directly.
+
+Alongside the platform work I built and deployed custom WordPress themes, which is where the delivery side of an agency lives: the same client who needs a tracking platform also needs the site in front of it.
+
 ## gymrevenue-software-engineer
 
 I was a software engineer at GymRevenue from 2022 to 2023, working across the core modules of its gym management platform. Predominantly, I shouldered the responsibility for cultivating the billing engine, distinguished by its proficiency in seamless integration with a spectrum of payment gateways. Moreover, I spearheaded the implementation of the in-system Point of Sale (PoS) interface, an inventory management system, and the orchestration of service agreements.

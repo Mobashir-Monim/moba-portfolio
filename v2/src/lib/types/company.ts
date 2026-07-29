@@ -4,8 +4,12 @@ export type Company = {
 	slug: string;
 	name: string;
 	description: string[];
-	/** Resolved asset URL from a Vite import, so the filename carries a content hash. */
-	logo: string;
+	/**
+	 * Resolved asset URL from a Vite import, so the filename carries a content hash. Optional
+	 * because not every employer has a mark in the repo, and a placeholder logo is a worse
+	 * answer than none: it claims a brand that is not theirs.
+	 */
+	logo?: string;
 	location: Location;
 	industry: string;
 	/** Bare host, no scheme. The one place a link is built from a value, and it is a display

@@ -564,8 +564,43 @@ ledger defect reintroduced.
 
 ### 4.1 Résumé viewer (~0.5 day)
 
-Document window with a PDF download. The old site had no way to get a CV, which is the one
-artifact a recruiter reliably wants.
+- [x] Document window with a PDF download. The old site had no way to get a CV, which is the one
+      artifact a recruiter reliably wants.
+
+      **Not an app.** The roster in `CLAUDE.md` lists this under Tier 1, but an app has no route,
+      no sitemap entry, and no structured data, and a CV is the single page most worth indexing.
+      So it is a content node at `/resume` like every other document, and the Apps menu stays
+      dark until Terminal and Mail, which genuinely are not content. `SETTINGS_ID` keeps its
+      note that phase 4 turns it into a roster; this task did not need one.
+
+      **The body is assembled, not authored.** `Resume.svelte` reads `about`, `experiences`,
+      `degrees`, `certifications`, `publications`, and the skill catalogue, and links each row to
+      the page it summarises. So the résumé is the one document that links to all of them and
+      nothing on it can drift from them: there is no second copy to keep in step. The `Resume`
+      record holds only the page's own framing plus a pointer at the PDF.
+
+      `ProfilePage` in the graph, with `mainEntity` pointing at the `#person` node every page
+      already carries. Schema.org has no résumé type, and `CreativeWork` would claim a career is
+      a work I authored. The PDF rides along as `associatedMedia`, a `DigitalDocument` with an
+      `encodingFormat`, or a crawler is told there is an associated URL and not that following
+      it hands back a PDF.
+
+      The download is an anchor with `download`, which is the whole mechanism: SvelteKit's router
+      leaves such links alone, so it works with JavaScript off and needs no handler. The one thing
+      no other test could catch is the file going missing, since renaming `static/resume.pdf`
+      still builds, still renders, and 404s only when someone clicks. `resume.test.ts` ties the
+      record to the file on disk.
+
+      **Content caught up to the PDF first.** The collections were a year behind it: KroDev was
+      missing entirely, and the about title and two roles disagreed with the CV a visitor would
+      download from the same page. Added `krodev` as a company and a sixth experience, corrected
+      the Eveneer and GymRevenue roles and `about.title`. KroDev carries no project children, the
+      way `aml-technology-advisor` already does. `Company.logo` became optional, because there is
+      no KroDev mark in the repo and a placeholder logo claims a brand that is not theirs.
+
+      Verified by driving headless Chrome over CDP against the preview build: Tab to the Résumé
+      icon, Enter opens the window with focus inside it, the download anchor and all six
+      experience links resolve, Escape closes and hands focus back to the icon.
 
 ### 4.2 Case study reader (~1.5 days)
 

@@ -2,12 +2,14 @@ import { about } from './content/about';
 import { certifications, degrees, publications } from './content/attainments';
 import { experiences } from './content/experiences';
 import { projectList } from './content/projects';
+import { resume } from './content/resume';
 import { SITE_MODIFIED, type Kind } from './os';
 import type { About } from './types/about';
 import type { Certification, Degree, Publication } from './types/attainment';
 import type { YearMonth } from './types/common';
 import type { Experience } from './types/experience';
 import type { Project } from './types/project';
+import type { Resume } from './types/resume';
 
 /**
  * The directory tree, derived from the content collections rather than maintained beside them.
@@ -47,6 +49,7 @@ type Base = {
  */
 export type Body =
 	| { type: 'about'; data: About }
+	| { type: 'resume'; data: Resume }
 	| { type: 'experience'; data: Experience }
 	| { type: 'project'; data: Project }
 	| { type: 'degree'; data: Degree }
@@ -106,6 +109,22 @@ add({
 	kind: 'document',
 	href: '/about',
 	size: bytes(about.description),
+	modified: SITE_MODIFIED
+});
+
+/**
+ * The one document that is also a file. Its size is the page's own framing and not the CV, since
+ * the CV itself is assembled from records that already count as their own nodes; counting them
+ * twice would make this the largest file on a site where size means length of copy.
+ */
+add({
+	type: 'resume',
+	data: resume,
+	id: resume.slug,
+	name: resume.name,
+	kind: 'document',
+	href: '/resume',
+	size: bytes(resume.description),
 	modified: SITE_MODIFIED
 });
 
@@ -215,6 +234,7 @@ const attainmentIds = [
  */
 export const root: string[] = [
 	about.slug,
+	resume.slug,
 	index('experience', 'Experience', '/experience', experienceIds),
 	index(
 		'projects',

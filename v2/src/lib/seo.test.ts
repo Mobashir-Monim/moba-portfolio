@@ -132,6 +132,8 @@ test('every node type resolves to the type that describes it', () => {
 
 	// The Person is the entity `/about` is about, and it is in the graph already.
 	expect(typesOf('about')).toEqual(['Person', 'WebSite', 'BreadcrumbList']);
+	// A CV is a page about a person, and the person is the one already in the graph.
+	expect(typesOf('resume')).toContain('ProfilePage');
 	expect(typesOf('bsc-computer-science')).toContain('EducationalOccupationalCredential');
 	expect(typesOf('certified-scrum-master')).toContain('EducationalOccupationalCredential');
 	expect(typesOf('blockchain-land-registry')).toContain('ScholarlyArticle');

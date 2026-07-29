@@ -5,10 +5,12 @@ import { companies, companyList } from './companies';
 import { experiences } from './experiences';
 import { projectList, projects } from './projects';
 import { proseKeys } from './prose';
+import { resume } from './resume';
 
 /** Every item in the site, whatever collection it came from. */
 const items = [
 	about,
+	resume,
 	...companyList,
 	...experiences,
 	...projectList,
@@ -86,7 +88,9 @@ describe('links', () => {
 	});
 
 	test('a company website is a bare host, so nothing double-schemes it', () => {
-		for (const company of Object.values(companies))
+		// `companyList`, not `Object.values`: the collection is `satisfies`, so its values keep
+		// their literal types and a company with no `website` has no such property to read.
+		for (const company of companyList)
 			if (company.website) expect(company.website).not.toMatch(/^https?:\/\//);
 	});
 

@@ -3,6 +3,7 @@ import attainmentsMd from './prose/attainments.md?raw';
 import companiesMd from './prose/companies.md?raw';
 import experiencesMd from './prose/experiences.md?raw';
 import projectsMd from './prose/projects.md?raw';
+import resumeMd from './prose/resume.md?raw';
 
 /**
  * Prose lives in markdown, not in TypeScript. Ledger #32: the old site's
@@ -47,6 +48,7 @@ index(attainmentsMd, 'attainments.md');
 index(companiesMd, 'companies.md');
 index(experiencesMd, 'experiences.md');
 index(projectsMd, 'projects.md');
+index(resumeMd, 'resume.md');
 
 /**
  * Throws rather than returning empty, so a slug that drifts away from its prose is a build

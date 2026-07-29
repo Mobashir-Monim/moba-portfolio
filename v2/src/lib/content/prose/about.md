@@ -4,7 +4,7 @@ Prose for the about-me document. Keys match `about.slug`.
 
 ## about
 
-I am a full stack web developer. Since 2014 I have built billing engines, point-of-sale systems, single sign-on, and the platforms universities run on. My inherent curiosity fuels a deep-seated enthusiasm for meticulous research, consistently propelling me to explore novel ideas and methodologies. My persistent commitment lies in contributing substantively to intricate problem-solving within the perpetually evolving sphere of technology.
+I am a senior full stack engineer. Since 2014 I have built billing engines, point-of-sale systems, single sign-on, and the platforms universities run on. My inherent curiosity fuels a deep-seated enthusiasm for meticulous research, consistently propelling me to explore novel ideas and methodologies. My persistent commitment lies in contributing substantively to intricate problem-solving within the perpetually evolving sphere of technology.
 
 My professional interests encompass cryptography, data analytics, information security, and blockchain. I ardently engage in a continuous quest for knowledge, perpetually augmenting my proficiency and expertise.
 

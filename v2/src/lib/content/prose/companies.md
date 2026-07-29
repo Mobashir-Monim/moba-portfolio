@@ -14,6 +14,10 @@ Brac University (BracU), situated in Dhaka, Bangladesh, embraces a liberal arts 
 
 Techynaf operates as a dynamic software agency specializing in comprehensive client-centric solutions. The agency's service portfolio encompasses a spectrum of offerings, ranging from the development of web applications to encompassing testing, deployment, and ongoing maintenance.
 
+## krodev
+
+KroDev is a software company in Florida that builds client-facing platforms and web properties with a fully remote team. Its work runs from internal tooling to WordPress builds, so a single engineer there moves between platform work and delivery for named clients rather than owning one product.
+
 ## eveneer
 
 Eveneer, an initiative conceived by myself, functions as a strategic platform for engaging in specialized contractual endeavors aligned with both my research pursuits and personal interests. The operational ethos of Eveneer is distinguished by a meticulous approach to client engagement, deliberately selecting projects based on a discerning criterion.

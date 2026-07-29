@@ -6,6 +6,7 @@
 	import Experience from './Experience.svelte';
 	import Project from './Project.svelte';
 	import Publication from './Publication.svelte';
+	import Resume from './Resume.svelte';
 
 	let { node }: { node: Node } = $props();
 </script>
@@ -19,6 +20,8 @@
 -->
 {#if node.type === 'about'}
 	<About data={node.data} />
+{:else if node.type === 'resume'}
+	<Resume data={node.data} />
 {:else if node.type === 'experience'}
 	<Experience data={node.data} />
 {:else if node.type === 'project'}

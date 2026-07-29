@@ -10,7 +10,7 @@ import { prose } from './prose';
 export const experiences: Experience[] = [
 	{
 		slug: 'eveneer-tech-wizard',
-		role: 'Tech Wizard',
+		role: 'Founder and Full Stack Engineer',
 		company: companies.eveneer,
 		start: '2018-12',
 		description: prose('eveneer-tech-wizard'),
@@ -23,8 +23,20 @@ export const experiences: Experience[] = [
 		]
 	},
 	{
+		// KroDev has no project children, the way `aml-technology-advisor` has none: the work
+		// there is not a catalogue of named systems, and an invented one would be worse than an
+		// empty folder.
+		slug: 'krodev-senior-software-engineer',
+		role: 'Senior Software Engineer',
+		company: companies.krodev,
+		start: '2023-10',
+		end: '2024-10',
+		description: prose('krodev-senior-software-engineer'),
+		projects: []
+	},
+	{
 		slug: 'gymrevenue-software-engineer',
-		role: 'Software Engineer',
+		role: 'Senior Software Engineer',
 		company: companies.gymrevenue,
 		start: '2022-11',
 		end: '2023-08',

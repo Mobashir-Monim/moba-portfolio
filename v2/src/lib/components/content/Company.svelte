@@ -10,10 +10,13 @@
 
 <!--
 	The company card, shared by an experience and by a project built under one. The logo is
-	decorative: the name is right beside it in text, so announcing it twice is noise.
+	decorative: the name is right beside it in text, so announcing it twice is noise, and a
+	company with no mark in the repo simply drops it rather than standing in a placeholder.
 -->
 <div class="flex items-center gap-3">
-	<img src={data.logo} alt="" width="40" height="40" class="rounded-sm object-contain" />
+	{#if data.logo}
+		<img src={data.logo} alt="" width="40" height="40" class="rounded-sm object-contain" />
+	{/if}
 	<div class="min-w-0">
 		<p class="font-ui text-sm font-semibold">{data.name}</p>
 		<p class="font-ui text-xs text-fg-3">{data.industry}, {place}</p>
