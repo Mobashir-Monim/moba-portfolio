@@ -215,6 +215,14 @@
 		A window that has never been resized sets no `--w`, so the default below stays a CSS
 		expression against the viewport rather than a number frozen at open time.
 	-->
+	<!--
+		`|global`, and it is load-bearing rather than decorative (2.14). A Svelte 5 transition is
+		local by default, which means it plays only when the state change happened in its own block.
+		Minimize and restore flip the `{#if}` above, so those two qualify; opening and closing add
+		and remove this whole component from the each in `WindowLayer`, which is one block up, so
+		local skipped both silently. Removing the modifier does not fail a test or log a warning, it
+		just quietly takes the animation off the two operations most visitors will ever see.
+	-->
 	<div
 		bind:this={frame}
 		class="frame"
@@ -223,7 +231,7 @@
 		style:--w={w ? `${w}px` : null}
 		style:--h={h ? `${h}px` : null}
 		style:z-index={z}
-		transition:scale={motion}
+		transition:scale|global={motion}
 	>
 		<Window
 			class="h-full w-full"

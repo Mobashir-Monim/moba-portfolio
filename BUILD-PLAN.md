@@ -510,26 +510,57 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
 
       **One thing found on the way that is not this task's**, recorded as 2.14.
 
-- [ ] 2.14 The window's open and close transition does not play. Found while building 2.10's
+- [x] 2.14 The window's open and close transition does not play. Found while building 2.10's
       control run, which needed a case where something visibly animates and could not get one out
       of `transition:scale` on the window frame.
 
-      Chrome's Animation domain reports no animation object created for the frame on open or on
+      Chrome's Animation domain reported no animation object created for the frame on open or on
       close, in either motion preference, on the preview build. Not a slow one, not a capped one:
-      none. The only animations the page starts around a window opening are the desktop icon's own
-      `background-color` and `color` transitions.
+      none. The only animations the page started around a window opening were the desktop icon's
+      own `background-color` and `color` transitions.
 
-      Three things are already ruled out. The parameters are not it: the value was exaggerated to
-      `duration: 1600` with `start: 0.5`, rebuilt, and confirmed present in the shipped chunk, and
-      the result was unchanged. The preference is not it: `matchMedia` reports no preference in the
-      control run and the boot screen plays, which is the same signal read the same way. And it is
-      not the reduced-motion branch introduced by 2.10, since it reproduces identically before it.
+      **A Svelte 5 transition is local by default, and local means it plays only when the state
+      change happened in its own block.** That is the whole of it. The runtime says so in as many
+      words, and the shape of the bug is the proof: minimize and restore flip the `{#if}` in
+      `WindowFrame` directly, so those two animated all along, while opening and closing add and
+      remove the entire component from the each in `WindowLayer`, one block up, which is precisely
+      the case local skips. Measured before the fix, in that order: open none, minimize 160ms,
+      restore 160ms, close none.
 
-      What still stands is the window itself: it opens, it closes, it leaves the DOM, and 2.13's
-      behaviour is unaffected. So this is the flourish missing, not the mechanism. Worth checking
-      first is whether Svelte plays an intro for a block that is already true on its component's
-      first render, since the `{#if}` in `WindowFrame` is created with the component the each block
-      adds, which would explain the intro and leaves the outro still to account for.
+      Three cheaper explanations were ruled out first. Not the parameters: exaggerated to
+      `duration: 1600` with `start: 0.5`, rebuilt, confirmed present in the shipped chunk, no
+      change. Not the preference: `matchMedia` reports none in the control and the boot screen
+      plays, which is the same signal read the same way. Not 2.10, since it reproduces before it.
+
+      The fix is `|global` on the directive. Weighed against moving the `{#if}` up into
+      `WindowLayer` so the each block owns the frame's presence, which would make the transition
+      local-correct: that trades one modifier for restructuring the component that 2.4, 2.9, and
+      2.13 all have hands in, to express the same intent less directly.
+
+      **What this also settles is how Svelte 5 spends a transition, which 2.10 was guessing at.**
+      Every directive goes through the Web Animations API, reported as `WebAnimation` beside the
+      `CSSTransition` entries the same page produces. A stylesheet does not reach WAAPI at all, so
+      the blanket rule in `app.css` buys nothing against a directive and `prefersReducedMotion` is
+      the only thing that caps one. `motion.test.ts` said "either compilation, so assume the worst";
+      it now says what was measured, and the check it guards went from prudent to required.
+
+      A zero duration makes Svelte start no animation rather than a zero-length one, so under the
+      preference the window's absence from the Animation domain is the pass, and the control run is
+      what keeps that from being vacuous.
+
+      `motion.test.ts` gained the modifier itself, because this is a defect that no compiler,
+      linter, or type checker notices and that presents only as an animation quietly not happening.
+      It holds every directive in the repo global, not just this one, since everything animated here
+      lives in a component a parent block adds; a future local transition is a real decision and
+      should have to be written down. Mutated to confirm it fails.
+
+      Verified by driving headless Chrome over CDP against the preview build, reading the Animation
+      domain rather than computed styles: open, minimize, restore, and close each start a 160ms
+      `WebAnimation` where before only two of the four did, and close still leaves no frame behind,
+      so the outro plays before removal rather than instead of it. 2.10 was re-run on top and still
+      passes in all three skins, now with a real WAAPI animation in the control to be absent from
+      the reduced run. 2.13 was re-run too, since this touches the same component: two windows open,
+      one press on the background window's Close still closes it, in all three skins.
 
 - [x] 2.11 Folder views: icon, list, column, gallery, switched from a segmented control at the
       right of the path row. Asked for after the fact, and built as one dispatcher over one set of

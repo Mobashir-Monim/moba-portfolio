@@ -9,13 +9,14 @@ import { describe, expect, test } from 'bun:test';
  * the media query cannot see. So the rule itself is asserted here, and so are the two escape
  * hatches out of it.
  *
- * A Svelte `transition:` directive is the first, and the reason is that it has two compilations. A
- * transition that returns a `css` function becomes a real CSS animation and the blanket rule does
- * reach it; one that returns a `tick` function runs in script and the rule reaches nothing. Which
- * of the two a directive is cannot be read at the call site, so the only safe rule is that a
- * component with a directive also asks `prefersReducedMotion` and hands over a zero. `WindowFrame`
- * is the only one that does today, which is precisely why this is worth holding: the next one will
- * be written by copying a component that had no directive to copy the check from.
+ * A Svelte `transition:` directive is the first, and it is not a hedge: Svelte 5 runs every one of
+ * them through the Web Animations API, which Chrome's Animation domain reports as `WebAnimation`
+ * beside the `CSSTransition` entries the same page produces. A stylesheet does not reach a WAAPI
+ * animation at all, so `animation-duration: 1ms !important` buys exactly nothing against a
+ * directive, and the only thing that caps one is the component asking `prefersReducedMotion` and
+ * handing over a zero. `WindowFrame` is the only one that does today, which is precisely why this
+ * is worth holding: the next one will be written by copying a component that had no directive to
+ * copy the check from.
  *
  * `scrollIntoView({ behavior: 'smooth' })` is the second, and it is the sharper of the two because
  * it looks like it obeys CSS and does not. The option overrides `scroll-behavior` rather than
@@ -94,6 +95,30 @@ describe('motion the rule cannot reach', () => {
 		// If nothing uses a directive any more, the test above passes vacuously and stops meaning
 		// anything. It should fail loudly and be deleted rather than quietly guard nothing.
 		expect(sources.filter(([, source]) => DIRECTIVE.test(markup(source)))).not.toBeEmpty();
+	});
+
+	/**
+	 * Not reduced motion, but the same failure shape and it belongs with its neighbours: a wrong
+	 * answer here changes nothing a compiler, a linter, or a test would notice, and only shows up as
+	 * an animation quietly not happening.
+	 *
+	 * A Svelte 5 transition is local by default, so it plays only when the state change happened in
+	 * its own block. Everything animated in this codebase lives in a component that a parent block
+	 * adds and removes, which is the case local skips, and 2.14 was exactly that: the window's open
+	 * and close played nothing for as long as the modifier was missing, while minimize and restore
+	 * worked because those flip the `{#if}` directly. Weakening this is a real decision; make it on
+	 * purpose and write down why.
+	 */
+	test('every transition directive is global', () => {
+		const local = sources
+			.flatMap(([path, source]) =>
+				[
+					...markup(source).matchAll(/(?:^|\s)((?:transition|in|out):[a-zA-Z_$][\w$]*(?:\|\w+)*)/g)
+				].map(([, directive]) => `${path}: ${directive}`)
+			)
+			.filter((entry) => !entry.includes('|global'));
+
+		expect(local).toEqual([]);
 	});
 
 	test('nothing scrolls smoothly from script', () => {
