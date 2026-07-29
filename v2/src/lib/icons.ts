@@ -72,6 +72,32 @@ export const CHROME = {
 		glass:
 			'M7.5 4.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM16.5 4.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM7.5 13.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM16.5 13.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z'
 	},
+	// The four folder views, drawn as the thing each one produces rather than as an abstraction:
+	// a field of tiles, stacked rows, side-by-side panes, one large pane over a filmstrip. That
+	// is what makes them readable at 16px with no label, which is how Finder gets away with it.
+	'view-icon': {
+		modern: 'M5.5 5.5h5v5h-5zM13.5 5.5h5v5h-5zM5.5 13.5h5v5h-5zM13.5 13.5h5v5h-5z',
+		retro: 'M4.5 4.5h6v6h-6zM13.5 4.5h6v6h-6zM4.5 13.5h6v6h-6zM13.5 13.5h6v6h-6z',
+		glass:
+			'M7 5.5h2a1.5 1.5 0 0 1 1.5 1.5v2a1.5 1.5 0 0 1-1.5 1.5h-2a1.5 1.5 0 0 1-1.5-1.5v-2a1.5 1.5 0 0 1 1.5-1.5zM15 5.5h2a1.5 1.5 0 0 1 1.5 1.5v2a1.5 1.5 0 0 1-1.5 1.5h-2a1.5 1.5 0 0 1-1.5-1.5v-2a1.5 1.5 0 0 1 1.5-1.5zM7 13.5h2a1.5 1.5 0 0 1 1.5 1.5v2a1.5 1.5 0 0 1-1.5 1.5h-2a1.5 1.5 0 0 1-1.5-1.5v-2a1.5 1.5 0 0 1 1.5-1.5zM15 13.5h2a1.5 1.5 0 0 1 1.5 1.5v2a1.5 1.5 0 0 1-1.5 1.5h-2a1.5 1.5 0 0 1-1.5-1.5v-2a1.5 1.5 0 0 1 1.5-1.5z'
+	},
+	'view-list': {
+		modern: 'M4.5 7.5h1.5M9 7.5h10.5M4.5 12h1.5M9 12h10.5M4.5 16.5h1.5M9 16.5h10.5',
+		retro: 'M4.5 6.5h2v2h-2zM8.5 7.5h11M4.5 11h2v2h-2zM8.5 12h11M4.5 15.5h2v2h-2zM8.5 16.5h11',
+		glass: 'M5 7.5h2M10 7.5h9M5 12h2M10 12h9M5 16.5h2M10 16.5h9'
+	},
+	'view-column': {
+		modern: 'M4.5 5.5h15v13h-15zM9.5 5.5v13M14.5 5.5v13',
+		retro: 'M3.5 4.5h17v15h-17zM9 4.5v15M15 4.5v15',
+		glass:
+			'M6 5.5h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-12a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2zM9.5 6v12M14.5 6v12'
+	},
+	'view-gallery': {
+		modern: 'M4.5 4.5h15v10h-15zM4.5 17.5h4v3h-4zM10 17.5h4v3h-4zM15.5 17.5h4v3h-4z',
+		retro: 'M3.5 3.5h17v11h-17zM3.5 16.5h5v4h-5zM9.5 16.5h5v4h-5zM15.5 16.5h5v4h-5z',
+		glass:
+			'M6.5 4.5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2zM5.5 17.5h4v3h-4zM10 17.5h4v3h-4zM14.5 17.5h4v3h-4z'
+	},
 	// Named for what it opens, not for what it draws: retro shows the System 7 control panel's
 	// sliders rather than a cog, because a cog is not a thing that shipped in 1991.
 	settings: {

@@ -170,7 +170,7 @@ One `<Icon>` component over a path map keyed by skin. Chrome glyphs carry three 
 document, their open states, window controls, chevron, apps, cog. Brand and social icons carry
 one. The old site had a separate 31-line component per icon and no variants at all.
 
-- [x] 1. `src/lib/icons.ts`: `CHROME`, nine glyphs by three skins, stroked on a 24-unit grid, and
+- [x] 1. `src/lib/icons.ts`: `CHROME`, thirteen glyphs by three skins, stroked on a 24-unit grid, and
       `BRAND`, six filled marks each on the grid it was drawn on. The cog is named `settings`,
       because retro draws System 7's control-panel sliders rather than a gear.
 - [x] 2. `src/lib/components/Icon.svelte`. All three variants render and CSS picks by `data-skin`,
@@ -354,9 +354,26 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       Raising happens on `pointerdown` and on `focusin`, so a pointer and a Tab key agree about
       what is in front, and both land on the window `<section>` rather than making it a button.
 
-- [ ] 2.4 Drag via Pointer Events with `setPointerCapture`. One code path for mouse, touch, and
-      pen. `translate3d()`, never `left`/`top`. Position in component-local state during the
-      gesture, committed to the store once on pointerup.
+- [x] 2.4 Drag and resize via Pointer Events with `setPointerCapture`. One code path for mouse,
+      touch, and pen. `translate3d()`, never `left`/`top`. Position and size live in
+      component-local state during the gesture and are committed to the store once on pointerup.
+
+      Both gestures are the same gesture, so `src/lib/gesture.ts` owns it once: capture on the way
+      down, feed the delta while it moves, commit when it comes up. The surface listens on itself
+      once capture is set, so no per-window `window` listener exists (ledger #25), and
+      `touch-action: none` on the title bar and the grip is what makes the one path cover touch.
+      Bounds are measured at pointerdown, never on mount (ledger #5).
+
+      `clampToDesktop` keeps a margin of the window on screen, because the layer clips its
+      overflow and a window dragged past an edge has no scrollbar to bring it back. `clampSize`
+      holds a 320x200 floor and a desktop-sized ceiling, so a window cannot be shrunk past its own
+      title bar or stretched past the screen. Size is undefined until the first resize, which is
+      what keeps the default a CSS expression against the viewport instead of a number frozen at
+      open time; the window's container query then restacks the sidebar as it narrows, with no
+      second breakpoint to keep in step.
+
+      Both stay mouse-optional, which `CLAUDE.md` allows: nothing is reachable only through them,
+      since position and size are presentation and the window is already fully keyboard-operable.
 
 - [x] 2.5 Responsive: one markup tree, Tailwind variants. The window is full-screen below 40rem
       through a media query that drops the transform, which is why position is a custom property
@@ -383,6 +400,23 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
 
 - [ ] 2.10 `prefers-reduced-motion` honoured throughout. The global CSS rule and the window
       transition already are; the remaining animations arrive with the apps.
+
+- [x] 2.11 Folder views: icon, list, column, gallery, switched from a segmented control at the
+      right of the path row. Asked for after the fact, and built as one dispatcher over one set of
+      items so the window never learns which view is on screen and the plain routes keep taking the
+      default, which is what keeps the JavaScript-off document unchanged.
+
+      `view` lives on the window record rather than in the frame, because the frame unmounts while
+      minimized and a view that reset itself on every trip to the dock is not a setting. The
+      click-mode branch moved to `src/lib/activate.ts` and is now tested: `activators` honours the
+      setting for icon and list, `pickers` overrides it for column and gallery, where a single click
+      has to pick or those two views cannot be walked at all. Ledger #10 was this same branch,
+      solved with a 100ms `setTimeout` racing a re-read of the setting.
+
+      Column view anchors at the window's current folder, not at the root, because the tree has no
+      parent map by design: a project is listed under both its experience and under Projects. Gallery
+      previews the item's own write-up through a new `NodeBody`, split out of `NodeContent` so a
+      preview cannot recurse into the previewed item's children.
 
 **Exit criteria:** fully operable by keyboard alone; readable and navigable with JS off; no
 ledger defect reintroduced.

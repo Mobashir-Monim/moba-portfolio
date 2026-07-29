@@ -143,6 +143,37 @@ describe('moveTo', () => {
 	});
 });
 
+describe('resizeTo', () => {
+	test('a new window claims no size, so the stylesheet keeps deciding', () => {
+		const w = createWindows();
+		w.open('a', 'folder');
+		expect([w.all[0].w, w.all[0].h]).toEqual([undefined, undefined]);
+	});
+
+	test('writes the committed size', () => {
+		const w = createWindows();
+		w.open('a', 'folder');
+		w.resizeTo('a', 640, 480);
+		expect([w.all[0].w, w.all[0].h]).toEqual([640, 480]);
+	});
+});
+
+describe('setView', () => {
+	test('a new window opens in the icon view', () => {
+		const w = createWindows();
+		w.open('a', 'folder');
+		expect(w.all[0].view).toBe('icon');
+	});
+
+	test('writes the view and keeps it across navigation', () => {
+		const w = createWindows();
+		w.open('a', 'folder');
+		w.setView('a', 'column');
+		w.navigate('a', 'b');
+		expect(w.all[0].view).toBe('column');
+	});
+});
+
 describe('navigate', () => {
 	test('pushes onto history and moves the cursor', () => {
 		const w = createWindows();

@@ -9,9 +9,12 @@
 	import InfoSidebar from '$lib/components/InfoSidebar.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
+	import ViewSwitcher from '$lib/components/ViewSwitcher.svelte';
 	import Window from '$lib/components/Window.svelte';
+	import FolderView from '$lib/components/views/FolderView.svelte';
 	import { BRAND_NAMES, CHROME_NAMES } from '$lib/icons';
-	import { BOOT_LINES, OS_NAME, OS_VERSION, OWNER } from '$lib/os';
+	import { BOOT_LINES, OS_NAME, OS_VERSION, OWNER, VIEW_LABEL, type View } from '$lib/os';
+	import { nodes } from '$lib/tree';
 
 	const COLOURS = [
 		'--c-surface-0',
@@ -98,6 +101,16 @@
 		{ name: 'Projects', kind: 'folder' },
 		{ name: 'Attainments', kind: 'folder' }
 	] as const;
+
+	/**
+	 * The four folder views, drawn over the real tree rather than over invented names: the list
+	 * shows kind, size, and date, the gallery renders an item's actual write-up, and neither is
+	 * checkable against placeholders. Each panel is live, so this is also where the views get
+	 * clicked.
+	 */
+	const FOLDER = $derived(nodes.projects);
+	let view = $state<View>('icon');
+	let picked = $state<string | undefined>();
 
 	const SCENE_FOLDER = [
 		'bout',
@@ -461,6 +474,37 @@
 				/>
 			{/each}
 		</IconGrid>
+	</section>
+
+	<section aria-labelledby="views" class="mb-12">
+		<h2 id="views" class="mb-4 text-xl font-semibold">Folder views</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			The four a Finder window offers, over one set of items and one set of callbacks, so the window
+			never learns which is on screen and the plain routes keep taking the default. Icons and list
+			honour the click-mode setting; columns and gallery always pick on one click and open on two,
+			because in those two picking is the navigation.
+		</p>
+		<p class="mb-4 text-sm text-fg-2">
+			Columns anchor at the folder you are in rather than at the root: this tree has no parent map
+			by design, since a project is listed under both its experience and under Projects. Gallery
+			previews the item's real write-up, because nothing here has a thumbnail and a large generic
+			icon would be a dead pane.
+		</p>
+
+		<div class="mb-4 flex items-center gap-3">
+			<ViewSwitcher {view} onview={(next) => (view = next)} />
+			<span class="text-sm text-fg-3">{VIEW_LABEL[view]}</span>
+		</div>
+
+		<div class="rounded-md border border-line bg-surface-1 p-4">
+			<FolderView
+				node={FOLDER}
+				{view}
+				selected={picked}
+				onselect={(child) => (picked = child.id)}
+				onopen={(child) => (picked = child.id)}
+			/>
+		</div>
 	</section>
 
 	<section aria-labelledby="composition" class="mb-12">

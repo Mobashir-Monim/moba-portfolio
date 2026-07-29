@@ -144,7 +144,7 @@ a skin needs `{#if skin === 'retro'}` wrapped around duplicated chrome, it has b
 with a new name. Reach for a token first, a scoped rule second, and a branch only after both fail.
 
 **Icons** carry three variants for chrome glyphs only: folder, document, their open states, window
-controls, chevron, apps, cog. Brand and social icons have one variant.
+controls, chevron, apps, the four folder views, cog. Brand and social icons have one variant.
 
 Skin, theme, and appearance must all be applied **before first paint** by a small inline script in
 `app.html` that reads localStorage and sets the attributes. The old site hardcoded
@@ -186,11 +186,30 @@ only, skippable, and never blocks content from existing in the DOM.
 **Desktop.** Logo and name, plus the root directory rendered as an icon grid. Icons are
 folders and documents.
 
-**Windows.** Draggable, focusable, stackable, minimizable, closable. Chrome is a title bar
-with the name, back/forward navigation for folder windows, and minimize/close controls. Folder
+**Windows.** Draggable, resizable, focusable, stackable, minimizable, closable. Chrome is a title
+bar with the name, back/forward navigation for folder windows, and minimize/close controls. Folder
 windows additionally show an info sidebar for the selected item, with the invented filesystem
 details that give the piece its charm: fake size, `644` permissions, `MDir Folder` / `MDoc File`
 type names, author. Keep those.
+
+Drag and resize are one gesture module and are both pointer-only, which the accessibility contract
+allows: position and size are presentation, and nothing is reachable only through them. Both clamp,
+so a window can be neither dragged off the clipped desktop nor shrunk past its own title bar.
+
+Opening from inside a window follows the kind. A folder is a place, so it opens in the same window
+and pushes history; a document is not, so it gets its own window, the way double-clicking a file
+has always handed it to a viewer. Opening something already open raises it instead of duplicating
+it, so there is never a second window on one item.
+
+**Folder views.** Four, the same four a Finder window offers and in the same order: icon, list,
+column, gallery. The switcher is a segmented control at the right of the path row, which is that
+row's second job. The view is per window and survives navigating inside it.
+
+Icon and list honour the click-mode setting. Column and gallery always pick on one click and open
+on two, whatever that setting says, because in those two picking is how you move. Column view
+anchors at the folder the window is in, never at the root: the tree has no parent map by design, so
+there is no single ancestor path to draw. Gallery previews the item's real write-up rather than a
+large generic icon, because nothing on this site has a thumbnail.
 
 **Dock.** Fixed to the bottom. Apps menu, settings, and grouped counts of open documents and
 folders, clicking a group unminimizes that group.

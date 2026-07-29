@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Handle } from '$lib/gesture';
 	import type { Snippet } from 'svelte';
 	import TitleBar from './TitleBar.svelte';
 
@@ -15,6 +16,9 @@
 		onclose,
 		onpointerdown,
 		onfocusin,
+		handle,
+		grip,
+		toolbar,
 		sidebar,
 		children,
 		class: klass = ''
@@ -40,6 +44,18 @@
 		 */
 		onpointerdown?: (event: PointerEvent) => void;
 		onfocusin?: (event: FocusEvent) => void;
+		/** Passed straight to the title bar, which is the drag surface. See `$lib/gesture`. */
+		handle?: Handle;
+		/**
+		 * Resize. Absent means no corner grip is rendered at all, which is the styleguide and any
+		 * other caller that is not a positioned window on a desktop.
+		 */
+		grip?: Handle;
+		/**
+		 * The right end of the path row, which is where a Finder window keeps its view control.
+		 * A snippet rather than props, so this component never learns what a view is.
+		 */
+		toolbar?: Snippet;
 		/** Folder windows carry the info panel. Document windows leave it out. */
 		sidebar?: Snippet;
 		children: Snippet;
@@ -65,10 +81,14 @@
 		{onforward}
 		{onminimize}
 		{onclose}
+		{handle}
 	/>
 
-	{#if path}
-		<p class="path">{path}</p>
+	{#if path || toolbar}
+		<div class="bar">
+			{#if path}<p class="path">{path}</p>{/if}
+			{@render toolbar?.()}
+		</div>
 	{/if}
 
 	<div class="body">
@@ -77,13 +97,24 @@
 			<aside class="sidebar" aria-label="{title} info">{@render sidebar()}</aside>
 		{/if}
 	</div>
+
+	{#if grip}
+		<!-- Pointer-only and deliberately so, the same call `CLAUDE.md` allows for drag: nothing is
+		     reachable only through it, since size is presentation and the window is already fully
+		     operable by keyboard. It is not focusable, so it is not a keyboard trap either. -->
+		<div class="grip" {...grip} aria-hidden="true"></div>
+	{/if}
 </section>
 
 <style>
 	.window {
 		/* The breakpoint below is the window's own width, not the viewport's, because a narrow
-		   window on a wide screen has exactly the same problem. */
+		   window on a wide screen has exactly the same problem. Resizing therefore restacks the
+		   sidebar on its own, with no second breakpoint to keep in step. */
 		container-type: inline-size;
+
+		/* The grip's containing block. */
+		position: relative;
 
 		display: flex;
 		flex-direction: column;
@@ -102,14 +133,25 @@
 		box-shadow: var(--elev-2);
 	}
 
-	/* Where you are, under the bar that says what you are looking at. `--path-prefix` is the one
-	   token that differs: `~/` in modern, nothing in the other two, which is the difference
-	   between a systems tool and a folder window without a branch in the markup. */
-	.path {
+	/* Where you are on the left, how you are looking at it on the right. That is Finder's toolbar,
+	   compressed into the row this window already had. */
+	.bar {
+		display: flex;
 		flex: none;
-		padding: 0.25rem 0.75rem;
+		align-items: center;
+		gap: 0.5rem;
+		min-height: 1.75rem;
+		padding: 0.125rem 0.375rem 0.125rem 0.75rem;
 		background: var(--c-surface-1);
 		border-bottom: var(--bw) solid var(--c-line);
+	}
+
+	/* `--path-prefix` is the one token that differs: `~/` in modern, nothing in the other two,
+	   which is the difference between a systems tool and a folder window without a branch in the
+	   markup. */
+	.path {
+		flex: 1;
+		min-width: 0;
 		color: var(--c-fg-3);
 		font-family: var(--ff-mono);
 		font-size: var(--fs-xs);
@@ -149,6 +191,40 @@
 		overflow: auto;
 		background: var(--c-surface-2);
 		border-top: var(--bw) solid var(--c-line);
+	}
+
+	/* System 7's grow box, and near enough to every window corner since. Two hairlines rather than
+	   a glyph, so it costs no icon and reads the same in all three skins; `touch-action` is what
+	   makes the one gesture path cover touch, exactly as on the title bar. */
+	.grip {
+		position: absolute;
+		inset-block-end: 0;
+		inset-inline-end: 0;
+		width: 1rem;
+		height: 1rem;
+		cursor: nwse-resize;
+		touch-action: none;
+		background: linear-gradient(
+			-45deg,
+			transparent 0 30%,
+			var(--c-line-strong) 30% 40%,
+			transparent 40% 55%,
+			var(--c-line-strong) 55% 65%,
+			transparent 65%
+		);
+		opacity: 0.7;
+	}
+
+	.grip:hover {
+		opacity: 1;
+	}
+
+	/* Full-screen windows have nothing to resize to. Same breakpoint as the frame's, which is the
+	   one place that decides a window is full-screen. */
+	@media (max-width: 40rem) {
+		.grip {
+			display: none;
+		}
 	}
 
 	@container (min-width: 32rem) {

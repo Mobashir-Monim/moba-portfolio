@@ -1,4 +1,4 @@
-import type { Kind } from './os';
+import type { Kind, View } from './os';
 
 /**
  * The one module that owns window state.
@@ -23,6 +23,20 @@ export type WindowRecord = {
 	/** Desktop position in pixels. Applied as `translate3d()`, never `left`/`top` (ledger #24). */
 	x: number;
 	y: number;
+	/**
+	 * Size in pixels, once the window has been resized. Undefined until then, and undefined is
+	 * load-bearing: the default size is a CSS expression against the viewport, so a record that
+	 * has never been resized has no business claiming a number the stylesheet can already work
+	 * out, and would go stale the moment the viewport changed.
+	 */
+	w?: number;
+	h?: number;
+	/**
+	 * How this window draws what it holds. Window state rather than component state because the
+	 * frame unmounts while minimized, and a view that reset itself every time you put a window
+	 * away would be a setting you cannot keep.
+	 */
+	view: View;
 	minimized: boolean;
 	/**
 	 * Node ids visited in this window, oldest first. `history[0]` is always `id`, so a window
@@ -118,6 +132,7 @@ export function createWindows() {
 					kind,
 					x: ORIGIN.x + n * STEP,
 					y: ORIGIN.y + n * STEP,
+					view: 'icon',
 					minimized: false,
 					history: [id],
 					index: 0
@@ -151,6 +166,16 @@ export function createWindows() {
 		/** Committed once on pointerup. The gesture itself lives in component-local state. */
 		moveTo(id: string, x: number, y: number): void {
 			replace(id, (w) => ({ ...w, x, y }));
+		},
+
+		/** Same contract as `moveTo`: the drag is local, this is the one write it produces. */
+		resizeTo(id: string, w: number, h: number): void {
+			replace(id, (rec) => ({ ...rec, w, h }));
+		},
+
+		/** Per window, the way Finder is per folder. It survives navigating inside the window. */
+		setView(id: string, view: View): void {
+			replace(id, (w) => ({ ...w, view }));
 		},
 
 		/** Navigating anywhere discards the forward stack, the way every back button has. */

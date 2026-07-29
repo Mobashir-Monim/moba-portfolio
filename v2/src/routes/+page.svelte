@@ -1,19 +1,16 @@
 <script lang="ts">
-	import { isDark, settings, update } from '$lib/appearance.svelte';
 	import Boot from '$lib/components/Boot.svelte';
 	import Desktop from '$lib/components/Desktop.svelte';
 	import DesktopIcon from '$lib/components/DesktopIcon.svelte';
 	import Dock from '$lib/components/Dock.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
 	import WindowLayer from '$lib/components/WindowLayer.svelte';
 	import { about } from '$lib/content/about';
+	import { SETTINGS_ID } from '$lib/os';
 	import { nodes, root, summary } from '$lib/tree';
 	import { windows } from '$lib/windows.svelte';
 
 	/** Desktop selection. Purely a view state, and the desktop has no sidebar to feed. */
 	let selected = $state<string | undefined>();
-	let settingsOpen = $state(false);
 
 	const person = `${about.person.first} ${about.person.last}`;
 </script>
@@ -60,7 +57,7 @@
 		<Dock
 			folders={windows.counts.folder}
 			documents={windows.counts.document}
-			onsettings={() => (settingsOpen = true)}
+			onsettings={() => windows.open(SETTINGS_ID, 'document')}
 			onfolders={() => windows.restoreKind('folder')}
 			ondocuments={() => windows.restoreKind('document')}
 		/>
@@ -70,21 +67,6 @@
 <!-- Over the desktop, never instead of it: the content beneath already exists in the DOM, which
      is the whole of ledger #12 held to even here. -->
 <Boot />
-
-{#if settingsOpen}
-	<div class="modal-layer">
-		<Modal title="Settings" onclose={() => (settingsOpen = false)}>
-			<SettingsPanel
-				skin={settings.skin}
-				theme={settings.theme}
-				appearance={settings.appearance}
-				clickMode={settings.clickMode}
-				dark={isDark()}
-				onchange={update}
-			/>
-		</Modal>
-	</div>
-{/if}
 
 <style>
 	.shell {
@@ -107,10 +89,5 @@
 		display: flex;
 		justify-content: center;
 		padding-inline: 0.75rem;
-	}
-
-	.modal-layer {
-		position: fixed;
-		inset: 0;
 	}
 </style>

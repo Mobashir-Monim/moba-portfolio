@@ -273,17 +273,23 @@
 	/* Graph paper at 32px. The technical detailing the direction was picked for, and the reason
 	   the ground is a token: retro dithers here, glass washes, modern rules a grid. */
 	--desktop-bg:
+		linear-gradient(color-mix(in oklab, var(--c-line) 30%, transparent) 1px, transparent 1px) 0 0 /
+			32px 32px,
+		linear-gradient(90deg, color-mix(in oklab, var(--c-line) 30%, transparent) 1px, transparent 1px)
+			0 0 / 32px 32px,
+		radial-gradient(120% 110% at 50% -10%, var(--color-surface-1) 0%, var(--color-surface-3) 68%);
+	/* --desktop-bg:
 		repeating-linear-gradient(
 			to right,
-			color-mix(in oklab, var(--c-line) 55%, transparent) 0 1px,
+			color-mix(in oklab, var(--c-line) 30%, transparent) 0 1px,
 			transparent 1px 32px
 		),
 		repeating-linear-gradient(
 			to bottom,
-			color-mix(in oklab, var(--c-line) 55%, transparent) 0 1px,
+			color-mix(in oklab, var(--c-line) 30%, transparent) 0 1px,
 			transparent 1px 32px
 		),
-		var(--c-surface-0);
+		var(--c-surface-0); */
 	--sidebar-w: 13rem;
 	--titlebar-pattern: none;
 	--title-align: start;

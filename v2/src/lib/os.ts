@@ -15,6 +15,17 @@ export const OS_VERSION = '2.0';
 export type Kind = 'folder' | 'document';
 
 /**
+ * Settings is a window like every other window, not a modal over a hidden desktop: it changes how
+ * the desktop looks, so covering the desktop while you change it is the wrong shape.
+ *
+ * It has no node in the tree, because it is an app and not content, and the `app:` prefix cannot
+ * occur in a content slug. That is what keeps the id out of the tree's namespace without a
+ * runtime check. Phase 4 turns this into a roster; one app does not need one yet.
+ */
+export const SETTINGS_ID = 'app:settings';
+export const SETTINGS_NAME = 'Settings';
+
+/**
  * The invented type names the info sidebar shows. They lean on the `M` of Mnemos, which is why
  * they live beside the name rather than inside the sidebar component: renaming the OS has to
  * rename these in the same edit or the world stops being one world.
@@ -22,6 +33,24 @@ export type Kind = 'folder' | 'document';
 export const FILE_TYPE: Record<Kind, string> = {
 	folder: 'MDir Folder',
 	document: 'MDoc File'
+};
+
+/**
+ * How a folder window draws what it holds. The same four a Finder window offers, and the same
+ * order, because that is the order the segmented control has been in for twenty years.
+ *
+ * `column` and `gallery` are genuinely different browsers rather than restyled grids, which is
+ * why this is a per-window setting and not a class on the grid.
+ */
+export const VIEWS = ['icon', 'list', 'column', 'gallery'] as const;
+export type View = (typeof VIEWS)[number];
+
+/** Names the switcher announces, and the labels the styleguide prints beside each view. */
+export const VIEW_LABEL: Record<View, string> = {
+	icon: 'Icons',
+	list: 'List',
+	column: 'Columns',
+	gallery: 'Gallery'
 };
 
 /** Every item claims the same permissions. It is a portfolio, nothing here is writable. */

@@ -37,6 +37,10 @@ describe('chrome glyphs are skin-owned', () => {
 			'minimize',
 			'chevron',
 			'apps',
+			'view-icon',
+			'view-list',
+			'view-column',
+			'view-gallery',
 			'settings'
 		]);
 	});

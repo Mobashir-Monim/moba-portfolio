@@ -1,22 +1,19 @@
 <script lang="ts">
-	import DesktopIcon from '$lib/components/DesktopIcon.svelte';
-	import IconGrid from '$lib/components/IconGrid.svelte';
+	import FolderView from '$lib/components/views/FolderView.svelte';
+	import type { View } from '$lib/os';
 	import { childrenOf, type Node } from '$lib/tree';
-	import { windows } from '$lib/windows.svelte';
-	import About from './About.svelte';
-	import Certification from './Certification.svelte';
-	import Degree from './Degree.svelte';
-	import Experience from './Experience.svelte';
-	import Project from './Project.svelte';
-	import Publication from './Publication.svelte';
+	import NodeBody from './NodeBody.svelte';
 
 	let {
 		node,
+		view = 'icon',
 		selected,
 		onopen,
 		onselect
 	}: {
 		node: Node;
+		/** How to draw what the node holds. A window passes its own; a route takes the default. */
+		view?: View;
 		/** Id of the child the info sidebar is describing. Windows only; a route has no sidebar. */
 		selected?: string;
 		/** Omit and the child icons stay plain links, which is the route and the no-script case. */
@@ -32,34 +29,20 @@
 	renders this and gets a document; a window renders the same call and gets the same document
 	inside chrome. That is the whole of the dual-render decision in `CLAUDE.md`, and it is why
 	the tree carries its body rather than the shell keeping a second lookup keyed by the same ids.
+
+	The body is its own component so the gallery view can preview an item without recursing into
+	that item's children; what the node holds is the four views' business, not this file's.
 -->
-{#if node.type === 'about'}
-	<About data={node.data} />
-{:else if node.type === 'experience'}
-	<Experience data={node.data} />
-{:else if node.type === 'project'}
-	<Project data={node.data} />
-{:else if node.type === 'degree'}
-	<Degree data={node.data} />
-{:else if node.type === 'publication'}
-	<Publication data={node.data} />
-{:else if node.type === 'certification'}
-	<Certification data={node.data} />
-{/if}
+<NodeBody {node} />
 
 {#if children.length > 0}
 	<!-- `mt-6` only when there is prose above it, which is every folder except a bare index. -->
-	<IconGrid class={node.type === 'index' ? '' : 'mt-6'}>
-		{#each children as child (child.id)}
-			<DesktopIcon
-				name={child.name}
-				href={child.href}
-				kind={child.kind}
-				selected={selected === child.id}
-				open={windows.byId(child.id) !== undefined}
-				onopen={onopen && (() => onopen(child))}
-				onselect={onselect && (() => onselect(child))}
-			/>
-		{/each}
-	</IconGrid>
+	<FolderView
+		{node}
+		{view}
+		{selected}
+		{onopen}
+		{onselect}
+		class={node.type === 'index' ? '' : 'mt-6'}
+	/>
 {/if}

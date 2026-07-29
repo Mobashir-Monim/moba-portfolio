@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Handle } from '$lib/gesture';
 	import Icon from './Icon.svelte';
 
 	let {
@@ -10,7 +11,8 @@
 		onback,
 		onforward,
 		onminimize,
-		onclose
+		onclose,
+		handle
 	}: {
 		title: string;
 		/** Focused windows get the accent title bar and, in retro, the pinstripes. */
@@ -23,21 +25,26 @@
 		onforward?: () => void;
 		onminimize?: () => void;
 		onclose?: () => void;
+		/**
+		 * Pointer handlers from whatever owns this window's position. Absent means the bar is not a
+		 * drag surface, which is how the styleguide renders one without inventing a desktop for it.
+		 */
+		handle?: Handle;
 	} = $props();
 </script>
 
 <!--
 	A div, not a button. Ledger #17: the old site nested a control button inside a toolbar button
 	inside the window button, which is invalid HTML and unpredictable in assistive tech. The drag
-	handlers land on this element in phase 2.4; nothing about it needs to be interactive to be
-	draggable.
+	handlers land on this element and nothing about it needs to be interactive to take them: a
+	pointer gesture is not a control, and the window is already reachable and closable by keyboard.
 -->
 <!--
 	Controls left, title, navigation right. That is the arrangement the 1.1 mockups were drawn
 	in, in all three skins, and DOM order matches visual order so a screen reader and a pointer
 	read the bar the same way.
 -->
-<div class="titlebar" class:focused>
+<div class="titlebar" class:focused class:grabbable={handle} {...handle}>
 	<div class="group">
 		{#if onclose}
 			<button type="button" class="control" onclick={onclose}>
@@ -102,6 +109,19 @@
 		--_bg: var(--titlebar-bg);
 		--_fg: var(--titlebar-fg);
 		--_pattern: var(--titlebar-pattern);
+	}
+
+	/* `touch-action: none` is what makes one code path cover mouse, touch, and pen: without it the
+	   browser claims the touch for a pan and the move events never arrive. `user-select` stops a
+	   drag from selecting the title, which is chrome text and never worth selecting anyway. */
+	.grabbable {
+		cursor: grab;
+		touch-action: none;
+		user-select: none;
+	}
+
+	.grabbable:active {
+		cursor: grabbing;
 	}
 
 	.title {

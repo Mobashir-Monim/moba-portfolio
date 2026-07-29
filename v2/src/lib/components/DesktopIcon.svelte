@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { settings } from '$lib/appearance.svelte';
+	import { activators } from '$lib/activate';
 	import type { Kind } from '$lib/os';
 	import Icon from './Icon.svelte';
 
@@ -36,25 +36,8 @@
 
 	const glyph = $derived(open ? (`${kind}-open` as const) : kind);
 
-	/** Anything the browser already has a better answer for: new tab, new window, middle click. */
-	function claimed(event: MouseEvent): boolean {
-		return !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0);
-	}
-
-	function activate(event: MouseEvent): void {
-		if (!onopen || !claimed(event)) return;
-		event.preventDefault();
-		onopen();
-	}
-
-	function click(event: MouseEvent): void {
-		// Enter on a link fires a click with no pointer behind it. That is an activation in either
-		// mode, so double-click mode must not swallow it into a selection.
-		if (settings.clickMode === 'single' || event.detail === 0) return activate(event);
-		if (!onselect || !claimed(event)) return;
-		event.preventDefault();
-		onselect();
-	}
+	/** Shared with the other three folder views, which owe a link exactly the same behaviour. */
+	const activate = $derived(activators(onopen, onselect));
 </script>
 
 <!--
@@ -79,8 +62,7 @@
 	class:selected
 	class:open
 	aria-current={selected ? 'true' : undefined}
-	onclick={click}
-	ondblclick={activate}
+	{...activate}
 >
 	<Icon name={glyph} size={layout === 'row' ? 20 : 40} />
 	<span class="label">{name}</span>

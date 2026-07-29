@@ -1,10 +1,14 @@
 <script lang="ts">
-	import { OWNER } from '$lib/os';
+	import { isDark, settings, update } from '$lib/appearance.svelte';
+	import { clampSize, clampToDesktop, gesture, type Bounds } from '$lib/gesture';
+	import { OWNER, SETTINGS_ID, SETTINGS_NAME } from '$lib/os';
 	import { node, type Node } from '$lib/tree';
 	import { canBack, canForward, current, windows, type WindowRecord } from '$lib/windows.svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { scale } from 'svelte/transition';
 	import InfoSidebar from './InfoSidebar.svelte';
+	import SettingsPanel from './SettingsPanel.svelte';
+	import ViewSwitcher from './ViewSwitcher.svelte';
 	import NodeContent from './content/NodeContent.svelte';
 	import Window from './Window.svelte';
 
@@ -13,6 +17,14 @@
 	/** What this window is showing right now, which is not what it was opened from. */
 	const showingId = $derived(current(record));
 	const showing = $derived(node(showingId));
+
+	/**
+	 * The one window with no node behind it. An app is not content, so it has no tree entry, no
+	 * route, and no info sidebar; everything else about it is an ordinary window, which is the
+	 * point. When there is a roster this becomes a lookup, not a second branch.
+	 */
+	const isSettings = $derived(showingId === SETTINGS_ID);
+	const title = $derived(isSettings ? SETTINGS_NAME : (showing?.name ?? ''));
 
 	/**
 	 * Which child the info sidebar is describing. Local, not in the store: it is a property of
@@ -58,25 +70,109 @@
 		windows.focus(record.id);
 	}
 
+	let frame = $state<HTMLElement>();
+
+	/**
+	 * Where the window is being dragged to and how big it is being dragged out to, both
+	 * component-local for the length of the gesture. The store is written once, on pointerup, so
+	 * a gesture is one state change and not one per frame (ledger #25). Null means no gesture is
+	 * running and the record is the truth again, which is also what a cancelled gesture restores.
+	 */
+	let pos = $state<{ x: number; y: number } | null>(null);
+	let size = $state<Bounds | null>(null);
+
+	const x = $derived(pos?.x ?? record.x);
+	const y = $derived(pos?.y ?? record.y);
+	const w = $derived(size?.w ?? record.w);
+	const h = $derived(size?.h ?? record.h);
+
+	/**
+	 * The desktop the window is being moved or stretched inside. Read at pointerdown rather than
+	 * on mount, so a resized viewport is measured again: ledger #5 was exactly the opposite,
+	 * dimensions read once in `onMount` while the position math stayed live.
+	 */
+	function desktop(): Bounds | undefined {
+		const layer = frame?.parentElement;
+		return layer ? { w: layer.clientWidth, h: layer.clientHeight } : undefined;
+	}
+
+	/** Dragging by the title bar. */
+	const handle = gesture((event) => {
+		// A press on one of the title bar's controls is that control's, not a drag's.
+		if ((event.target as Element).closest('button')) return;
+
+		const bounds = desktop();
+		if (!frame || !bounds) return;
+
+		const from = { x: record.x, y: record.y };
+		const width = frame.offsetWidth;
+		pos = from;
+
+		return {
+			move: (dx, dy) => (pos = clampToDesktop(from.x + dx, from.y + dy, width, bounds)),
+			commit: () => {
+				if (pos) windows.moveTo(record.id, pos.x, pos.y);
+				pos = null;
+			},
+			cancel: () => (pos = null)
+		};
+	});
+
+	/** Stretching by the corner grip. Same gesture, different arithmetic. */
+	const grip = gesture(() => {
+		const bounds = desktop();
+		if (!frame || !bounds) return;
+
+		// The rendered size, because a window that has never been resized carries none of its own.
+		const from = { w: frame.offsetWidth, h: frame.offsetHeight };
+		size = from;
+
+		return {
+			move: (dx, dy) => (size = clampSize(from.w + dx, from.h + dy, bounds)),
+			commit: () => {
+				if (size) windows.resizeTo(record.id, size.w, size.h);
+				size = null;
+			},
+			cancel: () => (size = null)
+		};
+	});
+
 	function open(child: Node): void {
-		// Inside a folder, a child opens in place and pushes history, the way a file manager has
-		// always worked. The window's back button is the way out.
-		windows.navigate(record.id, child.id);
+		// A folder is a place, so it opens in this window and pushes history, the way a file
+		// manager has always worked; the back button is the way out. A document is not a place: it
+		// gets its own window, the way double-clicking a file has always handed it to a viewer.
+		// `windows.open` raises and unminimizes one that is already open rather than duplicating it.
+		if (child.kind === 'folder') windows.navigate(record.id, child.id);
+		else windows.open(child.id, child.kind);
 	}
 </script>
 
-{#if showing && !record.minimized}
+{#if (showing || isSettings) && !record.minimized}
 	<!--
 		Position is a custom property rather than an inline `transform`, so the mobile rule below
 		can drop it without `!important` and without a second markup tree (ledger #27). The
 		property applied is `translate3d`, never `left`/`top` (ledger #24).
 	-->
-	<div class="frame" style="--x: {record.x}px; --y: {record.y}px" transition:scale={motion}>
+	<!--
+		A window that has never been resized sets no `--w`, so the default below stays a CSS
+		expression against the viewport rather than a number frozen at open time.
+	-->
+	<div
+		bind:this={frame}
+		class="frame"
+		style:--x="{x}px"
+		style:--y="{y}px"
+		style:--w={w ? `${w}px` : null}
+		style:--h={h ? `${h}px` : null}
+		transition:scale={motion}
+	>
 		<Window
 			class="h-full w-full"
+			{handle}
+			{grip}
 			onpointerdown={raise}
 			onfocusin={raise}
-			title={showing.name}
+			{title}
 			focused={windows.isFocused(record.id)}
 			nav={isFolder}
 			path={isFolder ? path : undefined}
@@ -86,17 +182,34 @@
 			onforward={() => windows.forward(record.id)}
 			onminimize={() => windows.minimize(record.id)}
 			onclose={() => windows.close(record.id)}
+			toolbar={isFolder ? toolbar : undefined}
 			sidebar={isFolder && described ? sidebar : undefined}
 		>
-			<NodeContent
-				node={showing}
-				{selected}
-				onopen={open}
-				onselect={(child) => (selected = child.id)}
-			/>
+			{#if isSettings}
+				<SettingsPanel
+					skin={settings.skin}
+					theme={settings.theme}
+					appearance={settings.appearance}
+					clickMode={settings.clickMode}
+					dark={isDark()}
+					onchange={update}
+				/>
+			{:else if showing}
+				<NodeContent
+					node={showing}
+					view={record.view}
+					{selected}
+					onopen={open}
+					onselect={(child) => (selected = child.id)}
+				/>
+			{/if}
 		</Window>
 	</div>
 {/if}
+
+{#snippet toolbar()}
+	<ViewSwitcher view={record.view} onview={(next) => windows.setView(record.id, next)} />
+{/snippet}
 
 {#snippet sidebar()}
 	{#if described}
@@ -118,8 +231,8 @@
 		position: absolute;
 		inset-block-start: 0;
 		inset-inline-start: 0;
-		width: min(46rem, calc(100vw - 2rem));
-		height: min(30rem, calc(100dvh - var(--dock-h) - 4rem));
+		width: var(--w, min(46rem, calc(100vw - 2rem)));
+		height: var(--h, min(30rem, calc(100dvh - var(--dock-h) - 4rem)));
 		transform: translate3d(var(--x), var(--y), 0);
 		/* The layer itself is inert so the desktop under it stays clickable; each window opts
 		   back in. */
