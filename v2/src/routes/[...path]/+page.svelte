@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Head from '$lib/components/Head.svelte';
 	import NodeContent from '$lib/components/content/NodeContent.svelte';
-	import { jsonLd, PERSON as person } from '$lib/seo';
+	import { graph, PERSON as person } from '$lib/seo';
 	import { nodes, summary } from '$lib/tree';
 	import { resolve } from '$app/paths';
 	import type { PageProps } from './$types';
@@ -16,7 +16,7 @@
 	description={summary(node)}
 	path={node.href}
 	type="article"
-	jsonld={jsonLd(node)}
+	jsonld={graph(node)}
 />
 
 <!--

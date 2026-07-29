@@ -7,7 +7,7 @@
 	import WindowLayer from '$lib/components/WindowLayer.svelte';
 	import { about } from '$lib/content/about';
 	import { SETTINGS_ID } from '$lib/os';
-	import { jsonLd, PERSON as person } from '$lib/seo';
+	import { graph, PERSON as person } from '$lib/seo';
 	import { nodes, root, summary } from '$lib/tree';
 	import { windows } from '$lib/windows.svelte';
 
@@ -26,14 +26,9 @@
 	const aboutNode = nodes[about.slug];
 </script>
 
-<!-- The home page is the person, so it carries the `Person` graph and `/about` carries it too:
-     they are the two URLs anyone links to when they mean me rather than a piece of work. -->
-<Head
-	title="{person}, {about.title}"
-	description={summary(aboutNode)}
-	path="/"
-	jsonld={jsonLd(aboutNode)}
-/>
+<!-- The root graph is the person and the site and nothing else. Every other page carries the same
+     two nodes and adds its own, so the whole site describes one person rather than thirty. -->
+<Head title="{person}, {about.title}" description={summary(aboutNode)} path="/" jsonld={graph()} />
 
 <!--
 	The shell. Everything it opens is a real route with its own server-rendered HTML, so this page
