@@ -114,11 +114,39 @@ inside an `$effect`, never the user-agent string.
 
 ### Theming
 
-CSS custom properties defined in `app.css`, one block per theme, switched by a `data-theme`
-attribute on `<html>`. Dark and light are a separate axis (`class="dark"`) with an `auto` mode
-following `prefers-color-scheme`.
+CSS custom properties defined in `app.css`. Three independent axes, all set on `<html>`:
 
-Theme and appearance must be applied **before first paint** by a small inline script in
+| Axis | Attribute | Values | Owns |
+|---|---|---|---|
+| Skin | `data-skin` | `modern`, `retro`, `glass` | Shape |
+| Colour theme | `data-theme` | four palettes | Colour |
+| Appearance | `class="dark"` | dark, light, auto | Ground polarity |
+
+That is 24 valid combinations, and every one must pass WCAG AA.
+
+**Skins own shape, themes own colour.** This split is the whole architecture, and it is what keeps
+three skins from becoming three stylesheets. A skin block sets font families, radii, border
+widths, chrome heights, shadow and blur recipes, and icon geometry. A theme block sets the surface
+ramp, the text ramp, and the accent. Neither writes into the other's tokens.
+
+Each skin decides how much of the accent to spend, and that budget is part of the skin, not the
+theme:
+
+- `modern` spends it throughout: accent, borders, focus rings, active icons.
+- `retro` spends it only where System 7's Color control panel did, on the selection highlight and
+  the title bar. Everything else stays greyscale. A colourised retro is not retro.
+- `glass` spends it as the gradient stops.
+
+**One markup tree.** Skins are token blocks plus a small number of rules scoped to
+`[data-skin="..."]` for the things tokens genuinely cannot express: retro's pinstripe title bar,
+dithered desktop, inset bevels, and selection-by-inversion; glass's `backdrop-filter`. The moment
+a skin needs `{#if skin === 'retro'}` wrapped around duplicated chrome, it has become defect #27
+with a new name. Reach for a token first, a scoped rule second, and a branch only after both fail.
+
+**Icons** carry three variants for chrome glyphs only: folder, document, their open states, window
+controls, chevron, apps, cog. Brand and social icons have one variant.
+
+Skin, theme, and appearance must all be applied **before first paint** by a small inline script in
 `app.html` that reads localStorage and sets the attributes. The old site hardcoded
 `data-theme="crimson"` in the HTML and applied the saved theme after mount, so every
 non-default user saw a flash.
@@ -144,6 +172,14 @@ non-default user saw a flash.
 
 Carried over from the old site. The metaphor is the product; keep the personality.
 
+**The OS is called Mnemos**, version 2.0, matching the site. Greek, memory: a portfolio is a
+record of work, so the name means what the site is, and it earns the `M` that `MDir` and `MDoc`
+already lean on. It sits above the skin, so it reads the same in pinstripes as in monospace.
+
+The name lives in one exported constant in `src/lib/`, never as a string literal in a component.
+It surfaces in the boot sequence, the Terminal prompt and hostname, System Info, the file-type
+labels, and the `404` voice, and those must never drift apart.
+
 **Boot screen.** Logo, progress bar, rotating fake POST/BIOS messages. Shows on first load
 only, skippable, and never blocks content from existing in the DOM.
 
@@ -159,9 +195,13 @@ type names, author. Keep those.
 **Dock.** Fixed to the bottom. Apps menu, settings, and grouped counts of open documents and
 folders, clicking a group unminimizes that group.
 
-**Settings window.** Appearance (dark / light / auto), color theme, and open-on-single-click
-vs open-on-double-click. Persisted to localStorage. The first-visit click-mode prompt from the
-old site stays.
+**Settings window.** Skin, colour theme, appearance (dark / light / auto), and
+open-on-single-click vs open-on-double-click. Persisted to localStorage. The first-visit
+click-mode prompt from the old site stays.
+
+Skin is the headline control, so it gets the most space and a live preview rather than a label
+in a select. Switching skin re-dresses the running desktop in place; it never reloads, and open
+windows keep their position and stacking order. Give the user a reason to try all three.
 
 **Apps menu.** Real this time. A launcher for the app roster below. The old site shipped a
 full-screen overlay reading "No apps installed yet"; that does not return.

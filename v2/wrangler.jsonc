@@ -1,7 +1,7 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	// Must match the Cloudflare Workers project name.
-	"name": "portfolio",
+	// Must match the deployed Worker name, or a deploy creates a second Worker.
+	"name": "moba-portfolio",
 	"compatibility_date": "2026-07-29",
 	"compatibility_flags": ["nodejs_als"],
 	"main": ".svelte-kit/cloudflare/_worker.js",

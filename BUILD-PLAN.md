@@ -3,8 +3,9 @@
 Companion to `CLAUDE.md`. That file is the standing context and the rules. This file is the
 ordered work. Phases are sequential; tasks inside a phase are mostly parallel.
 
-Honest total: roughly 22 to 30 days of focused work. The shell and the apps are each about as
-much work as the entire old site was.
+Honest total: roughly 25 to 34 days of focused work. The shell and the apps are each about as
+much work as the entire old site was, and the three switchable skins add three to four days on
+top of that, almost all of it in Phase 1.
 
 The old site is not vendored here. It stays in its own repo, `mosite-svelte-v2`, and is read
 across when content, copy, or assets are needed. See the porting table in `CLAUDE.md`.
@@ -24,8 +25,8 @@ across when content, copy, or assets are needed. See the porting table in `CLAUD
 - [x] 0.5 `bun test` script in `package.json`. `bunfig.toml` and `bun-test-setup.ts` exist, the
       script does not.
 - [x] 0.6 `git init` at `portfolio/`, first commit, push.
-- [ ] 0.7 Connect Cloudflare Workers Builds to the repo, deploy the hello-world. **Do this now,
-      not at the end.**
+- [x] 0.7 Connect Cloudflare Workers Builds to the repo, deploy the hello-world. Live at
+      `moba-portfolio.m-monim.workers.dev`. **Do this now, not at the end.**
       Adapter and build surprises are cheap to fix against an empty repo and expensive to fix
       against a finished site.
 
@@ -33,74 +34,103 @@ across when content, copy, or assets are needed. See the porting table in `CLAUD
 
 ## Phase 1: Design system and static reskin
 
-**~3 to 5 days. Goal: every surface of the OS drawn and verified, with no state wired in.**
+**~6 to 9 days. Goal: every surface of the OS drawn and verified in all three skins, with no
+state wired in.**
 
 This is the reskin. Components are real Svelte components with real markup and styles, driven
 by props only. Nothing is interactive yet. Phase 2 makes them work.
 
-### 1.1 Aesthetic direction (decide first, everything else depends on it)
+### 1.1 Aesthetic direction: all three ship as user-switchable skins
 
-The old site was vaguely modern-macOS: translucent windows, backdrop blur, `rounded-2xl`,
-Montserrat with wide letter-spacing, on top of Skeleton's `crimson` preset. It reads pleasant
-but generic, and
-it sits oddly against the BIOS boot messages, which point somewhere more technical.
+**Decided.** The old site's theme switcher changed colour. This one changes shape. Three skins,
+selectable at runtime, persisted, switching in place without a reload:
 
-Pick a lane. My recommendation: **modern base, technical detailing.** Keep the blur, the radii,
-and the depth, but make typography, iconography, and copy read like a systems tool. Mono for all
-system chrome (title bars, sidebar metadata, dock tooltips, terminal), proportional for content.
-Precise, geometric icons rather than soft ones. It stays contemporary, it makes the Terminal and
-the boot screen feel native rather than bolted on, and it does not commit you to drawing pixel
-art.
+| Skin | Character |
+|---|---|
+| `modern` | Blur, radii, depth kept. Mono chrome, proportional content. Stroked geometric icons on a 24-unit grid. |
+| `retro` | System 7. Pinstripe title bar, dithered desktop, black hairlines, hard drop shadows, inset bevels, selection by inversion. No translucency. |
+| `glass` | Translucency all the way. Heavy backdrop blur, generous radii, soft light, gradient accent. Where the old site already was. |
 
-The alternatives, for completeness: full retro (System 7 or Win95 bitmap chrome, high charm,
-high art cost, dates fast) or full glass (prettier, but nothing distinguishes it from every
-other portfolio using a glass aesthetic).
+Crossed with four colour themes and dark/light, that is **24 combinations, every one of which
+must pass AA**. See the theming table in `CLAUDE.md` for which axis owns what, and for the
+per-skin accent budget. The load-bearing constraint: skins own shape, themes own colour, and it
+stays one markup tree.
 
-**Needs your sign-off before 1.2 starts.**
+Evidence this is tractable: the three directions were prototyped from byte-for-byte identical
+markup. Every difference was CSS.
 
 ### 1.2 Name the OS
 
-The old site's operating system is unnamed, which is why the boot screen, the sidebar's `MDir`/`MDoc`
-types, and the `644` permissions feel like isolated jokes instead of one world. Naming it makes
-the boot sequence, System Info, the Terminal prompt, and the file-type labels cohere for free.
-Cheap, and the single biggest personality gain available.
+**Decided: Mnemos.** Version 2.0, matching the site.
+
+The old site's operating system was unnamed, which is why the boot screen, the sidebar's
+`MDir`/`MDoc` types, and the `644` permissions read as isolated jokes instead of one world.
+
+Mnemos is Greek, memory. A portfolio is a record of work, so the name means what the site is. It
+earns the `M` prefix that `MDir` and `MDoc` already depend on, and it reads as native in
+pinstripes and in monospace alike, which the skin switcher requires.
+
+Where it surfaces: the boot sequence, the Terminal prompt and hostname, System Info, the
+file-type labels, and the `404` voice. One exported constant in `src/lib/`, never a string
+literal in a component, or renaming it later means grepping eight files.
 
 ### 1.3 Tokens
 
-Defined as CSS custom properties in `app.css`, one block per theme, switched by `data-theme` on
-`<html>`, with dark/light as an independent axis.
+Defined as CSS custom properties in `app.css`. Two independent sets, and the split between them
+is the architecture:
 
-- Colour: surface ramp, text ramp, accent, plus semantic aliases. Four themes carried over from
-  the old site, but your own palettes, not Skeleton presets.
-- Type scale, and the two families (proportional and mono).
-- Spacing, radii, border widths.
-- Elevation: shadow and blur per depth level, so a focused window reads above an unfocused one.
-- Motion: duration and easing tokens. Named, so nothing hardcodes `300ms` again.
+**Theme tokens (colour), one block per theme, switched by `data-theme`:** surface ramp, text
+ramp, accent, semantic aliases. Four themes carried over from the old site, but your own
+palettes, not Skeleton presets.
+
+**Skin tokens (shape), one block per skin, switched by `data-skin`:** font families, type scale,
+radii, border widths, chrome heights, elevation recipes (shadow and blur per depth level, so a
+focused window reads above an unfocused one), motion durations and easings.
+
+Motion is a skin token, not a global: glass wants a soft ease, retro wants near-instant with no
+easing at all, because System 7 did not animate. Named tokens throughout, so nothing hardcodes
+`300ms` again.
+
+Build the token contract before any component. Every skin must define every shape token, so a
+missing value is a build-time hole rather than a silent fallback.
 
 ### 1.4 Typography
 
-Subset to woff2 and preload. The old site shipped a raw `.ttf` variable font. Add the mono
-family that 1.1 requires.
+Three skins, three type pairings. Subset to woff2 and preload only what the active skin needs;
+do not ship all three families to every visitor. The old site shipped a raw `.ttf` variable font.
+
+Retro is the constraint: it wants a bitmap or chunky geometric face, and web-safe stacks
+(Geneva, Verdana, Tahoma) get most of the way there for free. Weigh a real bitmap face against
+zero bytes before committing to one.
 
 ### 1.5 Icon system
 
-One `<Icon>` component over a path map, or a single SVG sprite. The old site had a separate
-31-line component per icon.
+One `<Icon>` component over a path map keyed by skin. Chrome glyphs carry three variants: folder,
+document, their open states, window controls, chevron, apps, cog. Brand and social icons carry
+one. The old site had a separate 31-line component per icon and no variants at all.
 
 ### 1.6 Static components
 
 Window chrome (title bar, controls, info sidebar, focused and unfocused states), desktop grid
 and icon states (rest, hover, selected, open), dock, boot screen, settings panel, modal shell.
 
+Each gets built once and verified in all three skins before moving to the next. Building all
+components in one skin and re-skinning later is how the markup tree splits.
+
+The boot screen is the sharpest test: it has to read as a POST sequence in `retro`, as a systems
+tool in `modern`, and as something other than a soft gradient in `glass`. If glass cannot carry
+it, that is worth knowing in Phase 1 rather than Phase 6.
+
 ### 1.7 Styleguide route
 
-A prerendered `/styleguide` rendering every token and every component state, with theme and
-mode switchers. This is how you check contrast across four themes times two modes without
-clicking through the whole site, and it is where you catch the WCAG AA failures early rather
-than during the launch audit.
+A prerendered `/styleguide` rendering every token and every component state, with skin, theme,
+and mode switchers. At 24 combinations this stops being a convenience and becomes the only
+practical way to verify contrast, so build it early and keep it current. It is where WCAG AA
+failures get caught, not the launch audit.
 
-**Exit criteria:** every surface drawn, every state visible in the styleguide, AA contrast
-passing in all eight theme/mode combinations.
+**Exit criteria:** every surface drawn in every skin, every state visible in the styleguide, AA
+contrast passing in all 24 skin/theme/mode combinations, and no component branching on skin where
+a token or a scoped rule would do.
 
 ---
 
@@ -130,8 +160,9 @@ same components inside window chrome. Verify with JavaScript disabled.
 2.7 Head and SEO: per-route title, description, canonical, Open Graph, Twitter card, JSON-LD.
 `sitemap.xml`, `robots.txt`.
 
-2.8 Theme and appearance applied pre-paint by an inline script in `app.html` reading
-localStorage. No flash.
+2.8 Skin, theme, and appearance all applied pre-paint by an inline script in `app.html` reading
+localStorage. No flash. Switching skin at runtime re-dresses the running desktop in place: no
+reload, open windows keep their position and stacking order.
 
 2.9 Accessibility pass against the contract in `CLAUDE.md`: no nested interactives, accessible
 names on every icon-only control, arrow-key grid navigation, Escape closes, focus moves into a
