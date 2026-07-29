@@ -1,11 +1,13 @@
 import { about } from './content/about';
 import { certifications, degrees, publications } from './content/attainments';
+import { caseStudies } from './content/case-studies';
 import { experiences } from './content/experiences';
 import { projectList } from './content/projects';
 import { resume } from './content/resume';
 import { SITE_MODIFIED, type Kind } from './os';
 import type { About } from './types/about';
 import type { Certification, Degree, Publication } from './types/attainment';
+import type { CaseStudy } from './types/case-study';
 import type { YearMonth } from './types/common';
 import type { Experience } from './types/experience';
 import type { Project } from './types/project';
@@ -52,6 +54,7 @@ export type Body =
 	| { type: 'resume'; data: Resume }
 	| { type: 'experience'; data: Experience }
 	| { type: 'project'; data: Project }
+	| { type: 'case-study'; data: CaseStudy }
 	| { type: 'degree'; data: Degree }
 	| { type: 'publication'; data: Publication }
 	| { type: 'certification'; data: Certification }
@@ -149,6 +152,36 @@ for (const project of projectList)
 		modified: projectModified.get(project.slug) ?? SITE_MODIFIED
 	});
 
+/**
+ * A study is a document about a project, so it takes that project's date: it is a write-up of work
+ * done under the same job, and giving it one of its own would date the writing rather than the
+ * work.
+ *
+ * The href repeats the words the slug already carries, `/projects/case-studies/busso-case-study`,
+ * and that is the trade for the rule in `CLAUDE.md` that a slug is both the window id and the
+ * route segment. Ids are one flat namespace, so a study cannot be `busso`, and the last segment of
+ * a document's href is its id.
+ */
+const caseStudyByProject = new Map<string, string>();
+
+for (const study of caseStudies)
+	caseStudyByProject.set(
+		study.project.slug,
+		add({
+			type: 'case-study',
+			data: study,
+			id: study.slug,
+			name: study.name,
+			kind: 'document',
+			href: `/projects/case-studies/${study.slug}`,
+			size: bytes([
+				...study.description,
+				...study.sections.flatMap((section) => section.paragraphs)
+			]),
+			modified: draft[study.project.slug].modified
+		})
+	);
+
 for (const degree of degrees)
 	add({
 		type: 'degree',
@@ -229,6 +262,18 @@ const attainmentIds = [
 ];
 
 /**
+ * The studies get their own folder inside Projects rather than sitting beside the catalogue
+ * entries they are about. Two folders would duplicate the set; one folder mixing both would put
+ * two nodes named for the same work in one listing.
+ */
+const caseStudiesId = index(
+	'case-studies',
+	'Case Studies',
+	'/projects/case-studies',
+	caseStudies.map((study) => study.slug)
+);
+
+/**
  * Root order, which is the order the desktop draws. Deliberately not alphabetical: it opens on
  * who I am and closes on the paperwork.
  */
@@ -236,12 +281,11 @@ export const root: string[] = [
 	about.slug,
 	resume.slug,
 	index('experience', 'Experience', '/experience', experienceIds),
-	index(
-		'projects',
-		'Projects',
-		'/projects',
-		projectList.map((project) => project.slug)
-	),
+	index('projects', 'Projects', '/projects', [
+		// The folder first, which is where a file manager has always put them.
+		caseStudiesId,
+		...projectList.map((project) => project.slug)
+	]),
 	index('attainments', 'Attainments', '/attainments', attainmentIds)
 ];
 
@@ -254,6 +298,15 @@ export function node(id: string): Node | undefined {
 /** The catch-all route's whole job: a path back to the node that owns it. */
 export function byHref(href: string): Node | undefined {
 	return byPath.get(href);
+}
+
+/**
+ * The study of a project, where one has been written. Six of the twenty-one have one, so the
+ * catalogue entry asks rather than assuming, and this is the one place the pairing is recorded.
+ */
+export function caseStudyOf(projectSlug: string): Node | undefined {
+	const id = caseStudyByProject.get(projectSlug);
+	return id ? draft[id] : undefined;
 }
 
 /** Empty for a document, and for an id that does not exist. Callers render a grid either way. */

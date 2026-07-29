@@ -139,6 +139,9 @@ test('every node type resolves to the type that describes it', () => {
 	expect(typesOf('blockchain-land-registry')).toContain('ScholarlyArticle');
 	expect(typesOf('projects')).toContain('CollectionPage');
 	expect(typesOf('busso')).toContain('CreativeWork');
+	// The write-up is the Article; the project it is about is nested inside it, not beside it.
+	expect(typesOf('busso-case-study')).toContain('Article');
+	expect(typesOf('busso-case-study')).not.toContain('CreativeWork');
 	// An experience page is the employer; the employment is a dated role on the Person.
 	expect(typesOf('gymrevenue-software-engineer')).toContain('Organization');
 });

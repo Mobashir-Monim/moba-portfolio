@@ -1,8 +1,9 @@
 import { describe, expect, test } from 'bun:test';
 import { about } from './content/about';
+import { caseStudies } from './content/case-studies';
 import { experiences } from './content/experiences';
 import { projectList, projects } from './content/projects';
-import { byHref, childrenOf, node, nodes, root, summary } from './tree';
+import { byHref, caseStudyOf, childrenOf, node, nodes, root, summary } from './tree';
 
 const all = Object.values(nodes);
 
@@ -67,10 +68,28 @@ describe('filesystem details', () => {
 });
 
 describe('derivation', () => {
-	test('every project is a document under Projects', () => {
+	test('every project is a document under Projects, behind the studies folder', () => {
 		const listed = nodes.projects.children ?? [];
-		expect(listed).toEqual(Object.keys(projects));
+		expect(listed).toEqual(['case-studies', ...Object.keys(projects)]);
 		for (const project of projectList) expect(nodes[project.slug].kind).toBe('document');
+	});
+
+	test('a case study is a document in its own folder, dated by the work it is about', () => {
+		expect(nodes['case-studies'].children).toEqual(caseStudies.map((study) => study.slug));
+
+		for (const study of caseStudies) {
+			const record = nodes[study.slug];
+			expect(record.kind).toBe('document');
+			expect(record.href).toBe(`/projects/case-studies/${study.slug}`);
+			// The write-up dates to the job the work was done under, not to when it was written.
+			expect(record.modified).toBe(nodes[study.project.slug].modified);
+		}
+	});
+
+	test('a project finds its study, and a project without one finds nothing', () => {
+		expect(caseStudyOf('billing-engine')).toBe(nodes['billing-engine-case-study']);
+		expect(caseStudyOf('lightsaml')).toBeUndefined();
+		expect(caseStudyOf('nope')).toBeUndefined();
 	});
 
 	test('an experience is a folder of exactly the work done there', () => {
@@ -123,7 +142,15 @@ describe('bodies', () => {
 		expect(nodes['blockchain-land-registry'].type).toBe('publication');
 		expect(nodes['certified-scrum-master'].type).toBe('certification');
 		expect(nodes['gymrevenue-software-engineer'].type).toBe('experience');
-		for (const id of ['projects', 'attainments', 'degrees', 'publications', 'certifications'])
+		expect(nodes['billing-engine-case-study'].type).toBe('case-study');
+		for (const id of [
+			'projects',
+			'case-studies',
+			'attainments',
+			'degrees',
+			'publications',
+			'certifications'
+		])
 			expect(nodes[id].type).toBe('index');
 	});
 
@@ -153,6 +180,7 @@ describe('summary', () => {
 	});
 
 	test('an index folder says what it holds', () => {
-		expect(summary(nodes.projects)).toContain('21 items');
+		// Twenty-one projects and the folder the studies sit in.
+		expect(summary(nodes.projects)).toContain('22 items');
 	});
 });

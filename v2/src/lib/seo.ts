@@ -4,7 +4,8 @@ import { companyList } from './content/companies';
 import { experiences } from './content/experiences';
 import { OS_NAME, SITE_MODIFIED } from './os';
 import { byHref, childrenOf, nodes, summary, type Node } from './tree';
-import type { Location, PersonName } from './types/common';
+import type { Location, PersonName, YearMonth } from './types/common';
+import type { Project } from './types/project';
 
 /**
  * Everything a crawler and a link preview need, derived from the tree rather than declared beside
@@ -134,6 +135,30 @@ function credential(node: CredentialNode): object {
 		dateModified: node.modified,
 		// Degrees do not lapse. Certifications do, and `end` is when.
 		...(node.type === 'certification' && node.data.end && { expires: node.data.end })
+	};
+}
+
+/**
+ * A project as a thing rather than as a page. Taken apart from the node because the case study
+ * page has to emit the project it is about, and that project is not the node being rendered.
+ */
+function creativeWork(
+	project: Project,
+	href: string,
+	modified: YearMonth,
+	description: string
+): object {
+	return {
+		'@type': 'CreativeWork',
+		'@id': itemId(href),
+		name: project.name,
+		description,
+		url: canonical(href),
+		author: ref(PERSON_ID),
+		dateModified: modified,
+		...(project.company && { sourceOrganization: organization(project.company.name) }),
+		// The repository or product itself, which is a different page from ours.
+		...(project.url && { sameAs: project.url })
 	};
 }
 
@@ -284,20 +309,30 @@ function entity(node: Node): object | undefined {
 			return organization(node.data.company.name);
 
 		case 'project':
+			return creativeWork(node.data, node.href, node.modified, summary(node));
+
+		/**
+		 * The write-up is an `Article`; the thing it is about is the project, which is a different
+		 * node with a different `@id`.
+		 *
+		 * That project is defined here in full rather than referenced, because a page that points
+		 * at an `@id` nothing on it defines is a dangling edge: the consumer is told the article is
+		 * about a work and given nowhere to look.
+		 */
+		case 'case-study': {
+			const project = nodes[node.data.project.slug];
 			return {
-				'@type': 'CreativeWork',
+				'@type': 'Article',
 				'@id': itemId(node.href),
-				name: node.name,
+				headline: node.name,
 				description: summary(node),
 				url: canonical(node.href),
 				author: ref(PERSON_ID),
-				dateModified: node.modified,
-				...(node.data.company && {
-					sourceOrganization: organization(node.data.company.name)
-				}),
-				// The repository or product itself, which is a different page from ours.
-				...(node.data.url && { sameAs: node.data.url })
+				isPartOf: ref(SITE_ID),
+				about: creativeWork(node.data.project, project.href, project.modified, summary(project)),
+				dateModified: node.modified
 			};
+		}
 
 		case 'publication':
 			return {

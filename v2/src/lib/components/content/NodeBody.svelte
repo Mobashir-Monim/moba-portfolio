@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Node } from '$lib/tree';
 	import About from './About.svelte';
+	import CaseStudy from './CaseStudy.svelte';
 	import Certification from './Certification.svelte';
 	import Degree from './Degree.svelte';
 	import Experience from './Experience.svelte';
@@ -26,6 +27,8 @@
 	<Experience data={node.data} />
 {:else if node.type === 'project'}
 	<Project data={node.data} />
+{:else if node.type === 'case-study'}
+	<CaseStudy data={node.data} />
 {:else if node.type === 'degree'}
 	<Degree data={node.data} />
 {:else if node.type === 'publication'}

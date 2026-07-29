@@ -604,10 +604,80 @@ ledger defect reintroduced.
 
 ### 4.2 Case study reader (~1.5 days)
 
-Distinct from the Projects catalogue: narrative documents with problem, constraints, approach,
-outcome, and measured results. Reader chrome with a table-of-contents sidebar, scroll progress,
-and next/previous. Case studies live as deep files inside Projects so nothing is duplicated;
-the reader is simply the better viewer for them.
+- [x] Narrative documents with problem, constraints, approach, outcome, and where there is one,
+      measured results. Reader chrome with a table-of-contents sidebar, scroll progress, and
+      next/previous.
+
+      **Where they live.** A `Case Studies` folder inside Projects, six studies of the twenty-one
+      projects. Not beside the catalogue entries, which would put two nodes named for the same work
+      in one listing, and not at the root, which would be a second top-level section mirroring the
+      first. The href repeats what the slug already says,
+      `/projects/case-studies/busso-case-study`, and that is the price of the rule in `CLAUDE.md`
+      that a slug is both the window id and the route segment: ids are one flat namespace, so a
+      study cannot be `busso`, and the last segment of a document's href is its id.
+
+      A study dates to the job its project was built under rather than to when it was written,
+      because `modified` on this site means the work and not the writing.
+
+      **The five sections are markdown, not five fields.** `prose.ts` gained a third honoured piece
+      of syntax, `### heading`, and a `proseSections` beside `prose`. The alternative was five
+      named fields and a mapping table from heading text to field name, when the markdown already
+      declares both the set and the order. What that gives up is the type system holding the
+      headings, so `content.test.ts` holds them instead: canonical set, canonical order, and the
+      four that are not optional. Results is the one that may be missing, because it is the one
+      that needs a number.
+
+      This is also the shape the raw notes arrive in. `CASE-STUDIES.md` at the repo root uses the
+      same `## slug` plus `### Heading` layout, so a filled-in block moves into
+      `content/prose/case-studies.md` nearly verbatim.
+
+      **The reader is a content component**, so the route and the window get the same one, the way
+      every other content type already works. It is its own container, which is what lets one
+      markup tree fit a full-width route, a narrow window on a wide screen, and the gallery view's
+      preview pane: the contents list moves beside the prose and sticks above 40rem, and sits above
+      it below that.
+
+      **Scroll progress is CSS.** `animation-timeline: scroll()` against whichever scroller the
+      reader is inside, so there is no listener, no `$effect`, and no script, and it is right in
+      all three frames without knowing which one it is in. Two things it cost:
+
+      1. The bar started pinned across the top of the prose, which is where a reading progress bar
+         normally goes. The prose scrolls under it, and a rule crossing a line of text reads as a
+         strikethrough. It moved into the contents box, which is opaque and already sticks.
+      2. `overflow: hidden` on any ancestor of the bar makes that ancestor a scroll container, and
+         `scroll()` resolves to the nearest one. The box clipped its own radius for one revision
+         and the bar sat at zero forever while still looking correct in a screenshot. Both the box
+         and the bar carry a note not to.
+
+      Reduced motion keeps it: a bar that moves only as far as the reader has already scrolled is
+      not motion. The global rule in `app.css` caps every animation at 1ms, which on a progress
+      timeline means permanently full rather than instant, so the component puts the duration back.
+
+      The fill is `--c-select` rather than `--c-accent`, for the reason the boot thermometer
+      already gives: the selection highlight is inside every skin's accent budget, retro's
+      included, and this is the same widget filling the same way.
+
+      **Fragment links and nothing else** for the contents list, so it works with no script.
+      Anchors are prefixed with the study's own slug, because two studies can be open in two
+      windows at once and a bare `#problem` would then exist twice in one document.
+
+      **`Article` in the graph**, with the project it is about nested inside it in full rather than
+      referenced. A page that points at an `@id` nothing on it defines is a dangling edge, which
+      2.12's test already forbids, so the project's `CreativeWork` came out of the `entity` switch
+      into a function both cases call.
+
+      **The content is assembled, not recorded.** These six were built from the project write-ups,
+      the feature lists, and the employment records, restructured into the five sections. Nothing
+      in them asserts a fact those three do not already carry, and the only number anywhere is the
+      one `cli-dev-tool` already claimed, which is why five of the six carry no Results section at
+      all. `CASE-STUDIES.md` is where the first-hand notes go, and they replace this section by
+      section as they arrive.
+
+      Verified by driving headless Chrome over CDP against the dev server: the study opens in a
+      document window from the Case Studies folder, the two-column layout and sticky contents box
+      resolve against the window rather than the viewport, the bar reads 0, 0.5 and 1.0 at the
+      matching scroll positions, and a contents link scrolls the window's own body to the heading.
+      All three skins checked.
 
 ### 4.3 Mail (~2 days)
 

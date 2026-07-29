@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { about } from './about';
 import { certifications, degrees, publications } from './attainments';
+import { caseStudies, neighbours } from './case-studies';
 import { companies, companyList } from './companies';
 import { experiences } from './experiences';
 import { projectList, projects } from './projects';
@@ -14,6 +15,7 @@ const items = [
 	...companyList,
 	...experiences,
 	...projectList,
+	...caseStudies,
 	...degrees,
 	...publications,
 	...certifications
@@ -78,6 +80,66 @@ describe('references', () => {
 	// Only open source has somewhere to link to, and a closed project with a URL is a leak.
 	test('a URL implies open source', () => {
 		for (const project of projectList) if (project.url) expect(project.source).toBe('open');
+	});
+});
+
+/**
+ * The five headings are what makes a case study one rather than a feature list with headings on,
+ * and nothing in the type system holds them: the sections are parsed out of markdown, so a
+ * misspelled or reordered heading would ship as a section titled exactly that.
+ */
+describe('case studies', () => {
+	const HEADINGS = ['Problem', 'Constraints', 'Approach', 'Outcome', 'Results'];
+	/** Results is the one that may be missing, because it is the one that needs a number. */
+	const REQUIRED = HEADINGS.slice(0, 4);
+
+	test('every study is of a project in the catalogue, and no project has two', () => {
+		const slugs = caseStudies.map((study) => study.project.slug);
+		expect(new Set(slugs).size).toBe(slugs.length);
+		for (const study of caseStudies) expect(projectList.includes(study.project)).toBe(true);
+	});
+
+	test('a slug is its project, so the pairing cannot be got wrong twice', () => {
+		for (const study of caseStudies) expect(study.slug).toBe(`${study.project.slug}-case-study`);
+	});
+
+	test('sections are drawn from the canonical set and stay in that order', () => {
+		for (const study of caseStudies) {
+			const titles = study.sections.map((section) => section.title);
+			expect(titles).toEqual(HEADINGS.filter((heading) => titles.includes(heading)));
+		}
+	});
+
+	test('every study carries the four sections that are not optional', () => {
+		for (const study of caseStudies) {
+			const titles = study.sections.map((section) => section.title);
+			for (const heading of REQUIRED) expect(titles).toContain(heading);
+		}
+	});
+
+	test('every section has prose under it, or the heading is the whole content', () => {
+		for (const study of caseStudies)
+			for (const section of study.sections) expect(section.paragraphs.length).toBeGreaterThan(0);
+	});
+
+	// The reader builds a fragment link per section, prefixed with the study's slug.
+	test('section ids are URL-safe and unique within a study', () => {
+		for (const study of caseStudies) {
+			const ids = study.sections.map((section) => section.id);
+			expect(new Set(ids).size).toBe(ids.length);
+			for (const id of ids) expect(id).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+		}
+	});
+
+	test('the pager walks the reading order and stops at both ends', () => {
+		const first = caseStudies[0];
+		const last = caseStudies.at(-1)!;
+
+		expect(neighbours(first.slug).previous).toBeUndefined();
+		expect(neighbours(first.slug).next).toBe(caseStudies[1]);
+		expect(neighbours(last.slug).next).toBeUndefined();
+		// An unknown slug is nowhere in the order, not before the first one.
+		expect(neighbours('nope')).toEqual({});
 	});
 });
 
