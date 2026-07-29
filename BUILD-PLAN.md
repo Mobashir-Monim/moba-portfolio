@@ -489,39 +489,51 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       previews the item's own write-up through a new `NodeBody`, split out of `NodeContent` so a
       preview cannot recurse into the previewed item's children.
 
-- [ ] 2.12 Structured data as a graph, and the answer engines. Opened after 2.7, which shipped the
+- [x] 2.12 Structured data as a graph, and the answer engines. Opened after 2.7, which shipped the
       mechanical head and nothing that describes the site as a set of connected entities. That
       description is what a rich result and an LLM citation are both reading.
 
-      **The graph.** Every page currently asserts its own anonymous `Person` for `author`, so a
-      crawler is looking at thirty people who happen to share a name. One `Person` at
-      `{SITE_URL}/#person` and one `WebSite` at `/#website`, with every other node referencing them
-      by `@id`. Highest value item here and close to the cheapest.
+      **The graph.** Every page asserted its own anonymous `Person` for `author`, so a crawler was
+      looking at thirty people who happen to share a name. Now one `Person` at `{SITE_URL}/#person`
+      and one `WebSite` at `/#website`, emitted on every page, with every other node referencing
+      them by `@id`. Highest value item here and close to the cheapest.
 
-      **`BreadcrumbList`** per content page, which needs no new data: an href is a path, and
+      An `@id` that nothing defines is a dangling edge: the consumer is told a project has an
+      author and given nowhere to look. So organizations resolve through the company slug rather
+      than through their name, which is what keeps Brac University as employer and Brac University
+      as degree institution one node instead of two, and a test walks every page asserting that no
+      `@id` is referenced without also being defined there.
+
+      **`BreadcrumbList`** per content page, which needed no new data: an href is a path, and
       `byHref` turns each prefix of it back into a node. The tree deliberately has no parent map
       (2.11), but a URL is one.
 
-      **`CollectionPage` with an `ItemList`** on the four index folders, which carry no structured
-      data at all today and are exactly the pages that tell a machine the shape of the site.
+      **`CollectionPage` with an `ItemList`** on the four index folders, which carried no structured
+      data at all and are exactly the pages that tell a machine the shape of the site.
 
       **`EducationalOccupationalCredential`** for degrees and certifications. 2.7 gave them nothing
       on the grounds that a credential is not a `CreativeWork`, which was right about
       `CreativeWork` and wrong about there being no correct type.
 
-      **Employment.** Experience nodes get an `Organization` and the Person gets `worksFor` and
-      `alumniOf`, so the CV reads as employment history rather than as prose that mentions dates.
+      **Employment** through schema.org's role pattern rather than a bare `worksFor`, which is a
+      present-tense claim: every job is an `OrganizationRole` carrying its own dates, so a finished
+      one reads as finished. Plus `alumniOf` and `hasCredential`, and the experience page emits the
+      employer. The CV reads as employment history rather than as prose that mentions dates.
 
-      **`datePublished` and `dateModified`** from `node.modified`, which the tree already derives
-      per node and the head currently drops on the floor.
+      **`dateModified`** from `node.modified`, which the tree already derives per node and the head
+      dropped on the floor. `datePublished` only where the content records one: a publication has a
+      year and a credential has an award date, a project has neither, and deriving one from the
+      single date a project carries would be a claim rather than a derivation.
 
       **AEO and GEO, honestly scoped.** Most of what is sold under those two names is either SEO
       with a new label or unmeasurable. Three things are real and are ours to control:
 
       1. Extractable lead sentences. An answer engine quotes the first sentence that answers the
-         implied question, and `summary()` takes `description[0]` verbatim. So this is a copy edit
-         in `content/prose/*.md` and not code: every document's opening sentence has to stand alone
-         as an answer to "what is this".
+         implied question, and `summary()` takes `description[0]` verbatim. So this was a copy edit
+         in `content/prose/*.md` and not code: every document's opening sentence now stands alone
+         as an answer to "what is this" and fits the 155-character window whole. Four opened on a
+         pronoun with no antecedent anywhere in the document, and two were in a present tense the
+         records had already ended.
       2. Semantic HTML, short sentences, one fact each. The dual render already gives the first,
          and this is the actual mechanism behind most GEO advice.
       3. Crawler policy, decided and written down here so it does not get "hardened" later by
@@ -532,11 +544,14 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       `FAQPage`, whose rich result Google retired for non-government sites in 2023. Both stay cheap
       if either grows teeth.
 
-      **Three things nothing else claims.** `/styleguide` is prerendered, linkable, and in no
-      sitemap, so it needs `noindex`. No `404` route exists, so a wrong URL gets SvelteKit's bare
-      error page, which reads as a soft 404 and is also the one place `CLAUDE.md` asks for a voice
-      and no task builds it. And `og:image` is still absent: the trigger is art existing, the boot
-      screen is the obvious source, and one static 1200x630 covering every page beats none.
+      **Three things nothing else claimed.** `/styleguide` already carried `noindex`, from 1.7.
+      No `404` route existed, so a wrong URL got SvelteKit's bare error page, which reads as a soft
+      404 and was also the one place `CLAUDE.md` asks for a voice that no task built; it speaks the
+      shell's, which is what Terminal (4.4) will speak too. And `og:image` is now one static
+      1200x630 covering every page, drawn as the boot screen in the default dress, source in
+      `scripts/og.svg` and baked with the Chrome already on the machine, so no renderer and no
+      dependency. Per-page cards want a renderer in the build, and thirty generated ones are not
+      worth more than one honest one.
 
 **Exit criteria:** fully operable by keyboard alone; readable and navigable with JS off; no
 ledger defect reintroduced.
