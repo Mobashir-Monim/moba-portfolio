@@ -5,8 +5,8 @@
 	import Dock from '$lib/components/Dock.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import WindowLayer from '$lib/components/WindowLayer.svelte';
+	import { APP_KIND, APPS, SETTINGS_ID } from '$lib/apps';
 	import { about } from '$lib/content/about';
-	import { SETTINGS_ID } from '$lib/os';
 	import { graph, PERSON as person } from '$lib/seo';
 	import { nodes, root, summary } from '$lib/tree';
 	import { windows } from '$lib/windows.svelte';
@@ -69,7 +69,9 @@
 		<Dock
 			folders={windows.counts.folder}
 			documents={windows.counts.document}
-			onsettings={() => windows.open(SETTINGS_ID, 'document')}
+			apps={APPS}
+			onlaunch={(id) => windows.open(id, APP_KIND)}
+			onsettings={() => windows.open(SETTINGS_ID, APP_KIND)}
 			onfolders={() => windows.restoreKind('folder')}
 			ondocuments={() => windows.restoreKind('document')}
 		/>

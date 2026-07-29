@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { isDark, settings, update } from '$lib/appearance.svelte';
+	import { app } from '$lib/apps';
 	import { clampSize, clampToDesktop, gesture, type Bounds } from '$lib/gesture';
-	import { OWNER, SETTINGS_ID, SETTINGS_NAME } from '$lib/os';
+	import { OWNER } from '$lib/os';
 	import { node, type Node } from '$lib/tree';
 	import { canBack, canForward, current, windows, type WindowRecord } from '$lib/windows.svelte';
 	import { untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { scale } from 'svelte/transition';
 	import InfoSidebar from './InfoSidebar.svelte';
-	import SettingsPanel from './SettingsPanel.svelte';
 	import ViewSwitcher from './ViewSwitcher.svelte';
+	import AppContent from './apps/AppContent.svelte';
 	import NodeContent from './content/NodeContent.svelte';
 	import Window from './Window.svelte';
 
@@ -20,12 +20,12 @@
 	const showing = $derived(node(showingId));
 
 	/**
-	 * The one window with no node behind it. An app is not content, so it has no tree entry, no
+	 * The windows with no node behind them. An app is not content, so it has no tree entry, no
 	 * route, and no info sidebar; everything else about it is an ordinary window, which is the
-	 * point. When there is a roster this becomes a lookup, not a second branch.
+	 * point. A lookup rather than a branch per app, which is what 4.5 turned this into.
 	 */
-	const isSettings = $derived(showingId === SETTINGS_ID);
-	const title = $derived(isSettings ? SETTINGS_NAME : (showing?.name ?? ''));
+	const showingApp = $derived(app(showingId));
+	const title = $derived(showingApp?.name ?? showing?.name ?? '');
 
 	/**
 	 * Which child the info sidebar is describing. Local, not in the store: it is a property of
@@ -115,8 +115,13 @@
 		return () => {
 			// Clicking a link does not focus it in every browser, and the opener can equally be a
 			// row inside a window that has since closed. The item's own icon answers both.
+			//
+			// Connected is not enough: a control inside a closed popover is still in the document and
+			// still refuses focus, so `focus()` on it silently drops the keyboard on the body. That is
+			// the launcher, and it is why the dock hands focus back to its own button before opening.
+			const usable = opener?.isConnected && opener.checkVisibility() ? opener : null;
 			const icon = href ? document.querySelector<HTMLElement>(`a[href="${href}"]`) : null;
-			(opener?.isConnected ? opener : icon)?.focus();
+			(usable ?? icon)?.focus();
 		};
 	});
 
@@ -195,7 +200,7 @@
 	}
 </script>
 
-{#if (showing || isSettings) && !record.minimized}
+{#if (showing || showingApp) && !record.minimized}
 	<!--
 		Position is a custom property rather than an inline `transform`, so the mobile rule below
 		can drop it without `!important` and without a second markup tree (ledger #27). The
@@ -235,15 +240,8 @@
 			toolbar={isFolder ? toolbar : undefined}
 			sidebar={isFolder && described ? sidebar : undefined}
 		>
-			{#if isSettings}
-				<SettingsPanel
-					skin={settings.skin}
-					theme={settings.theme}
-					appearance={settings.appearance}
-					clickMode={settings.clickMode}
-					dark={isDark()}
-					onchange={update}
-				/>
+			{#if showingApp}
+				<AppContent id={showingApp.id} />
 			{:else if showing}
 				<NodeContent
 					node={showing}

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { isDark, settings, update } from '$lib/appearance.svelte';
+	import { APPS } from '$lib/apps';
 	import BootScreen from '$lib/components/BootScreen.svelte';
+	import AppContent from '$lib/components/apps/AppContent.svelte';
 	import Desktop from '$lib/components/Desktop.svelte';
 	import DesktopIcon from '$lib/components/DesktopIcon.svelte';
 	import Dock from '$lib/components/Dock.svelte';
@@ -568,11 +570,16 @@
 		<h2 id="dock" class="mb-4 text-xl font-semibold">Dock</h2>
 		<p class="mb-4 text-sm text-fg-2">
 			Apps, settings, then one group per kind of open window with its count, worded. A group at zero
-			is absent rather than empty. Apps is present from the start and disabled until there is a
-			roster behind it, which is the second dock below.
+			is absent rather than empty. Apps opens the launcher, and is disabled when the roster it is
+			handed is empty, which is the second dock below.
+		</p>
+		<p class="mb-4 text-sm text-fg-2">
+			The launcher is a native popover, so it lives in the top layer and positions itself against
+			the viewport rather than against the dock it belongs to. On the desktop that is exact, since
+			the dock is fixed to the bottom too. Here it opens above where a real dock would be.
 		</p>
 		<div class="flex flex-wrap items-end gap-6">
-			<Dock folders={3} documents={2} onapps={() => {}} onsettings={() => {}} />
+			<Dock folders={3} documents={2} apps={APPS} onlaunch={() => {}} onsettings={() => {}} />
 			<Dock onsettings={() => {}} />
 		</div>
 	</section>
@@ -585,6 +592,28 @@
 			a flat track elsewhere, from <code>--bevel-in</code> resolving to <code>none</code>.
 		</p>
 		<BootScreen progress={62} lines={BOOT_LINES.slice(0, 4)} onskip={() => {}} />
+	</section>
+
+	<section aria-labelledby="apps" class="mb-12">
+		<h2 id="apps" class="mb-4 text-xl font-semibold">Apps</h2>
+		<p class="mb-4 text-sm text-fg-2">
+			An app is a window with no node behind it: no route, no sitemap entry, no info sidebar. One
+			dispatcher stands between an id and the app, the way <code>NodeContent</code> does for content types,
+			so the window frame never learns which app it is holding.
+		</p>
+		<p class="mb-4 text-sm text-fg-2">
+			System Info reads its numbers rather than storing them. Versions come from
+			<code>package.json</code> at build time, the weight comes from the browser's own resource timings,
+			and the dress comes from the settings store, so the panel above changes it. Lighthouse scores are
+			absent until 6.1 has run Lighthouse.
+		</p>
+		<div class="grid gap-4 md:grid-cols-2">
+			{#each APPS as item (item.id)}
+				<Window title={item.name} class="h-96">
+					<AppContent id={item.id} />
+				</Window>
+			{/each}
+		</div>
 	</section>
 
 	<section aria-labelledby="modal" class="mb-12">

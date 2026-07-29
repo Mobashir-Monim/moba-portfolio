@@ -681,6 +681,10 @@ ledger defect reintroduced.
 
 ### 4.3 Mail (~2 days)
 
+**Deferred, at the reviewer's call.** The rest of phase 4 runs first. Nothing else in the phase
+depends on it: the app roster it would have forced landed with 4.5 instead, since Terminal and
+System Info are equally apps with no route.
+
 Compose-and-send only, no inbox. The only app with a trust boundary, so it gets real controls.
 
 - Endpoint as a `+server.ts` POST route. Under `adapter-cloudflare` it becomes a Worker function
@@ -708,8 +712,65 @@ than any game, and it lands with exactly the audience that decides whether to co
 
 ### 4.5 System Info (~0.5 day)
 
-"About This Machine": the stack this site runs on, bundle size, Lighthouse scores, build date.
-Pull real numbers at build time rather than hardcoding them, or the joke curdles.
+- [x] "About This Machine": the stack this site runs on, bundle size, Lighthouse scores, build date.
+      Pull real numbers at build time rather than hardcoding them, or the joke curdles.
+
+      **The roster came due here.** `SETTINGS_ID` carried a note saying phase 4 would turn it into
+      one, and a second app is what made that true: one app is a branch, two are a pair of branches,
+      and three are ledger #27 with a new name. So `src/lib/apps.ts` owns the roster and
+      `AppContent.svelte` is the one dispatcher between an id and the app, which is the shape
+      `NodeContent` already has for content types. The window frame no longer knows that Settings
+      exists.
+
+      A branch per app inside that dispatcher rather than a lookup table, because each app takes
+      different props. That is the thing a test has to hold, since a roster entry with no branch
+      opens an empty window and throws nothing; `apps.test.ts` reads the component's source, the way
+      `icons.test.ts` holds `Icon.svelte` to the skin list. It also asserts what keeps two namespaces
+      apart: an `app:` prefix cannot occur in a content slug, so one window store can address both.
+
+      **Apps open as documents.** The dock groups by `Kind`, and an app is nearer a document than a
+      folder: a thing you look at, not a place you go. A third member of `Kind` would have rippled
+      through the tree, the file-type labels, and the info sidebar to buy one more heading.
+
+      **The launcher is the native popover.** Light dismiss, Escape, the top layer, and returning
+      focus to its button are all the platform's, and they are the whole of what a hand-rolled menu
+      would have been writing. It is a labelled list of buttons and deliberately not `role="menu"`,
+      which would promise arrow keys nothing implements: 2.9 settled that principle. An open popover
+      leaves its ancestor's containing block, so it positions against the viewport, which is exact on
+      the desktop and approximate in the styleguide, and the styleguide says so.
+
+      That cost one real bug, found by driving the keyboard rather than by reading. A window records
+      what held focus when it opened and hands it back when it closes, and a menu item is inside a
+      popover that is about to be hidden: still connected, still refusing focus, so the keyboard fell
+      to the body. The dock now focuses its own launcher before opening anything, and the window's
+      restore checks `checkVisibility()` rather than only `isConnected`.
+
+      **Every number is measured or injected.** Versions come from `package.json` through `define`,
+      which is why `vite.config.ts` dumps the manifest and `$lib/build` picks and labels: the config
+      has no business deciding what the window shows. Bun's version is asked of the binary, because
+      `bun run dev` honours the shebang on vite's bin and that shebang says node, so this file is
+      evaluated by Node even in a repo with no npm in it.
+
+      `BUILT` is the day and not the minute, since the client and the server build separately and a
+      straddled minute would put two strings in one deploy. `SITE_MODIFIED` reads it, which retires
+      the hand-bumped constant `os.ts` was carrying and its `ponytail:` note with it. A deploy now
+      dates the whole site.
+
+      **Weight is read from the browser, not from the build.** A bundle size cannot be injected into
+      the bundle whose size it reports, and every way out of that circle is worse than the
+      Performance API: a second build pass, a byte-patched placeholder, or a runtime fetch. The
+      reading answers a better question anyway, counting the document, the CSS, and the font beside
+      the script. `encodedBodySize` rather than `transferSize`, which is zero on a cache hit and
+      would tell a returning visitor the site weighs nothing.
+
+      **Lighthouse waits for 6.1.** A score cannot be pulled at build time without running Lighthouse
+      in the build, and a hardcoded 100 is the number this window exists not to print. 6.1 runs the
+      audit and writes the numbers down; System Info reads them then.
+
+      Verified by driving headless Chrome over CDP against the preview build: the launcher opens by
+      pointer and by Enter, `aria-expanded` tracks it, Tab walks the list, Enter launches, the menu
+      dismisses itself, focus lands inside the window and returns to the launcher on Escape, and the
+      window carries no info sidebar. All three skins checked, including the popover in retro.
 
 ---
 

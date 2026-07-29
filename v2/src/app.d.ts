@@ -5,6 +5,14 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
+	/**
+	 * Build-time constants, substituted as literals by `define` in `vite.config.ts`. Read them
+	 * through `$lib/build` and never directly: that module owns the fallback for the environments
+	 * vite is not in, `bun test` being the one that exists.
+	 */
+	const __BUILT__: string;
+	const __VERSIONS__: Record<string, string>;
+
 	namespace App {
 		interface Platform {
 			env: Env;

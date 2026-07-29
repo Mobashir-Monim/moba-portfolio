@@ -1,3 +1,5 @@
+import { BUILT } from './build';
+
 /**
  * The operating system this site is dressed as.
  *
@@ -13,17 +15,6 @@ export const OS_VERSION = '2.0';
 
 /** The two things the filesystem holds. Everything with a route is one or the other. */
 export type Kind = 'folder' | 'document';
-
-/**
- * Settings is a window like every other window, not a modal over a hidden desktop: it changes how
- * the desktop looks, so covering the desktop while you change it is the wrong shape.
- *
- * It has no node in the tree, because it is an app and not content, and the `app:` prefix cannot
- * occur in a content slug. That is what keeps the id out of the tree's namespace without a
- * runtime check. Phase 4 turns this into a roster; one app does not need one yet.
- */
-export const SETTINGS_ID = 'app:settings';
-export const SETTINGS_NAME = 'Settings';
 
 /**
  * The invented type names the info sidebar shows. They lean on the `M` of Mnemos, which is why
@@ -65,12 +56,11 @@ export const OWNER = 'mobashir';
 /**
  * What the info sidebar shows for a node whose content carries no date of its own, as `YYYY-MM`.
  *
- * ponytail: a constant, bumped by hand. The honest version reads the build timestamp, but that
- * has to be injected at build time to avoid a server and a client disagreeing about `now` and
- * failing hydration. Task 4.5, System Info, needs exactly that injection, so this becomes its
- * caller rather than growing its own.
+ * The build date, not a hand-bumped constant. 4.5 brought the injection this was waiting for, and
+ * `$lib/build` explains why it is the day and not the minute: the value lands in prerendered HTML,
+ * so the server and the client have to agree about it.
  */
-export const SITE_MODIFIED = '2026-07';
+export const SITE_MODIFIED = BUILT.slice(0, 7);
 
 /**
  * The POST sequence. Lives here with the name it opens on, so the boot screen, the styleguide,
