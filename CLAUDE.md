@@ -1,4 +1,4 @@
-# Portfolio (v3)
+# Portfolio (v2)
 
 Personal portfolio for Mobashir Monim, built as a desktop operating-system metaphor. This
 file is both the agent context and the spec. Read it before touching anything.
@@ -6,15 +6,21 @@ file is both the agent context and the spec. Read it before touching anything.
 ## Repo layout
 
 ```
-portfolio/            <- this repo (its own git repo, gitignored by the old v2 checkout)
+portfolio/            <- this repo, github.com/Mobashir-Monim/moba-portfolio
   CLAUDE.md           <- this file
-  v2/                 <- previous version, SvelteKit 1 + Svelte 4 + Skeleton 2. Reference only.
-  v3/                 <- the new site. All new work happens here.
+  BUILD-PLAN.md       <- the ordered work
+  v2/                 <- the new site. All new work happens here.
 ```
 
-`v2/` is frozen. Never edit it, never import from it. It exists so the concept, the copy, and
-the content data can be read across. Every file path in the defect ledger below is relative to
-`v2/`.
+The previous site is **not** vendored into this repo. It lives in its own repo,
+`mosite-svelte-v2` (github.com/Mobashir-Monim/mosite-svelte-v2, checked out locally at
+`~/mosite-svelte-v2`), built on SvelteKit 1 + Svelte 4 + Skeleton 2. It is referred to
+throughout this file as **the old site**.
+
+The old site is frozen. Never edit it, never import from it, never add it as a dependency.
+It exists so the concept, the copy, the content data, and the assets can be read across and
+ported by hand. Every file path in the defect ledger below is relative to the root of that
+repo.
 
 ## Stack
 
@@ -30,6 +36,8 @@ the content data can be read across. Every file path in the defect ledger below 
 | Analytics | Cloudflare Web Analytics |
 
 ### Commands
+
+Run from `v2/`.
 
 ```bash
 bun install
@@ -63,8 +71,9 @@ bun test           # bun's built-in test runner
 
 ### Rendering: dual layer, fully prerendered
 
-The single largest failure of v2 was that all portfolio content only existed inside windows
-that mounted on click, so search engines and link previews saw an empty page. v3 inverts this.
+The single largest failure of the old site was that all portfolio content only existed inside
+windows that mounted on click, so search engines and link previews saw an empty page. This
+build inverts that.
 
 - Every piece of content (about, each experience, each project, each attainment) is a real
   route that server-renders complete semantic HTML: headings, paragraphs, lists, links.
@@ -86,17 +95,19 @@ a flat array of window records plus derived helpers. Rules:
 - Treat state as immutable at the boundary: produce a new array, assign it. Do not splice a
   shared reference and reassign the same object.
 - Window stacking order is the array order. Focus moves a record to the end.
-- Navigation history (`origin` / `tail` in v2) is a **string id stack per window**, not object
-  references. v2 stored whole window objects inside each other and created reference cycles.
+- Navigation history (`origin` / `tail` in the old site) is a **string id stack per window**,
+  not object references. The old site stored whole window objects inside each other and
+  created reference cycles.
 - Drag position lives in component-local `$state` during the gesture and writes to the store
   once on pointerup. Never write to shared state on every pointermove.
-- Every exported mutator gets a unit test. The v2 store had a live bug (`===` instead of `=`)
+- Every exported mutator gets a unit test. The old store had a live bug (`===` instead of `=`)
   precisely because nothing tested it.
 
 ### Responsive
 
 Tailwind breakpoints and container queries. One markup tree, variant classes for the
-differences. v2 duplicated the entire window markup for mobile and desktop; do not do that.
+differences. The old site duplicated the entire window markup for mobile and desktop; do not
+do that.
 
 For behavior that genuinely differs by input device, use `matchMedia('(pointer: coarse)')`
 inside an `$effect`, never the user-agent string.
@@ -108,29 +119,30 @@ attribute on `<html>`. Dark and light are a separate axis (`class="dark"`) with 
 following `prefers-color-scheme`.
 
 Theme and appearance must be applied **before first paint** by a small inline script in
-`app.html` that reads localStorage and sets the attributes. v2 hardcoded `data-theme="crimson"`
-in the HTML and applied the saved theme after mount, so every non-default user saw a flash.
+`app.html` that reads localStorage and sets the attributes. The old site hardcoded
+`data-theme="crimson"` in the HTML and applied the saved theme after mount, so every
+non-default user saw a flash.
 
 ### Motion
 
 - Transition specific properties. Never `transition-all`.
 - Prefer `transform` and `opacity`. Window position is `translate3d()`, never `left`/`top`.
 - Svelte's built-in `transition:` directives handle enter and exit, including outro before
-  removal. v2 hand-rolled this with `justOpened` / `justClosed` flags and `setTimeout(500)`;
-  delete that entire mechanism.
+  removal. The old site hand-rolled this with `justOpened` / `justClosed` flags and
+  `setTimeout(500)`; do not carry that mechanism across.
 - Wrap every animation in `@media (prefers-reduced-motion: reduce)` or use Svelte's
   `reducedMotion` store. Reduced motion means instant state change, not a slower animation.
 
 ### Interaction
 
 - Pointer Events (`pointerdown` / `pointermove` / `pointerup`) with `setPointerCapture`, so
-  drag works with mouse, touch, and pen from one code path. v2 was mouse-only.
-- The drag surface listens on itself once capture is set, not on `window`. v2 registered a
-  global `mousemove` per open window.
+  drag works with mouse, touch, and pen from one code path. The old site was mouse-only.
+- The drag surface listens on itself once capture is set, not on `window`. The old site
+  registered a global `mousemove` per open window.
 
 ## Concept spec
 
-Carried over from v2. The metaphor is the product; keep the personality.
+Carried over from the old site. The metaphor is the product; keep the personality.
 
 **Boot screen.** Logo, progress bar, rotating fake POST/BIOS messages. Shows on first load
 only, skippable, and never blocks content from existing in the DOM.
@@ -148,11 +160,11 @@ type names, author. Keep those.
 folders, clicking a group unminimizes that group.
 
 **Settings window.** Appearance (dark / light / auto), color theme, and open-on-single-click
-vs open-on-double-click. Persisted to localStorage. The first-visit click-mode prompt from v2
-stays.
+vs open-on-double-click. Persisted to localStorage. The first-visit click-mode prompt from the
+old site stays.
 
-**Apps menu.** Real in v3. A launcher for the app roster below. v2 shipped a full-screen
-overlay reading "No apps installed yet"; that does not return.
+**Apps menu.** Real this time. A launcher for the app roster below. The old site shipped a
+full-screen overlay reading "No apps installed yet"; that does not return.
 
 ### App roster
 
@@ -181,9 +193,9 @@ single/double distinction.
 
 ## Data model
 
-Content is plain typed objects, not classes. v2 defined each shape twice: an interface in the
-data file and a class in `models/` that re-declared every field and assigned it in a
-constructor with no behavior. Delete that layer.
+Content is plain typed objects, not classes. The old site defined each shape twice: an
+interface in the data file and a class in `models/` that re-declared every field and assigned
+it in a constructor with no behavior. Do not carry that layer across.
 
 - Types live in `src/lib/types/`, one concern per file. Never in a data file.
 - Data lives in `src/lib/content/`, one file per collection.
@@ -193,12 +205,25 @@ constructor with no behavior. Delete that layer.
 - The directory tree is derived from the content collections, not hand-maintained alongside
   them.
 - If any collection grows past a few hundred lines, move it to markdown or JSON and import it.
-  `v2/src/lib/data/projects.ts` reached 642 lines of prose compiled into the bundle.
+  The old site's `src/lib/data/projects.ts` reached 642 lines of prose compiled into the
+  bundle.
+
+## Porting from the old site
+
+Nothing is imported. Everything is read across and rewritten. What is still needed, and when:
+
+| What | Old site path | Needed by |
+|---|---|---|
+| Content data, roughly 1200 lines | `src/lib/data/*.ts` | Phase 3 |
+| Fonts, Montserrat and Monofett `.ttf` | `src/assets/fonts/` | Phase 1, subset to woff2 |
+| Company logos, 5 PNG | `src/assets/imgs/` | Phase 3 |
+| 24 icon components | `src/assets/icons/` | Phase 1, redraw as one path map |
+| Window, store, and layout markup | `src/components/`, `src/lib/store/` | Phase 1 and 2, reference only |
 
 ## Accessibility contract
 
-v2 shipped zero `aria-*`, zero `role`, negative tabindex throughout, and buttons nested three
-deep. It was mouse-only. Non-negotiable for v3:
+The old site shipped zero `aria-*`, zero `role`, negative tabindex throughout, and buttons
+nested three deep. It was mouse-only. Non-negotiable here:
 
 - The window is a `<section>` (or `role="dialog"` where modal semantics apply) with
   `aria-label` set to its title, not a `<button>`. Focus on click via a handler on a
@@ -208,7 +233,7 @@ deep. It was mouse-only. Non-negotiable for v3:
 - Every icon-only control has an accessible name (`aria-label` or visually hidden text).
 - Desktop and folder icons are a `role="grid"` / `role="listbox"` pattern, or plain links.
   Arrow keys move, Enter opens, Escape deselects. Never a bare `on:keydown` that fires on
-  every key, which is what v2 did.
+  every key, which is what the old site did.
 - Visible `:focus-visible` ring on everything focusable. Never remove the outline without
   replacing it.
 - Open windows are reachable by keyboard. Escape closes the focused window.
@@ -217,10 +242,10 @@ deep. It was mouse-only. Non-negotiable for v3:
 - Colour contrast passes WCAG AA in every one of the themes, in both dark and light.
 - Test with keyboard only and with a screen reader before calling anything done.
 
-## v2 defect ledger
+## Old site defect ledger
 
-Every item below is a real defect found in `v2/`. None of them may reappear. Paths are
-relative to `v2/`.
+Every item below is a real defect found in the old site. None of them may reappear. Paths are
+relative to the root of the `mosite-svelte-v2` repo.
 
 ### Correctness
 

@@ -1,10 +1,13 @@
-# v3 Build Plan
+# v2 Build Plan
 
 Companion to `CLAUDE.md`. That file is the standing context and the rules. This file is the
 ordered work. Phases are sequential; tasks inside a phase are mostly parallel.
 
 Honest total: roughly 22 to 30 days of focused work. The shell and the apps are each about as
-much work as the entire v2 site was.
+much work as the entire old site was.
+
+The old site is not vendored here. It stays in its own repo, `mosite-svelte-v2`, and is read
+across when content, copy, or assets are needed. See the porting table in `CLAUDE.md`.
 
 ---
 
@@ -12,20 +15,18 @@ much work as the entire v2 site was.
 
 **~0.5 day. Goal: an empty site deploying to production before any real work exists.**
 
-0.1 Move the existing checkout to `portfolio/v2/`. Freeze it. Never edited again.
-
-0.2 `bun create svelte@latest v3` inside `portfolio/`. SvelteKit 2, Svelte 5, TypeScript strict.
-
-0.3 Tailwind v4, CSS-first config in `app.css`. No `tailwind.config.js` unless something
-genuinely needs it.
-
-0.4 `@sveltejs/adapter-cloudflare`. `export const prerender = true` in the root layout.
-
-0.5 ESLint, Prettier, `svelte-check`, `bun test`. Match the scripts block in `CLAUDE.md`.
-
-0.6 `git init` at `portfolio/`, first commit, push, connect Cloudflare Pages, deploy a
-hello-world. **Do this now, not at the end.** Adapter and build surprises are cheap to fix
-against an empty repo and expensive to fix against a finished site.
+- [x] 0.1 `bun create svelte@latest` into `portfolio/v2/`. SvelteKit 2, Svelte 5, TypeScript
+      strict.
+- [x] 0.2 Tailwind v4, CSS-first config in `app.css`. No `tailwind.config.js` unless something
+      genuinely needs it.
+- [x] 0.3 `@sveltejs/adapter-cloudflare`. `export const prerender = true` in the root layout.
+- [x] 0.4 ESLint, Prettier, `svelte-check`. Match the scripts block in `CLAUDE.md`.
+- [x] 0.5 `bun test` script in `package.json`. `bunfig.toml` and `bun-test-setup.ts` exist, the
+      script does not.
+- [x] 0.6 `git init` at `portfolio/`, first commit, push.
+- [ ] 0.7 Connect Cloudflare Pages, deploy the hello-world. **Do this now, not at the end.**
+      Adapter and build surprises are cheap to fix against an empty repo and expensive to fix
+      against a finished site.
 
 ---
 
@@ -38,8 +39,9 @@ by props only. Nothing is interactive yet. Phase 2 makes them work.
 
 ### 1.1 Aesthetic direction (decide first, everything else depends on it)
 
-v2 was vaguely modern-macOS: translucent windows, backdrop blur, `rounded-2xl`, Montserrat with
-wide letter-spacing, on top of Skeleton's `crimson` preset. It reads pleasant but generic, and
+The old site was vaguely modern-macOS: translucent windows, backdrop blur, `rounded-2xl`,
+Montserrat with wide letter-spacing, on top of Skeleton's `crimson` preset. It reads pleasant
+but generic, and
 it sits oddly against the BIOS boot messages, which point somewhere more technical.
 
 Pick a lane. My recommendation: **modern base, technical detailing.** Keep the blur, the radii,
@@ -57,7 +59,7 @@ other portfolio using a glass aesthetic).
 
 ### 1.2 Name the OS
 
-v2's operating system is unnamed, which is why the boot screen, the sidebar's `MDir`/`MDoc`
+The old site's operating system is unnamed, which is why the boot screen, the sidebar's `MDir`/`MDoc`
 types, and the `644` permissions feel like isolated jokes instead of one world. Naming it makes
 the boot sequence, System Info, the Terminal prompt, and the file-type labels cohere for free.
 Cheap, and the single biggest personality gain available.
@@ -68,7 +70,7 @@ Defined as CSS custom properties in `app.css`, one block per theme, switched by 
 `<html>`, with dark/light as an independent axis.
 
 - Colour: surface ramp, text ramp, accent, plus semantic aliases. Four themes carried over from
-  v2, but your own palettes, not Skeleton presets.
+  the old site, but your own palettes, not Skeleton presets.
 - Type scale, and the two families (proportional and mono).
 - Spacing, radii, border widths.
 - Elevation: shadow and blur per depth level, so a focused window reads above an unfocused one.
@@ -76,13 +78,13 @@ Defined as CSS custom properties in `app.css`, one block per theme, switched by 
 
 ### 1.4 Typography
 
-Subset to woff2 and preload. v2 shipped a raw `.ttf` variable font. Add the mono family that
-1.1 requires.
+Subset to woff2 and preload. The old site shipped a raw `.ttf` variable font. Add the mono
+family that 1.1 requires.
 
 ### 1.5 Icon system
 
-One `<Icon>` component over a path map, or a single SVG sprite. v2 had a separate 31-line
-component per icon.
+One `<Icon>` component over a path map, or a single SVG sprite. The old site had a separate
+31-line component per icon.
 
 ### 1.6 Static components
 
@@ -147,16 +149,19 @@ ledger defect reintroduced.
 
 3.1 Types in `src/lib/types/`. Plain objects, no model classes.
 
-3.2 Content collections in `src/lib/content/`, ported from `v2/src/lib/data/`. Every item gets
-a stable `slug`.
+3.2 Content collections in `src/lib/content/`, ported from the old site's `src/lib/data/`.
+Every item gets a stable `slug`.
 
 3.3 Directory tree derived from the collections, not maintained beside them.
 
 3.4 Content components: about, company, experience, project, degree, publication,
 certification. Each renders standalone on its route and inside a window.
 
-3.5 Move long prose out of TypeScript. `v2/src/lib/data/projects.ts` was 642 lines compiled
-into the bundle.
+3.5 Move long prose out of TypeScript. The old site's `src/lib/data/projects.ts` was 642 lines
+compiled into the bundle.
+
+3.6 Port the assets the content needs: fonts, company logos, icons. See the porting table in
+`CLAUDE.md`.
 
 ---
 
@@ -166,8 +171,8 @@ into the bundle.
 
 ### 4.1 Résumé viewer (~0.5 day)
 
-Document window with a PDF download. v2 had no way to get a CV, which is the one artifact a
-recruiter reliably wants.
+Document window with a PDF download. The old site had no way to get a CV, which is the one
+artifact a recruiter reliably wants.
 
 ### 4.2 Case study reader (~1.5 days)
 
@@ -259,7 +264,7 @@ alone, which misses most of what matters here.
 
 6.5 Cloudflare Web Analytics. No Google Analytics, no consent banner needed.
 
-6.6 Redirects from any v2 URLs worth preserving.
+6.6 Redirects from any old site URLs worth preserving.
 
 6.7 Ledger review: walk all 35 items in `CLAUDE.md` and confirm none returned.
 
