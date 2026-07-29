@@ -1,0 +1,8 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	// Must match the Cloudflare Pages project name.
+	"name": "portfolio",
+	"compatibility_date": "2026-07-29",
+	"compatibility_flags": ["nodejs_als"],
+	"pages_build_output_dir": ".svelte-kit/cloudflare"
+}
