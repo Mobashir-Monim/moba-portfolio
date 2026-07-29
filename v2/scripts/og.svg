@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The source of `static/og.png`, the one card every page shares. The bake recipe is in the
+  `<desc>` below, because an XML comment cannot hold a command-line flag.
+
+  Drawn as the boot screen, in the default dress: `modern` skin, `ferrite` theme, dark. That is
+  the first thing a visitor sees, so it is the right thing for a link preview to promise, and
+  every colour below is lifted from those two token blocks in `app.css` rather than picked.
+-->
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	width="1200"
+	height="630"
+	viewBox="0 0 1200 630"
+	font-family="ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace"
+>
+	<title>Mobashir Monim, Full Stack Web Developer</title>
+	<desc>
+		Baked with the Chrome that is already on the machine, so there is no toolchain and no
+		dependency. Run from v2/:
+
+		"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless
+		--screenshot=static/og.png --window-size=1200,630 --hide-scrollbars scripts/og.svg
+
+		The monospace stack resolves against the baking machine, so a re-bake wants a Mac or a
+		lookalike face. The PNG is committed precisely so nobody has to care day to day.
+	</desc>
+
+	<defs>
+		<!-- The desktop-bg token, radial half: 120% 110% at 50% -10%, surface-1 to surface-3. -->
+		<radialGradient id="ground" cx="600" cy="-63" r="720" gradientUnits="userSpaceOnUse">
+			<stop offset="0" stop-color="#1d1513" />
+			<stop offset="0.68" stop-color="#0b0504" />
+			<stop offset="1" stop-color="#0b0504" />
+		</radialGradient>
+
+		<!-- The other half: graph paper at 32px in the c-line token at 30%. -->
+		<pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+			<path d="M0 0.5H32M0.5 0V32" stroke="#3d3330" stroke-opacity="0.3" stroke-width="1" />
+		</pattern>
+	</defs>
+
+	<rect width="1200" height="630" fill="url(#ground)" />
+	<rect width="1200" height="630" fill="url(#grid)" />
+
+	<!-- The wordmark, in the chrome face at the scale the boot screen draws it. -->
+	<text
+		x="600"
+		y="248"
+		text-anchor="middle"
+		font-size="76"
+		font-weight="700"
+		letter-spacing="-0.4"
+		fill="#f9f2f0"
+	>
+		Mnemos
+	</text>
+
+	<text x="600" y="288" text-anchor="middle" font-size="19" fill="#a59e9d">Version 2.0</text>
+
+	<!-- The thermometer, filled. c-select, which is inside every skin's accent budget. -->
+	<rect
+		x="360.5"
+		y="330.5"
+		width="479"
+		height="19"
+		rx="4"
+		fill="#29211e"
+		stroke="#847571"
+		stroke-width="1"
+	/>
+	<rect x="361" y="331" width="478" height="18" rx="3.5" fill="#ae3f27" />
+
+	<!-- Where the POST lines run. A card has one job, and it is not reciting the memory check. -->
+	<text x="600" y="418" text-anchor="middle" font-size="32" font-weight="600" fill="#f9f2f0">
+		Mobashir Monim
+	</text>
+	<text x="600" y="456" text-anchor="middle" font-size="20" fill="#c7c1bf">
+		Full Stack Web Developer
+	</text>
+</svg>
