@@ -32,7 +32,7 @@ repo.
 | Component library | None. No Skeleton, no shadcn, no UI kit. |
 | Package manager / runtime | Bun. Never npm, yarn, or pnpm. |
 | Adapter | `@sveltejs/adapter-cloudflare` |
-| Hosting | Cloudflare Pages |
+| Hosting | Cloudflare Workers static assets, git-connected via Workers Builds |
 | Analytics | Cloudflare Web Analytics |
 
 ### Commands

@@ -24,7 +24,8 @@ across when content, copy, or assets are needed. See the porting table in `CLAUD
 - [x] 0.5 `bun test` script in `package.json`. `bunfig.toml` and `bun-test-setup.ts` exist, the
       script does not.
 - [x] 0.6 `git init` at `portfolio/`, first commit, push.
-- [ ] 0.7 Connect Cloudflare Pages, deploy the hello-world. **Do this now, not at the end.**
+- [ ] 0.7 Connect Cloudflare Workers Builds to the repo, deploy the hello-world. **Do this now,
+      not at the end.**
       Adapter and build surprises are cheap to fix against an empty repo and expensive to fix
       against a finished site.
 

@@ -3,7 +3,9 @@
 	"compilerOptions": {
 		"rewriteRelativeImportExtensions": true,
 		"allowJs": true,
-		"checkJs": true,
+		// svelte-check crawls the workspace rather than tsconfig's include, so it type-checks the
+		// generated bundles under .svelte-kit/. Source is all TypeScript; only config files are JS.
+		"checkJs": false,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
