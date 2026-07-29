@@ -12,6 +12,10 @@
 			The allowed values, the storage keys, and the defaults are duplicated from
 			src/lib/appearance.svelte.ts. A pre-paint script cannot import. Change one, change
 			the other.
+
+			It also preloads the resolved skin's web font, because that is the only moment the
+			skin is known and a static <link> is not. SKIN_FONT is duplicated from the @font-face
+			block in app.css, and src/lib/tokens.test.ts fails if the two drift.
 		-->
 		<script>
 			(() => {
@@ -36,6 +40,21 @@
 						? matchMedia('(prefers-color-scheme: dark)').matches
 						: appearance === 'dark';
 				el.classList.toggle('dark', dark);
+
+				// Skins absent from this map are on system stacks and need no request.
+				const SKIN_FONT = { glass: '/fonts/montserrat-latin-var.woff2' };
+				const href = SKIN_FONT[el.dataset.skin];
+				if (href) {
+					const link = document.createElement('link');
+					link.rel = 'preload';
+					link.as = 'font';
+					link.type = 'font/woff2';
+					// Required even same-origin: font fetches are always CORS-mode, so without
+					// this the preload is discarded and the file is requested a second time.
+					link.crossOrigin = 'anonymous';
+					link.href = href;
+					document.head.appendChild(link);
+				}
 			})();
 		</script>
 		%sveltekit.head%

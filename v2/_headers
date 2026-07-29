@@ -1,0 +1,7 @@
+# Cloudflare header rules. Read from the project root, not from `static/`; the
+# adapter appends its own rules for /_app/immutable at build time.
+#
+# The font filename is its cache key, so replacing the font means renaming the
+# file. See the @font-face block in src/app.css.
+/fonts/*.woff2
+  Cache-Control: public, max-age=31536000, immutable

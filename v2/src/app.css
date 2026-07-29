@@ -1,6 +1,47 @@
 @import 'tailwindcss';
 
 /* ==========================================================================
+   Web fonts
+   --------------------------------------------------------------------------
+   One family, for one skin. `glass` carries Montserrat because it is the skin
+   whose character is the old site's face, and because without it `glass` and
+   `modern` would share a body stack and read as the same typography. The other
+   two skins are on system stacks and cost zero bytes:
+
+   - `modern` pairs a monospace chrome with a proportional body, which is what a
+     native systems tool does, and `ui-monospace` / `system-ui` already are that
+     font on every platform.
+   - `retro` wants System 7, whose real faces are Chicago and Geneva. Both are
+     Apple trademarks with no free web licence, and the free lookalikes are
+     single-size bitmaps that fall apart off their design size. Geneva ships on
+     macOS, Verdana and Tahoma cover everywhere else. Weighed and declined.
+
+   Because only the active skin's `--ff-*` tokens are in play, the browser
+   downloads this file for `glass` visitors and for nobody else: no per-skin
+   stylesheet and no loader. The pre-paint script in `app.html` preloads it when
+   it resolves that skin, otherwise the request waits on this stylesheet.
+
+   The file is Google's own pre-subset latin variable woff2, which is what
+   pyftsubset would emit, so there is no font toolchain in this repo. It is
+   licensed OFL 1.1 and shipped with its licence at the path below. The
+   filename is the cache key: `_headers` marks it immutable, so replacing the
+   font means renaming the file.
+   ========================================================================== */
+
+@font-face {
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 400 700;
+	font-display: swap;
+	src: url('/fonts/montserrat-latin-var.woff2') format('woff2');
+	/* Latin, per /static/fonts/montserrat-OFL.txt. Covers the accents the copy
+	   actually uses (resume, role, cafe), the punctuation, and the currency. */
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+		U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ==========================================================================
    Token contract
    --------------------------------------------------------------------------
    Two independent sets, and the split between them is the architecture.
@@ -182,12 +223,13 @@
    control panel did, on the selection highlight and the title bar, and stays
    greyscale everywhere else. `glass` spends it as gradient stops.
 
-   Font stacks here are placeholders on purpose. Task 1.4 subsets Montserrat
-   and a retro face to woff2 and preloads only the active skin's family.
+   Three skins, three type pairings. See the web-font block at the top for why
+   only one of them costs a download.
    -------------------------------------------------------------------------- */
 
 [data-skin='modern'] {
-	/* Mono chrome, proportional content. */
+	/* Mono chrome against a proportional body. Both sides are the platform's own
+	   faces, which is exactly what a native systems tool uses. Zero bytes. */
 	--ff-ui: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 	--ff-body: ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 	--ff-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
@@ -232,7 +274,9 @@
 }
 
 [data-skin='retro'] {
-	/* Web-safe stacks get most of the way to a System 7 face for zero bytes. */
+	/* Geneva is the real System 7 body face and it ships on macOS. Verdana and
+	   Tahoma are the closest humanist grotesques everywhere else. Zero bytes,
+	   and no trademarked face redrawn as a bitmap. */
 	--ff-ui: Geneva, Verdana, Tahoma, sans-serif;
 	--ff-body: Geneva, Verdana, Tahoma, sans-serif;
 	--ff-mono: Monaco, 'Courier New', monospace;
@@ -279,8 +323,10 @@
 }
 
 [data-skin='glass'] {
-	--ff-ui: ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-	--ff-body: ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	/* The one skin that pays for a face. Montserrat throughout, against a system
+	   monospace. The stack behind it is what renders during the swap window. */
+	--ff-ui: Montserrat, ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	--ff-body: Montserrat, ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 	--ff-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
 	--fs-xs: 0.75rem;

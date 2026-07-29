@@ -130,9 +130,39 @@ expensive part and does not care what the colours are.
 Three skins, three type pairings. Subset to woff2 and preload only what the active skin needs;
 do not ship all three families to every visitor. The old site shipped a raw `.ttf` variable font.
 
-Retro is the constraint: it wants a bitmap or chunky geometric face, and web-safe stacks
-(Geneva, Verdana, Tahoma) get most of the way there for free. Weigh a real bitmap face against
-zero bytes before committing to one.
+**Decided: one webfont, not three.** Three pairings, of which two are free:
+
+| Skin | UI and body | Mono | Cost |
+|---|---|---|---|
+| `modern` | `ui-monospace` chrome, `system-ui` body | `ui-monospace` | 0 |
+| `retro` | Geneva, Verdana, Tahoma | Monaco | 0 |
+| `glass` | Montserrat, variable 400 to 700, latin | `ui-monospace` | 34.7 KB |
+
+`glass` earns the download twice over: it is the skin whose character is the old site's face, and
+without it `glass` and `modern` share a body stack and read as the same typography. `modern` pairs
+a monospace chrome against a proportional body, which is already distinct from both other skins,
+and `system-ui` plus `ui-monospace` is precisely what a native systems tool renders in.
+
+Retro's bitmap question, weighed and declined: System 7's real faces are Chicago and Geneva, both
+Apple trademarks with no free web licence, and the free lookalikes are single-size bitmaps that
+fall apart off their design size. Geneva ships on macOS, Verdana and Tahoma cover the rest.
+
+- [x] 1. Montserrat's latin variable woff2, self-hosted at `static/fonts/`, with its OFL 1.1
+      licence beside it. Google's pre-subset file is what `pyftsubset` emits, so there is no font
+      toolchain in the repo.
+- [x] 2. One `@font-face` in `app.css` with `font-display: swap`, referenced only by the `glass`
+      family tokens, so the browser fetches it for that skin and for nobody else. No per-skin
+      stylesheet, no loader.
+- [x] 3. Preload injected by the existing pre-paint script in `app.html`, keyed off the skin it has
+      just resolved, because that is the only moment the skin is known and a static `<link>` is
+      not. Without it the request waits on the stylesheet, which is the FOUT.
+- [x] 4. `v2/_headers` marks `/fonts/*.woff2` immutable. The adapter appends its own rules to it at
+      build time. The filename is the cache key, so replacing the font means renaming the file.
+- [x] 5. A `bun test` tying the `@font-face`, the skin that references it, and the preload map
+      together. That map is a fourth copy of the skin list, and a stale preload is invisible: the
+      page still renders, it just fetches the wrong file or nothing at all.
+- [x] 6. Weight specimen in `/styleguide`, so a variable axis that failed to load is visible rather
+      than silently synthesised.
 
 ### 1.5 Icon system
 

@@ -173,6 +173,22 @@
 			{/each}
 		</ul>
 
+		<p class="mb-2 text-sm text-fg-2">
+			Only <code>glass</code> pays for a face, Montserrat as a variable font. The row below is the
+			weight axis: if it renders as three identical lines under <code>glass</code>, the variable
+			axis did not load and the browser is synthesising the bolds.
+		</p>
+		<ul class="mb-6 space-y-1">
+			{#each [400, 600, 700] as weight (weight)}
+				<li class="flex items-baseline gap-4">
+					<code class="w-24 shrink-0 text-xs text-fg-3">{weight}</code>
+					<span style="font-family: var(--ff-body); font-weight: {weight}">
+						Mnemos remembers every window you opened
+					</span>
+				</li>
+			{/each}
+		</ul>
+
 		<ul class="mb-6 space-y-1">
 			{#each SIZES as token (token)}
 				<li class="flex items-baseline gap-4">

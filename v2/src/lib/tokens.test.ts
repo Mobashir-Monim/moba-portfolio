@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { existsSync, readdirSync } from 'node:fs';
 import { contrast } from './contrast';
 
 /**
@@ -13,6 +14,8 @@ import { contrast } from './contrast';
  */
 
 const css = await Bun.file(new URL('../app.css', import.meta.url)).text();
+const html = await Bun.file(new URL('../app.html', import.meta.url)).text();
+const staticDir = new URL('../../static/', import.meta.url);
 
 const SKINS = ['modern', 'retro', 'glass'] as const;
 const THEMES = ['ferrite', 'phosphor', 'halide', 'selenium'] as const;
@@ -218,5 +221,99 @@ describe('accent budget across all 24 combinations', () => {
 		// Only glass is allowed to be unresolvable. If another skin shows up here, the accent
 		// budget has grown a hole the test cannot see.
 		expect(skipped.every((s) => s.startsWith('glass'))).toBe(true);
+	});
+});
+
+/**
+ * Typography, and specifically the four-way duplication it creates.
+ *
+ * A web font is named in `app.css` twice, once in an `@font-face` and once in the skin that uses
+ * it, and a third time in the preload map inside `app.html`, which cannot import. Nothing but a
+ * test ties those together, and a stale preload is invisible: the page still renders, it just
+ * fetches the wrong file or fetches nothing and falls back. So the parse below is the contract.
+ */
+describe('web fonts', () => {
+	const FAMILY_TOKENS = ['--ff-ui', '--ff-body', '--ff-mono'] as const;
+
+	/** Every `@font-face` in app.css, keyed by family name. */
+	const faces = Object.fromEntries(
+		[...css.matchAll(/@font-face\s*\{([^}]*)\}/g)].map(([, body]) => {
+			const family = body.match(/font-family:\s*'([^']+)'/)?.[1];
+			if (!family) throw new Error('an @font-face in app.css declares no quoted font-family');
+			return [
+				family,
+				{
+					url: body.match(/src:\s*url\('([^']+)'\)/)?.[1] ?? '',
+					display: body.match(/font-display:\s*([\w-]+);/)?.[1] ?? ''
+				}
+			];
+		})
+	);
+
+	/** The preload map from the pre-paint script, `{ skin: url }`. */
+	const preloads = Object.fromEntries(
+		[
+			...(html.match(/const SKIN_FONT = \{([^}]*)\}/)?.[1] ?? '').matchAll(/(\w+):\s*'([^']+)'/g)
+		].map(([, skin, url]) => [skin, url])
+	);
+
+	/** Declared families this skin's family tokens actually reference. */
+	const familiesUsedBy = (skin: string) =>
+		Object.keys(faces).filter((family) =>
+			FAMILY_TOKENS.some((token) =>
+				new RegExp(`(^|,\\s*)'?${family}'?(\\s*,|$)`).test(skinTokens(skin)[token] ?? '')
+			)
+		);
+
+	test('the parse found something, so a silent regex break cannot pass this suite', () => {
+		expect(Object.keys(faces).length).toBeGreaterThan(0);
+	});
+
+	test('no font is shipped that no skin uses, and every used font has a system fallback', () => {
+		const problems: string[] = [];
+		const used = new Set(SKINS.flatMap(familiesUsedBy));
+		for (const family of Object.keys(faces)) {
+			if (!used.has(family)) problems.push(`${family} has an @font-face but no skin uses it`);
+		}
+		// Something has to render during the swap window, so the custom family is never alone.
+		for (const skin of SKINS) {
+			for (const token of FAMILY_TOKENS) {
+				const stack = (skinTokens(skin)[token] ?? '').split(',').map((s) => s.trim());
+				if (stack.length === 1 && faces[stack[0].replace(/'/g, '')]) {
+					problems.push(`${skin} ${token} is a web font with nothing behind it`);
+				}
+			}
+		}
+		expect(problems).toEqual([]);
+	});
+
+	test('every font declares a font-display that cannot blank text', () => {
+		// The default is `auto`, which most browsers treat as `block`: up to 3s of invisible text.
+		const bad = Object.entries(faces)
+			.filter(([, face]) => !['swap', 'fallback', 'optional'].includes(face.display))
+			.map(([family, face]) => `${family}: font-display is ${face.display || '(unset)'}`);
+		expect(bad).toEqual([]);
+	});
+
+	test('the preload map in app.html matches the skins and URLs in app.css', () => {
+		// The map holds one URL per skin, so a skin on two web fonts would preload only one of
+		// them and the comparison below would quietly agree. Rule that out first.
+		for (const skin of SKINS) expect(familiesUsedBy(skin).length).toBeLessThan(2);
+
+		const expected = Object.fromEntries(
+			SKINS.flatMap((skin) => familiesUsedBy(skin).map((family) => [skin, faces[family].url]))
+		);
+		expect(preloads).toEqual(expected);
+	});
+
+	test('every declared font file, and a licence for it, exists in static/', () => {
+		const missing = Object.values(faces)
+			.map((face) => face.url)
+			.filter((url) => !existsSync(new URL(`.${url}`, staticDir)));
+		expect(missing).toEqual([]);
+
+		// Self-hosting an OFL face requires shipping its licence. Fonts are only added here.
+		const fonts = readdirSync(new URL('fonts/', staticDir));
+		expect(fonts.some((f) => /licen|OFL/i.test(f))).toBe(true);
 	});
 });
