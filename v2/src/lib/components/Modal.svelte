@@ -19,20 +19,62 @@
 
 	// Unique per instance, so two modals on the same page cannot both claim the same heading.
 	const headingId = $props.id();
+
+	let dialog = $state<HTMLElement>();
+
+	/** Everything a Tab can land on. Enough for the controls a dialog of ours actually holds. */
+	const FOCUSABLE =
+		'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+	/**
+	 * Focus goes in when the dialog mounts and back to whatever opened it when it unmounts. The
+	 * dialog itself takes it rather than the first control, so the name and the role are announced
+	 * before the choices are.
+	 */
+	$effect(() => {
+		const opener = document.activeElement as HTMLElement | null;
+		dialog?.focus();
+		return () => opener?.focus();
+	});
+
+	/**
+	 * Escape, and the trap. `aria-modal` tells a screen reader the rest of the page is gone; this
+	 * is what makes that true for a keyboard, by sending Tab off the last control back round to the
+	 * first. Nothing here is a keyboard trap in the WCAG sense, because Escape is always a way out.
+	 */
+	function onkeydown(event: KeyboardEvent): void {
+		if (event.key === 'Escape') return onclose?.();
+		if (event.key !== 'Tab' || !dialog) return;
+
+		const items = [...dialog.querySelectorAll<HTMLElement>(FOCUSABLE)];
+		const edge = event.shiftKey ? items[0] : items[items.length - 1];
+		if (!edge || document.activeElement !== edge) return;
+
+		event.preventDefault();
+		(event.shiftKey ? items[items.length - 1] : items[0]).focus();
+	}
 </script>
 
 <!--
-	The shell only. Focus trapping, Escape, restoring focus to the opener, and the transition all
-	belong to phase 2, where the state that decides whether this is mounted lives.
+	`aria-modal` plus a labelled dialog, a keyboard that cannot leave until it is dismissed, and
+	Escape. The backdrop is not interactive, because a click target that is invisible to the
+	keyboard is not a way out; the close control and Escape both are.
 
-	`aria-modal` plus a labelled dialog is the whole contract here; the backdrop is not
-	interactive, because a click target that is invisible to the keyboard is not a way out.
-	The close control is.
+	Mounting is the caller's, and so is positioning: `class` lands on the backdrop, so whoever
+	opens this decides whether it covers the viewport or sits in a page.
 -->
 <div class="backdrop {klass}">
 	<!-- A div, not a section: `role="dialog"` on a landmark element is the one case where the
 	     semantic tag and the role fight, and the role is the one that matters here. -->
-	<div class="modal" role="dialog" aria-modal="true" aria-labelledby={headingId}>
+	<div
+		bind:this={dialog}
+		class="modal"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby={headingId}
+		tabindex="-1"
+		{onkeydown}
+	>
 		<header>
 			<h2 id={headingId}>{title}</h2>
 			{#if onclose}

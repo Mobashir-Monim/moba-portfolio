@@ -16,6 +16,8 @@
 		onclose,
 		onpointerdown,
 		onfocusin,
+		onkeydown,
+		element = $bindable(),
 		handle,
 		grip,
 		toolbar,
@@ -44,6 +46,17 @@
 		 */
 		onpointerdown?: (event: PointerEvent) => void;
 		onfocusin?: (event: FocusEvent) => void;
+		/**
+		 * Escape, and anything else the caller wants off the whole window. Handled here rather than
+		 * on `window` so it only fires when focus is actually inside this one, which is also what
+		 * lets the caller stop it before the desktop underneath sees it.
+		 */
+		onkeydown?: (event: KeyboardEvent) => void;
+		/**
+		 * The section, for the caller that has to move focus into it when it opens. `tabindex="-1"`
+		 * below is what makes that possible without putting the window in the tab order.
+		 */
+		element?: HTMLElement;
 		/** Passed straight to the title bar, which is the drag surface. See `$lib/gesture`. */
 		handle?: Handle;
 		/**
@@ -70,7 +83,23 @@
 	positions it with `translate3d()` from the store, so nothing here writes `left` or `top`
 	(ledger #24) and there is no second markup tree for mobile (ledger #27).
 -->
-<section class="window {klass}" class:focused aria-label={title} {onpointerdown} {onfocusin}>
+<!--
+	The ignored warning is that rule's own trade, and this is the case it exists for: what it asks
+	for instead is an interactive element, which is exactly the window-as-a-button of ledger #17.
+	The keys land on a labelled region, every control inside it is a real button, and nothing here
+	is reachable only through these handlers.
+-->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<section
+	bind:this={element}
+	class="window {klass}"
+	class:focused
+	aria-label={title}
+	tabindex="-1"
+	{onpointerdown}
+	{onfocusin}
+	{onkeydown}
+>
 	<TitleBar
 		{title}
 		{focused}

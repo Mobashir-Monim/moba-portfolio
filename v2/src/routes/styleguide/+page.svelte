@@ -85,6 +85,9 @@
 		resolved = Object.fromEntries(ALL.map((t) => [t, style.getPropertyValue(t).trim()]));
 	});
 
+	/** The modal traps focus, so it has to be openable rather than permanently on the page. */
+	let modal = $state(false);
+
 	/** Every icon state at once. Nothing here is the real store; the desktop route is. */
 	const DESKTOP = [
 		{ name: 'Experience', kind: 'folder', selected: false, open: false },
@@ -588,28 +591,40 @@
 		<h2 id="modal" class="mb-4 text-xl font-semibold">Modal shell</h2>
 		<p class="mb-4 text-sm text-fg-2">
 			<code>role="dialog"</code> with <code>aria-modal</code> and a heading it points at. The backdrop
-			is not a click target: an escape route that only a mouse can reach is not an escape route. Focus
-			trapping and Escape arrive with the state that mounts this, in phase 2.
+			is not a click target: an escape route that only a mouse can reach is not an escape route. Tab cycles
+			inside it, Escape closes it, and focus returns to the button below. It opens rather than sitting
+			on the page, because a trapped dialog cannot be a swatch.
 		</p>
-		<Modal title="Open on one click?" onclose={() => {}}>
-			{#snippet actions()}
-				<button
-					type="button"
-					class="rounded-sm border border-line-strong bg-surface-1 px-3 py-1 text-sm"
-				>
-					Two clicks
-				</button>
-				<button
-					type="button"
-					class="rounded-sm border border-line-strong bg-accent px-3 py-1 text-sm text-on-accent"
-				>
-					One click
-				</button>
-			{/snippet}
-			<p>
-				{OS_NAME} can open an item on a single click, or select on one and open on two, the way a desktop
-				usually does. You can change this later in Settings.
-			</p>
-		</Modal>
+		<button
+			type="button"
+			class="rounded-sm border border-line-strong bg-surface-1 px-3 py-1 text-sm"
+			onclick={() => (modal = true)}
+		>
+			Open the modal
+		</button>
+		{#if modal}
+			<Modal class="fixed inset-0 z-50" title="Open on one click?" onclose={() => (modal = false)}>
+				{#snippet actions()}
+					<button
+						type="button"
+						class="rounded-sm border border-line-strong bg-surface-1 px-3 py-1 text-sm"
+						onclick={() => (modal = false)}
+					>
+						Two clicks
+					</button>
+					<button
+						type="button"
+						class="rounded-sm border border-line-strong bg-accent px-3 py-1 text-sm text-on-accent"
+						onclick={() => (modal = false)}
+					>
+						One click
+					</button>
+				{/snippet}
+				<p>
+					{OS_NAME} can open an item on a single click, or select on one and open on two, the way a desktop
+					usually does. You can change this later in Settings.
+				</p>
+			</Modal>
+		{/if}
 	</section>
 </div>

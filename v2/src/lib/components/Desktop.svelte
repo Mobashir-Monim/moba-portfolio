@@ -13,8 +13,10 @@
 	column reads as a menu where a grid reads as a folder that happens to be empty. Folders use
 	`IconGrid`; this is the one place that does not.
 
-	No role and no label: 2.9 turns the list into a `role="listbox"` with arrow-key navigation,
-	and a role invented now would only have to be replaced then.
+	No role and no label, decided rather than deferred: the icons inside are plain links, which is
+	the pattern the accessibility contract allows alongside `role="listbox"`, and the arrows they
+	were missing live on the links themselves. See `$lib/roving` for why a role would be a promise
+	the prerendered HTML cannot keep.
 -->
 <div class="desktop {klass}">
 	<div class="list">{@render children()}</div>

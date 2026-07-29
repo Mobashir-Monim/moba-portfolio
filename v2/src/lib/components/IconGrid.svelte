@@ -9,9 +9,9 @@
 	sits on; the grid itself is the same grid in both places, so it is one component and not two
 	copies of `grid-template-columns`.
 
-	No role: 2.9 turns this into a `role="grid"` with arrow-key navigation, and a role invented
-	now would only have to be replaced then. Until it has that behavior, the plain links inside
-	are already reachable and operable.
+	No role, decided rather than deferred: the links inside are already reachable and operable, and
+	the arrows they were missing live on the links themselves. `$lib/roving` has the reasoning, and
+	it is also what measures this grid's column count, since only the layout knows where a row ends.
 -->
 <div class="grid {klass}">{@render children()}</div>
 

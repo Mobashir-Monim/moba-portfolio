@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { activators } from '$lib/activate';
 	import type { Kind } from '$lib/os';
+	import { move } from '$lib/roving';
 	import Icon from './Icon.svelte';
 
 	let {
@@ -46,8 +47,10 @@
 	selected the icon instead of moving past it, and nothing opened on Enter. An anchor gets all
 	of that from the platform.
 
-	Phase 2 layers the grid pattern (arrow keys move, Enter opens, Escape deselects) over this.
-	`aria-current` is the selection, because a link cannot be `aria-selected`.
+	The arrows are the one thing the platform does not give a set of links, so `move` adds them and
+	nothing else; Enter is still the anchor's, and Escape belongs to whatever holds the selection,
+	which is the desktop or the window. `aria-current` is the selection, because a link cannot be
+	`aria-selected`.
 -->
 <!--
 	`href` arrives already built. It comes off the node in `$lib/tree`, which is the route table,
@@ -62,6 +65,7 @@
 	class:selected
 	class:open
 	aria-current={selected ? 'true' : undefined}
+	onkeydown={move}
 	{...activate}
 >
 	<Icon name={glyph} size={layout === 'row' ? 20 : 40} />

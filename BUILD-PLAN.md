@@ -430,10 +430,44 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       class itself rather than leaving that to a second effect over `isDark()`, since `update()`
       already owns that line.
 
-- [ ] 2.9 Accessibility pass against the contract in `CLAUDE.md`: arrow-key grid navigation,
+- [x] 2.9 Accessibility pass against the contract in `CLAUDE.md`: arrow-key grid navigation,
       Escape closes the focused window and the settings modal, focus moves into a window on open
       and returns to its icon on close, focus trapping in `Modal`. The rest of the contract, no
       nested interactives and accessible names on every icon-only control, holds already.
+
+      Icons stay plain links rather than becoming `role="grid"` or `role="listbox"`, which is the
+      other pattern the contract allows, and the two components that had deferred the choice say so
+      now instead of promising a role. A role is an attribute: it ships in the prerendered HTML and
+      is still there with JavaScript off, announcing keyboard behaviour that nothing is around to
+      provide. `$lib/roving` adds the arrows and nothing else, on the link itself, so the element
+      taking the key is an interactive one and Svelte owns the listener.
+
+      A step off the edge stays put rather than clamping into range, which the test caught: clamped,
+      ArrowUp from the top row lands on the first item, a sideways move in answer to a vertical key.
+      Column count is measured off the layout rather than declared, because the grid wraps at
+      whatever the window is wide and only the layout knows where a row ends.
+
+      Escape means the innermost thing that can hear it. Inside a window it drops the selection if
+      there is one and closes the window otherwise, and it stops there, so the desktop's own Escape
+      does not also deselect behind it. Settings is a window, so it needs no case of its own.
+
+      Focus moves into the window's `<section>` on open and back to the opener on close, falling
+      back to the item's own icon by `href` when that element is gone: clicking a link does not
+      focus it in every browser, and the opener can equally be a row in a window that has since
+      closed. The effect re-runs when the section comes and goes, so minimize hands the keyboard
+      back and restore takes it again. The case it misses is navigating inside a folder window,
+      where the content is replaced along with the focused link and the keyboard lands on the body,
+      out of Escape's reach; recovered only when focus actually fell to the body, so the back button
+      keeps its own focus across a press.
+
+      `Modal` gained the trap, the Escape, and the focus restore that 1.6 deferred. Its copy in the
+      styleguide had to move behind a button, because a dialog that holds the keyboard cannot also
+      be a swatch sitting on a page.
+
+      Only `nextIndex` is unit tested, since it is the only part that is arithmetic rather than
+      focus. The rest was verified by driving headless Chrome against the dev server: arrows across
+      the desktop list and a five-column grid, Enter into a window, Escape deselecting then closing,
+      focus landing back on `/projects`, and Tab cycling inside the modal.
 
 - [ ] 2.10 `prefers-reduced-motion` honoured throughout. The global CSS rule and the window
       transition already are; the remaining animations arrive with the apps.

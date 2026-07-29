@@ -4,6 +4,7 @@
 	import { OWNER, SETTINGS_ID, SETTINGS_NAME } from '$lib/os';
 	import { node, type Node } from '$lib/tree';
 	import { canBack, canForward, current, windows, type WindowRecord } from '$lib/windows.svelte';
+	import { untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { scale } from 'svelte/transition';
 	import InfoSidebar from './InfoSidebar.svelte';
@@ -39,6 +40,13 @@
 	$effect(() => {
 		void showingId;
 		selected = undefined;
+
+		// Walking into a folder replaces the content, and with it the link that was focused, so the
+		// keyboard lands on the body and Escape stops reaching this window at all. Only that case:
+		// the back button survives its own click, and pulling focus off it would cost the second
+		// press. `win` is read untracked because this effect must not depend on it, or minimizing a
+		// window would clear the selection it was put away with.
+		if (document.activeElement === document.body) untrack(() => win)?.focus();
 	});
 
 	/** The folder itself until something inside it is picked. */
@@ -70,7 +78,47 @@
 		windows.focus(record.id);
 	}
 
+	/**
+	 * Escape drops the selection if there is one and closes the window otherwise, which is what a
+	 * file manager has always done with it. It stops here so the desktop's own Escape does not also
+	 * fire: this window is inside that desktop, and one key should not mean two things at once.
+	 */
+	function onkeydown(event: KeyboardEvent): void {
+		if (event.key !== 'Escape') return;
+		event.stopPropagation();
+		if (selected) selected = undefined;
+		else windows.close(record.id);
+	}
+
 	let frame = $state<HTMLElement>();
+
+	/** The window's own `<section>`, so focus can be put inside it when it opens. */
+	let win = $state<HTMLElement>();
+
+	/**
+	 * The icon this window is of, which is where focus goes when it closes. The record's id is what
+	 * the window was opened from, so unlike `showing` it does not move as the window navigates.
+	 */
+	const openedFrom = $derived(node(record.id)?.href);
+
+	/**
+	 * Focus follows the window in and back out again. The effect re-runs when the section comes and
+	 * goes, which is also minimize and restore, so putting a window away hands the keyboard back
+	 * rather than leaving it on a node that no longer exists.
+	 */
+	$effect(() => {
+		const opener = document.activeElement as HTMLElement | null;
+		// Read while the component is alive, because the teardown runs after it is not.
+		const href = openedFrom;
+		win?.focus();
+
+		return () => {
+			// Clicking a link does not focus it in every browser, and the opener can equally be a
+			// row inside a window that has since closed. The item's own icon answers both.
+			const icon = href ? document.querySelector<HTMLElement>(`a[href="${href}"]`) : null;
+			(opener?.isConnected ? opener : icon)?.focus();
+		};
+	});
 
 	/**
 	 * Where the window is being dragged to and how big it is being dragged out to, both
@@ -168,10 +216,12 @@
 	>
 		<Window
 			class="h-full w-full"
+			bind:element={win}
 			{handle}
 			{grip}
 			onpointerdown={raise}
 			onfocusin={raise}
+			{onkeydown}
 			{title}
 			focused={windows.isFocused(record.id)}
 			nav={isFolder}

@@ -14,6 +14,15 @@
 	/** Desktop selection. Purely a view state, and the desktop has no sidebar to feed. */
 	let selected = $state<string | undefined>();
 
+	/**
+	 * Escape deselects, the last of the four keys the grid pattern owes. On `<svelte:window>` so
+	 * that it works wherever focus is on the desktop, and safe there because every open window
+	 * stops its own Escape before it reaches this: inside a window the key closes the window.
+	 */
+	function onkeydown(event: KeyboardEvent): void {
+		if (event.key === 'Escape') selected = undefined;
+	}
+
 	const aboutNode = nodes[about.slug];
 </script>
 
@@ -33,6 +42,8 @@
 	With JavaScript off every icon is the link it looks like and the site is a plain, navigable
 	document. With JavaScript on the same click opens a window instead.
 -->
+<svelte:window {onkeydown} />
+
 <div class="shell">
 	<!--
 		The page still needs a heading, and the desktop in the 1.1 mockups carries no masthead.
