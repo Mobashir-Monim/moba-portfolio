@@ -123,6 +123,45 @@ describe('minimize and restore', () => {
 	});
 });
 
+/**
+ * 2.13: the layer renders in `seq` order and spends `z-index` on the stack, because a keyed each
+ * that reorders moves DOM nodes, and a node that moves between a press and its release eats the
+ * click. That only holds while `seq` is independent of everything that reorders the array.
+ */
+describe('seq', () => {
+	test('is open order, and nothing that reorders the stack touches it', () => {
+		const w = createWindows();
+		w.open('a', 'folder');
+		w.open('b', 'folder');
+		w.open('c', 'document');
+		const opened = () => [...w.all].sort((x, y) => x.seq - y.seq).map((r) => r.id);
+
+		w.focus('a');
+		w.minimize('b');
+		w.restore('b');
+		w.restoreKind('document');
+
+		expect(ids(w)).toEqual(['a', 'b', 'c']);
+		expect(opened()).toEqual(['a', 'b', 'c']);
+	});
+
+	test('a reopened window takes a later place, never its old one', () => {
+		const w = createWindows();
+		w.open('a', 'folder');
+		w.open('b', 'folder');
+		const first = w.all[0].seq;
+		w.close('a');
+		w.open('a', 'folder');
+		expect(w.all.find((r) => r.id === 'a')!.seq).toBeGreaterThan(first);
+	});
+
+	test('no two open windows share a place', () => {
+		const w = createWindows();
+		for (const id of ['a', 'b', 'c', 'd']) w.open(id, 'folder');
+		expect(new Set(w.all.map((r) => r.seq)).size).toBe(4);
+	});
+});
+
 describe('counts', () => {
 	test('groups by kind and includes minimized windows', () => {
 		const w = createWindows();

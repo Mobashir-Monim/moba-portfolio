@@ -13,7 +13,12 @@
 	import NodeContent from './content/NodeContent.svelte';
 	import Window from './Window.svelte';
 
-	let { record }: { record: WindowRecord } = $props();
+	/**
+	 * `z` is this window's place in the stack. The layer renders in open order and pays for the
+	 * stacking here, because a keyed each that reorders moves DOM nodes, and a node that moves
+	 * between a press and its release eats the click (2.13).
+	 */
+	let { record, z = 0 }: { record: WindowRecord; z?: number } = $props();
 
 	/** What this window is showing right now, which is not what it was opened from. */
 	const showingId = $derived(current(record));
@@ -217,6 +222,7 @@
 		style:--y="{y}px"
 		style:--w={w ? `${w}px` : null}
 		style:--h={h ? `${h}px` : null}
+		style:z-index={z}
 		transition:scale={motion}
 	>
 		<Window

@@ -20,6 +20,13 @@ export type WindowRecord = {
 	/** Stable identity, the slug the window was opened from. One window per item. */
 	id: string;
 	kind: Kind;
+	/**
+	 * When this window was opened, monotonic. Stacking order is the array order, but the DOM has
+	 * to be rendered in an order that never changes: moving a node mid-press loses the click that
+	 * press was going to produce, which is 2.13. So the layer sorts by this and spends `z-index`
+	 * on the stack instead.
+	 */
+	seq: number;
 	/** Desktop position in pixels. Applied as `translate3d()`, never `left`/`top` (ledger #24). */
 	x: number;
 	y: number;
@@ -124,12 +131,14 @@ export function createWindows() {
 				return;
 			}
 
-			const n = cascade++ % WRAP;
+			const seq = cascade++;
+			const n = seq % WRAP;
 			list = [
 				...list,
 				{
 					id,
 					kind,
+					seq,
 					x: ORIGIN.x + n * STEP,
 					y: ORIGIN.y + n * STEP,
 					view: 'icon',

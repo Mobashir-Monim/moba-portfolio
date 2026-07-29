@@ -553,7 +553,7 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       dependency. Per-page cards want a renderer in the build, and thirty generated ones are not
       worth more than one honest one.
 
-- [ ] 2.13 A closed window is not closed. Found while verifying 4.4 and reproduced with nothing
+- [x] 2.13 A closed window is not closed. Found while verifying 4.4 and reproduced with nothing
       from that task involved: open Projects and About from the desktop, click About's Close
       button, and its section leaves the DOM while the dock still counts it. Close Projects
       afterwards and About comes back, focused.
@@ -563,6 +563,42 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       whichever of them is wrong names the layer to look in. Ledger #1 was this shape, a store
       mutator that did not do what its name said, which is why 2.2 tests every one of them; add the
       failing case there before touching the fix.
+
+      **The store was not it, and the narrated symptom did not reproduce.** `close` was driven from
+      a fresh load in both `bun run dev` and the preview build, in every ordering the note allows:
+      About in front and behind, three windows deep, both closes inside the 160ms outro, close and
+      reopen inside it, close with the other window minimized. Store and DOM agreed every time, and
+      2.2 already covered the mutator itself. So no failing case was added there, because there was
+      none to add.
+
+      **What does reproduce, on the first press, every time: pressing Close on a window that is not
+      already on top does not close it.** It raises it and the press is spent. Press again and it
+      closes, which is why this reads from the user's seat as exactly what the title says, and why
+      a session of it leaves windows in states nobody meant to put them in.
+
+      Raising happens on `pointerdown`, stacking order was the store's array order, and the layer
+      rendered that array directly. So a press on a background window reordered a keyed `{#each}`,
+      Svelte moved the pressed button to a new place in the DOM, and Chrome, holding a press and a
+      release at different tree positions, dispatched no `click` at all. The event log is
+      unambiguous: `pointerdown` on the glyph, `mousedown` retargeted to the layer, `pointerup` and
+      `mouseup` back on the glyph, and no `click` anywhere. Nothing about it is specific to Close:
+      minimize, back, forward, and the view switcher all lost their first press the same way, which
+      is also why 4.4 had to reach for `pointerup` to get focus back into the terminal.
+
+      The fix separates the two orders that were one. The record carries `seq`, its open order, and
+      that is what the layer renders in, so a window's DOM node never moves while it is open. The
+      stack stays the array order and is spent as `z-index` off the record's index in it, derived
+      per render rather than bookkept, which is what the note in `WindowLayer` was actually guarding
+      against. The layer gets `isolation: isolate`, so a tenth window cannot climb over the boot
+      screen or the dock on the strength of a number that only means "tenth".
+
+      `seq` is tested in 2.2 for the property the fix rests on: open order is independent of
+      everything that reorders the stack, and a reopened window takes a later place rather than its
+      old one. The rest is DOM behaviour and was verified by driving headless Chrome over CDP
+      against both the dev server and the preview build, in all three skins: one press closes,
+      minimizes, and walks back a background window; the raised window is the one on screen while
+      the DOM order holds still; the dock still counts a minimized window and its group still
+      restores it; the dock still draws over the windows; and Escape still closes the focused window.
 
 **Exit criteria:** fully operable by keyboard alone; readable and navigable with JS off; no
 ledger defect reintroduced.
