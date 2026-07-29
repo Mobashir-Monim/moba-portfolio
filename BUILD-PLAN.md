@@ -415,9 +415,20 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       No `og:image`. Nothing here has art yet, and `summary` beats `summary_large_image` pointing
       at a placeholder. It becomes worth doing when there is something to put in it.
 
-- [ ] 2.8 Skin, theme, and appearance all applied pre-paint by an inline script in `app.html`
-      reading localStorage. Landed in 1.3; what is left is the `matchMedia` listener that follows
+- [x] 2.8 Skin, theme, and appearance all applied pre-paint by an inline script in `app.html`
+      reading localStorage. Landed in 1.3; what was left is the `matchMedia` listener that follows
       a live OS colour-scheme change while appearance is `auto`.
+
+      The OS preference is now module state rather than a `matchMedia` call on demand, because
+      `auto` has to be reactive: the system flipping under the page changes nothing about
+      `settings.appearance`, so every readout of `isDark()` would have gone stale. That is also
+      what retires the `void settings.appearance` nudge in `/styleguide`, which was standing in
+      for a dependency it did not actually have.
+
+      `followSystemAppearance()` returns its own teardown, so the caller is one `$effect` in the
+      root layout and there is no listener to unregister by hand (ledger #2, #3). It writes the
+      class itself rather than leaving that to a second effect over `isDark()`, since `update()`
+      already owns that line.
 
 - [ ] 2.9 Accessibility pass against the contract in `CLAUDE.md`: arrow-key grid navigation,
       Escape closes the focused window and the settings modal, focus moves into a window on open

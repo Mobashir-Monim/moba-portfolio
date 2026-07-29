@@ -80,7 +80,7 @@
 	$effect(() => {
 		void settings.skin;
 		void settings.theme;
-		void settings.appearance;
+		void isDark();
 		const style = getComputedStyle(document.documentElement);
 		resolved = Object.fromEntries(ALL.map((t) => [t, style.getPropertyValue(t).trim()]));
 	});

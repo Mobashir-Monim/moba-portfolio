@@ -85,20 +85,39 @@ function initial(): Settings {
 
 export const settings = $state<Settings>(initial());
 
-function prefersDark(): boolean {
-	return browser && matchMedia('(prefers-color-scheme: dark)').matches;
-}
+const SCHEME = '(prefers-color-scheme: dark)';
+
+/**
+ * The OS preference, held as state rather than read from `matchMedia` on demand, so that
+ * `auto` is reactive: a readout of `isDark()` has to follow the system flipping under it, and
+ * `settings.appearance` does not change when that happens.
+ */
+let systemDark = $state(browser && matchMedia(SCHEME).matches);
 
 export function isDark(appearance: Appearance = settings.appearance): boolean {
-	return appearance === 'auto' ? prefersDark() : appearance === 'dark';
+	return appearance === 'auto' ? systemDark : appearance === 'dark';
 }
 
 /**
- * Apply a change to any subset of the axes: state, then <html>, then storage.
+ * Follow a live OS colour-scheme change while appearance is `auto`. Returns its own teardown,
+ * so the only caller is one `$effect` in the root layout.
  *
- * ponytail: does not follow a live OS colour-scheme change while on `auto`. That needs a
- * matchMedia listener with teardown, which belongs in the root layout's `$effect` in task 2.8.
+ * The class is toggled here rather than in an effect over `isDark()`, because `update()`
+ * already owns that line and a second writer means two of them to keep in step.
  */
+export function followSystemAppearance(): () => void {
+	const mq = matchMedia(SCHEME);
+	const sync = () => {
+		systemDark = mq.matches;
+		if (settings.appearance === 'auto') {
+			document.documentElement.classList.toggle('dark', systemDark);
+		}
+	};
+	mq.addEventListener('change', sync);
+	return () => mq.removeEventListener('change', sync);
+}
+
+/** Apply a change to any subset of the axes: state, then <html>, then storage. */
 export function update(patch: Partial<Settings>): void {
 	Object.assign(settings, patch);
 	if (!browser) return;
