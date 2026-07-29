@@ -553,6 +553,17 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       dependency. Per-page cards want a renderer in the build, and thirty generated ones are not
       worth more than one honest one.
 
+- [ ] 2.13 A closed window is not closed. Found while verifying 4.4 and reproduced with nothing
+      from that task involved: open Projects and About from the desktop, click About's Close
+      button, and its section leaves the DOM while the dock still counts it. Close Projects
+      afterwards and About comes back, focused.
+
+      So the record survives `close`, or the each block re-materialises it from a stale list. The
+      dock and the DOM disagreeing is the useful half of the evidence: the dock reads the store, so
+      whichever of them is wrong names the layer to look in. Ledger #1 was this shape, a store
+      mutator that did not do what its name said, which is why 2.2 tests every one of them; add the
+      failing case there before touching the fix.
+
 **Exit criteria:** fully operable by keyboard alone; readable and navigable with JS off; no
 ledger defect reintroduced.
 
@@ -701,14 +712,56 @@ Compose-and-send only, no inbox. The only app with a trust boundary, so it gets 
 
 ### 4.4 Terminal (~2 days)
 
-A real shell over the content tree, which already exists as structured data, so the command
-layer is small relative to what it buys you.
+- [x] A real shell over the content tree, which already exists as structured data, so the command
+      layer is small relative to what it buys you. `ls`, `cd`, `cat`, `open`, `whoami`, `contact`,
+      `theme`, `help`, `clear`, with arrow-key history, tab completion, and the `404` page's error
+      voice.
 
-Commands: `ls`, `cd`, `cat`, `open`, `whoami`, `contact`, `theme`, `help`, `clear`. History with
-arrow keys, tab completion, and a `404`-style error voice consistent with the OS.
+      **The tree is already a filesystem, so paths are hrefs.** `..` is string work on the href
+      rather than a lookup, because the tree carries no parent map by design (2.11) and a URL is
+      one anyway; 2.12's breadcrumbs are the same trick. The root is the one path with no record
+      behind it, since nothing owns the whole filesystem, and that is the only special case in
+      `resolve`.
 
-Highest signal-to-effort item in the project. It demonstrates engineering judgment more directly
-than any game, and it lands with exactly the audience that decides whether to contact you.
+      `ls` prints the last href segment and not `node.name`, which is the difference between a
+      filename and a title: names here carry spaces, and `cd Case Studies` cannot work in a shell
+      that splits on them. One `label()` feeds `ls` and completion both, so the thing listed is
+      always the thing the next command accepts, and a test asserts exactly that.
+
+      **`src/lib/terminal.ts` is pure.** No DOM, no window store, no settings. A command that
+      changes something returns an effect describing it and `Terminal.svelte` performs it, which
+      is what makes all nine commands plain input-to-output assertions. One `COMMANDS` table is
+      the dispatch, the `help` output, and the completion candidates, so a command cannot exist in
+      two of those and not the third.
+
+      No `pwd`: the prompt is the status display and already shows the directory. First argument
+      only, marked as such, because nothing on the list takes two and flags would be a parser.
+
+      **Three focus problems, and each one needed the browser to find.** The terminal is the one
+      window whose content should hold the keyboard rather than its frame, and getting there took
+      three passes:
+
+      1. Taking focus in a plain `$effect` loses it. A child's effect runs before its parent's, so
+         `WindowFrame` hands the keyboard straight back to its own `<section>`. It cannot be fixed
+         from that side either: the frame reads `document.activeElement` to know where to return
+         focus on close, so content that had already taken it would record itself as its own
+         opener. A frame later is the fix.
+      2. Clicking back in after `open` needs `pointerup`, not `click` and not `pointerdown`.
+         `click` is never dispatched, because taking focus scrolls the body and the release lands
+         on a different element than the press. `pointerdown` fires, but the mousedown after it
+         focuses the nearest focusable ancestor, which is the window's own section.
+      3. So the terminal owns its scrolling instead of letting the window body do it. Both read
+         fine, but only this one is stable under a pointer: with the body scrolling, the release
+         lands on the body's padding, outside the component, and the handler never hears it.
+
+      Verified by driving headless Chrome over CDP against the dev server: focus lands in the
+      prompt on open, every command runs, Tab completes one candidate and lists many without
+      touching the line, the arrows walk the history and back out of it, `open` opens a window and
+      raises it, `theme` re-dresses the desktop, `clear` empties the screen, an unknown command
+      answers in the shell voice, clicking back into the terminal returns the cursor to the prompt,
+      and Escape closes the window and hands focus to the launcher. All three skins checked.
+
+      **One bug found on the way that is not this task's**, recorded as 2.13.
 
 ### 4.5 System Info (~0.5 day)
 

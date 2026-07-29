@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { isDark, settings, update } from '$lib/appearance.svelte';
-	import { SETTINGS_ID, SYSINFO_ID } from '$lib/apps';
+	import { SETTINGS_ID, SYSINFO_ID, TERMINAL_ID } from '$lib/apps';
 	import SettingsPanel from '../SettingsPanel.svelte';
 	import SystemInfo from './SystemInfo.svelte';
+	import Terminal from './Terminal.svelte';
 
 	let { id }: { id: string } = $props();
 </script>
@@ -25,6 +26,8 @@
 		dark={isDark()}
 		onchange={update}
 	/>
+{:else if id === TERMINAL_ID}
+	<Terminal />
 {:else if id === SYSINFO_ID}
 	<SystemInfo />
 {/if}

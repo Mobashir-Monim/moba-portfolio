@@ -24,9 +24,12 @@ export const SETTINGS_ID = 'app:settings';
 
 export const SYSINFO_ID = 'app:sysinfo';
 
+export const TERMINAL_ID = 'app:terminal';
+
 /** Declaration order is menu order. */
 export const APPS: readonly App[] = [
 	{ id: SETTINGS_ID, name: 'Settings' },
+	{ id: TERMINAL_ID, name: 'Terminal' },
 	{ id: SYSINFO_ID, name: 'System Info' }
 ];
 
