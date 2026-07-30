@@ -1,11 +1,19 @@
 <script lang="ts">
 	import { isDark, settings, update } from '$lib/appearance.svelte';
-	import { CALCULATOR_ID, SETTINGS_ID, SNAKE_ID, SYSINFO_ID, TERMINAL_ID } from '$lib/apps';
+	import {
+		CALCULATOR_ID,
+		SETTINGS_ID,
+		SNAKE_ID,
+		SYSINFO_ID,
+		TERMINAL_ID,
+		TILES_ID
+	} from '$lib/apps';
 	import SettingsPanel from '../SettingsPanel.svelte';
 	import Calculator from './Calculator.svelte';
 	import Snake from './Snake.svelte';
 	import SystemInfo from './SystemInfo.svelte';
 	import Terminal from './Terminal.svelte';
+	import Tiles from './Tiles.svelte';
 
 	let { id }: { id: string } = $props();
 </script>
@@ -36,4 +44,6 @@
 	<Snake />
 {:else if id === CALCULATOR_ID}
 	<Calculator />
+{:else if id === TILES_ID}
+	<Tiles />
 {/if}

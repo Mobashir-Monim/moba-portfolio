@@ -31,6 +31,14 @@ export const TERMINAL_ID = 'app:terminal';
 
 export const SNAKE_ID = 'app:snake';
 
+/**
+ * 2048, whose id is `tiles` because an id is also a JavaScript identifier here: `apps.test.ts`
+ * turns it into the constant name that `AppContent.svelte` has to branch on, and no identifier
+ * starts with a digit. The name is what the app is called and the id is what the code calls it,
+ * which `sysinfo` and System Info already do.
+ */
+export const TILES_ID = 'app:tiles';
+
 export const CALCULATOR_ID = 'app:calculator';
 
 /** Declaration order is launcher order: the tools first, then the toys. */
@@ -39,7 +47,8 @@ export const APPS: readonly App[] = [
 	{ id: TERMINAL_ID, name: 'Terminal', icon: 'terminal' },
 	{ id: SYSINFO_ID, name: 'System Info', icon: 'sysinfo' },
 	{ id: CALCULATOR_ID, name: 'Calculator', icon: 'calculator' },
-	{ id: SNAKE_ID, name: 'Snake', icon: 'snake' }
+	{ id: SNAKE_ID, name: 'Snake', icon: 'snake' },
+	{ id: TILES_ID, name: '2048', icon: 'tiles' }
 ];
 
 /**

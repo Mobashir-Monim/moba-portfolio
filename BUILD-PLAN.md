@@ -1102,10 +1102,81 @@ Compose-and-send only, no inbox. The only app with a trust boundary, so it gets 
       by keyboard, `8 ÷` refuses in the app's own words, and Escape closes the window and returns
       focus to the launcher. No field of any kind in the window at any point.
 
-### 5.3 Second game (~1 to 2 days)
+### 5.3 Second game, and a third (~1 to 2 days)
 
-2048 (original is MIT licensed, explicitly free to clone) or Minesweeper (generic concept, no
-enforcement history). Both are safe and bounded.
+**Both, at the reviewer's call.** The plan left the choice open between 2048 and Minesweeper. The
+answer was both: each is safe, bounded, and unlike the other and unlike Snake, so the second one
+costs a day and buys a third game.
+
+- [x] **2048.** The original is MIT licensed and explicitly free to clone, which is why this one
+      keeps its name where `CLAUDE.md`'s rule sends the two deferred below under their own.
+
+      **The rules are a pure module.** `src/lib/tiles.ts` is functions from a game to the next game,
+      the split `snake.ts`, `calc.ts` and `terminal.ts` already use, so the component holds a
+      keyboard and a grid of spans and nothing else. Randomness is a parameter, which is what makes
+      a spawn testable; a move draws twice, once for the cell and once for the value.
+
+      One `slide` covers all four directions, because every direction is "toward index 0 of a line":
+      the vertical pair transposes, the far pair reverses, and the same two operations undo it. Four
+      hand-written index walks is the other way, and three of them would be the first with a sign
+      flipped.
+
+      Four rules the naive version gets wrong, and each one has a test:
+
+      1. **A tile that has merged is spent for the rest of the move.** `2 2 4` gives `4 4` and not
+         `8`, and `2 2 2 2` gives `4 4`. Pairing from the leading edge and skipping the partner is
+         the whole of it.
+      2. **A press that moves nothing is not a move**, so it neither scores nor spawns. Spawning on
+         a blocked press is how a board fills up while the player holds a key against a wall.
+      3. **A full board is not the same as a finished one.** A full board with two equal neighbours
+         is still playable, so `stuck` asks `shift` in all four directions rather than scanning for
+         pairs, and the answer cannot disagree with the move.
+      4. **A row must not merge into the row above it**, which is what a shift written against the
+         flat array does. Nothing about the board says which one it did until that case runs.
+
+      Reaching 2048 is a flag and not an ending, because stopping the game at the moment it is won
+      is not the game.
+
+      **The board is `role="application"`**, for the reason `Snake.svelte` gives and 2.9 settled: a
+      `role="grid"` promises the arrows move a reading cursor, and here they move every tile at
+      once. The keys belong to the app, which is the one thing that role is for.
+
+      **The value ramp is a ring, not a fill.** A tile keeps one foreground on one background
+      whatever it is worth, the pair the calculator's keys already use and `tokens.test.ts` already
+      checks in all 24 combinations, and the value is spent on an outline of `--c-select` that
+      thickens as the tile climbs. A background mixed per value is the obvious way to draw this and
+      it puts text on a colour nothing has measured, which in light mode is where AA goes.
+
+      **One CSS defect found by looking, and it generalises.** The ring was first written as a
+      second entry in `box-shadow` beside `var(--bevel-out)`. Two of the three skins resolve that
+      token to `none`, a `none` inside a comma-separated shadow list is invalid, and the whole
+      declaration is dropped: the ramp rendered in retro and nowhere else, which looks exactly like
+      a ramp that is too subtle rather than like a syntax error. Anything composing a shadow with a
+      skin token has the same hole.
+
+      **It fits the window it opens in.** The board is square, so its width is its height, and 24rem
+      put the pad below the fold of a window that opens 384px tall. 17rem plus a single-row pad is
+      what clears the readout and the keys. The pad is one row rather than Snake's cross because
+      these four are not steering: every press slides the whole board, so there is no heading for a
+      cross to stand for.
+
+      **The id is `app:tiles` and the name is 2048.** `apps.test.ts` turns an app id into the
+      constant name `AppContent.svelte` has to branch on, and no JavaScript identifier starts with a
+      digit. `sysinfo` and System Info already work that way.
+
+      Verified by driving headless Chrome over CDP against the preview build, in all three skins:
+      the launcher opens 2048, focus lands on the board, real arrow keys slide it, every tile stays
+      a power of two, the d-pad slides and hands focus back, the score reads, New game returns the
+      board to two tiles, and Escape closes the window and returns focus to the launcher. No page
+      errors in any skin.
+
+      **One thing the harness had to learn**, and it is the reason the d-pad looked broken for a
+      pass: a control inside a window whose body clips its overflow has a bounding rect the pointer
+      cannot reach, and a press at those coordinates lands on whatever is on top at that point
+      instead. It reads as a focus bug. The harness now scrolls the target into view and checks
+      `elementFromPoint` before pressing, which any later CDP pass over a windowed control wants.
+
+- [ ] **Minesweeper.** Generic concept, no enforcement history.
 
 Deferred, and deliberately: a falling-block puzzle (~2 days) and a maze chase (~4+ days). The
 maze chase is both the highest effort and the highest legal risk on the list. If either gets

@@ -137,6 +137,14 @@ export const CHROME = {
 		glass:
 			'M3.5 5.5h9a3.5 3.5 0 0 1 0 7h-4a3.5 3.5 0 0 0 0 7h8M20 15.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z'
 	},
+	// Two small tiles and one large one, which is the move the game is made of. Drawn as sizes
+	// rather than as the number 2048, because four digits inside a 24-unit box is not a glyph.
+	tiles: {
+		modern: 'M4.5 5.5h5v5h-5zM4.5 13.5h5v5h-5zM12.5 6.5h7v11h-7z',
+		retro: 'M2.5 4.5h6v6h-6zM2.5 13.5h6v6h-6zM11.5 4.5h10v15h-10z',
+		glass:
+			'M6.5 5.5h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2zM6.5 13.5h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2zM15 6.5h3a2.5 2.5 0 0 1 2.5 2.5v6a2.5 2.5 0 0 1-2.5 2.5h-3a2.5 2.5 0 0 1-2.5-2.5v-6a2.5 2.5 0 0 1 2.5-2.5z'
+	},
 	// A body, a screen, and two rows of keys. Drawn narrow, because a wide one reads as a phone.
 	calculator: {
 		modern:
