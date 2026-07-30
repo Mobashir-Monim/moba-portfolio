@@ -1060,17 +1060,47 @@ Compose-and-send only, no inbox. The only app with a trust boundary, so it gets 
 
 ### 5.2 Calculator with the Pro paywall gag (~1 day)
 
-The calculator itself is a couple of hours. The gag is the point.
+- [x] The calculator itself is a couple of hours. The gag is the point.
 
-- On open: a "Calculator Pro" upsell. $499.99 to unlock.
-- A working escape hatch. Suggestion: "Continue with Basic" works fully except division, which
-  reports that division is a Pro feature. Funnier than a crippled calculator, and still usable.
-- **No fake payment form. Ever.** No field that looks like it takes a card number. That is the
-  line between a gag and a dark pattern, and it is also how people get trained to type card
-  details into unverified inputs.
-- If Stripe is added later: Stripe Checkout only, hosted and real, with a real product
-  description, terms, and a refund path. Once money can actually move, it is a real transaction
-  regardless of intent.
+      **The paywall is in the pure module, not the component.** `src/lib/calc.ts` is a function per
+      key, the split `snake.ts` and `terminal.ts` already use, and `operate` is where `÷` refuses
+      and says why. That is the product rule this app exists to tell a joke about, and a punchline
+      with no test is one that can stop working quietly. `calc.test.ts` drives the pad as strings
+      of key presses, which is the only way an arithmetic bug in a state machine is visible without
+      stepping through it.
+
+      Four functions and a display string, because `0.`, `-0` and a half-typed number are display
+      states that do not survive a round trip through `number`. `format` runs results through
+      twelve significant digits and back, which is what keeps `0.1 + 0.2` off the screen as
+      `0.30000000000000004`. An operator applies the pending one before storing itself, so
+      `2 + 3 +` reads 5 before it reads 9, and two operators in a row swap rather than apply.
+
+      **The escape hatch is the app.** "Continue with Basic" dismisses the upsell and everything
+      works except division, which reports that division is a Pro feature and leaves the entry
+      alone. The `÷` key is marked PRO before it is pressed, so the refusal is a punchline rather
+      than a bug report.
+
+      **No form, no field, nothing that resembles one**, which `CLAUDE.md` is explicit about and
+      the test asserts: zero `input`, `textarea` or `contenteditable` in the window, before and
+      after pressing Unlock. Unlock leads to an in-world dead end, that no payment processor is
+      installed on this machine, and the button then removes itself. A convincing payment form is
+      how people get trained to type card numbers into whatever asks, and a joke is not worth
+      teaching that. If this ever takes money it becomes hosted Stripe Checkout with a real product
+      description, terms, and a refund path.
+
+      The keypad is `inert` while the upsell is up, so Tab cannot walk through the panel into the
+      keys behind it, and typing is guarded separately. Both are the platform's rather than a focus
+      trap of our own, which is what 4.5 settled with the launcher popover.
+
+      Typing works as well as tapping: digits, the four operators, Enter, Backspace and Delete,
+      handled on a plain wrapper that the keys bubble to. Every one of them is a real button first,
+      so the app is fully operable by Tab and Enter with that handler deleted.
+
+      Verified by driving headless Chrome over CDP against the preview build, in all three skins:
+      the upsell is up on open with the keypad inert behind it, Unlock reaches the dead end and
+      takes its own button away, Basic dismisses it, `2 + 3` reads 5 by pointer, `9 * 6` reads 54
+      by keyboard, `8 ÷` refuses in the app's own words, and Escape closes the window and returns
+      focus to the launcher. No field of any kind in the window at any point.
 
 ### 5.3 Second game (~1 to 2 days)
 

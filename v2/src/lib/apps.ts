@@ -31,11 +31,14 @@ export const TERMINAL_ID = 'app:terminal';
 
 export const SNAKE_ID = 'app:snake';
 
+export const CALCULATOR_ID = 'app:calculator';
+
 /** Declaration order is launcher order: the tools first, then the toys. */
 export const APPS: readonly App[] = [
 	{ id: SETTINGS_ID, name: 'Settings', icon: 'settings' },
 	{ id: TERMINAL_ID, name: 'Terminal', icon: 'terminal' },
 	{ id: SYSINFO_ID, name: 'System Info', icon: 'sysinfo' },
+	{ id: CALCULATOR_ID, name: 'Calculator', icon: 'calculator' },
 	{ id: SNAKE_ID, name: 'Snake', icon: 'snake' }
 ];
 

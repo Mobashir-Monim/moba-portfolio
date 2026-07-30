@@ -137,6 +137,15 @@ export const CHROME = {
 		glass:
 			'M3.5 5.5h9a3.5 3.5 0 0 1 0 7h-4a3.5 3.5 0 0 0 0 7h8M20 15.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z'
 	},
+	// A body, a screen, and two rows of keys. Drawn narrow, because a wide one reads as a phone.
+	calculator: {
+		modern:
+			'M5.5 2.5h13v19h-13zM8.5 6.5h7M8.5 12h1M11.5 12h1M14.5 12h1M8.5 16.5h1M11.5 16.5h1M14.5 16.5h1',
+		retro:
+			'M4.5 2.5h15v19h-15zM6.5 5.5h11v3h-11zM7.5 12h2v2h-2zM11 12h2v2h-2zM14.5 12h2v2h-2zM7.5 16.5h2v2h-2zM11 16.5h2v2h-2zM14.5 16.5h2v2h-2z',
+		glass:
+			'M8 2.5h8a2.5 2.5 0 0 1 2.5 2.5v14a2.5 2.5 0 0 1-2.5 2.5h-8a2.5 2.5 0 0 1-2.5-2.5v-14a2.5 2.5 0 0 1 2.5-2.5zM8.5 7h7M9 11.5h0.5M11.75 11.5h0.5M14.5 11.5h0.5M9 15.5h0.5M11.75 15.5h0.5M14.5 15.5h0.5'
+	},
 	// Named for what it opens, not for what it draws: retro shows the System 7 control panel's
 	// sliders rather than a cog, because a cog is not a thing that shipped in 1991.
 	settings: {

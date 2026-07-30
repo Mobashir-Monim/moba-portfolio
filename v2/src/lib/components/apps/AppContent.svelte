@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { isDark, settings, update } from '$lib/appearance.svelte';
-	import { SETTINGS_ID, SNAKE_ID, SYSINFO_ID, TERMINAL_ID } from '$lib/apps';
+	import { CALCULATOR_ID, SETTINGS_ID, SNAKE_ID, SYSINFO_ID, TERMINAL_ID } from '$lib/apps';
 	import SettingsPanel from '../SettingsPanel.svelte';
+	import Calculator from './Calculator.svelte';
 	import Snake from './Snake.svelte';
 	import SystemInfo from './SystemInfo.svelte';
 	import Terminal from './Terminal.svelte';
@@ -33,4 +34,6 @@
 	<SystemInfo />
 {:else if id === SNAKE_ID}
 	<Snake />
+{:else if id === CALCULATOR_ID}
+	<Calculator />
 {/if}
