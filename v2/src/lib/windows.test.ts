@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { canBack, canForward, createWindows, current } from './windows.svelte';
+import { canBack, canForward, createWindows, current, WRAP } from './windows.svelte';
 
 /**
  * Every exported mutator gets a case here. Ledger #1 was a `===` typo in exactly this kind of
@@ -19,12 +19,20 @@ describe('open', () => {
 		expect(w.focused?.id).toBe('projects');
 	});
 
-	test('cascades position so windows do not land on each other', () => {
+	test('claims no position, so the stylesheet centres it', () => {
+		const w = createWindows();
+		w.open('a', 'folder');
+		expect([w.all[0].x, w.all[0].y]).toEqual([undefined, undefined]);
+	});
+
+	// The cascade moved into CSS with the centring, and `seq` is what carries it. Two windows
+	// opened back to back have to sit on different steps or they land on each other.
+	test('consecutive windows take different cascade steps', () => {
 		const w = createWindows();
 		w.open('a', 'folder');
 		w.open('b', 'folder');
 		const [a, b] = w.all;
-		expect([b.x - a.x, b.y - a.y]).toEqual([28, 28]);
+		expect(a.seq % WRAP).not.toBe(b.seq % WRAP);
 	});
 
 	test('starts history at the node it opened from', () => {
@@ -169,7 +177,8 @@ describe('counts', () => {
 		w.open('doc2', 'document');
 		w.open('dir1', 'folder');
 		w.minimize('doc2');
-		expect(w.counts).toEqual({ folder: 1, document: 2 });
+		w.open('app:settings', 'app');
+		expect(w.counts).toEqual({ folder: 1, document: 2, app: 1 });
 	});
 });
 

@@ -98,6 +98,36 @@ export const CHROME = {
 		glass:
 			'M6.5 4.5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2zM5.5 17.5h4v3h-4zM10 17.5h4v3h-4zM14.5 17.5h4v3h-4z'
 	},
+	/*
+	   The three app glyphs. An app is not a document, so it does not wear a document's mark: that
+	   is the whole of what "settings, terminal and system info should have their own icon" asks
+	   for, and `app` is the dock group the three of them land in.
+
+	   `app` is a window, because a window is what an app is on this desktop, and it has to stay
+	   readable beside `folder` and `document` at dock size.
+	*/
+	app: {
+		modern: 'M3.5 4.5h17v15h-17zM3.5 8.5h17M6 6.5H7M9 6.5H10',
+		retro: 'M2.5 3.5h19v17h-19zM2.5 7.5h19M4.5 4.5h2v2h-2z',
+		glass:
+			'M6 4.5h12a2.5 2.5 0 0 1 2.5 2.5v10a2.5 2.5 0 0 1-2.5 2.5h-12a2.5 2.5 0 0 1-2.5-2.5v-10a2.5 2.5 0 0 1 2.5-2.5zM3.5 9h17M6.5 6.75H7.5M9.5 6.75H10.5'
+	},
+	terminal: {
+		modern: 'M3.5 5.5h17v13h-17zM7 9.5 10 12 7 14.5M12.5 14.5H17',
+		retro: 'M2.5 4.5h19v15h-19zM2.5 8.5h19M5.5 12.5 8 14.5 5.5 16.5M10.5 16.5h6',
+		glass:
+			'M6 5.5h12a2.5 2.5 0 0 1 2.5 2.5v8a2.5 2.5 0 0 1-2.5 2.5h-12a2.5 2.5 0 0 1-2.5-2.5v-8a2.5 2.5 0 0 1 2.5-2.5zM7.5 10 10 12 7.5 14M12.5 14.5h4'
+	},
+	// A chip with its pins, which is what "system information" is about, and which stays legible
+	// at 16px where a spec sheet or a stack of gauges does not.
+	sysinfo: {
+		modern:
+			'M6.5 6.5h11v11h-11zM9.5 9.5h5v5h-5zM9 6.5V3.5M15 6.5V3.5M9 20.5V17.5M15 20.5V17.5M6.5 9H3.5M6.5 15H3.5M20.5 9H17.5M20.5 15H17.5',
+		retro:
+			'M5.5 5.5h13v13h-13zM8.5 8.5h7v7h-7zM8.5 5.5V2.5M15.5 5.5V2.5M8.5 21.5V18.5M15.5 21.5V18.5M5.5 8.5H2.5M5.5 15.5H2.5M21.5 8.5H18.5M21.5 15.5H18.5',
+		glass:
+			'M8 5.5h8a2.5 2.5 0 0 1 2.5 2.5v8a2.5 2.5 0 0 1-2.5 2.5h-8a2.5 2.5 0 0 1-2.5-2.5v-8a2.5 2.5 0 0 1 2.5-2.5zM10.5 10.5h3v3h-3zM9.5 5.5V3M14.5 5.5V3M9.5 21V18.5M14.5 21V18.5M5.5 9.5H3M5.5 14.5H3M21 9.5H18.5M21 14.5H18.5'
+	},
 	// Named for what it opens, not for what it draws: retro shows the System 7 control panel's
 	// sliders rather than a cog, because a cog is not a thing that shipped in 1991.
 	settings: {
@@ -110,10 +140,26 @@ export const CHROME = {
 } satisfies Record<string, Record<Skin, string>>;
 
 /**
- * Brand and social marks. One variant, filled, on the grid each was drawn on: rescaling a logo
- * by hand is how a logo stops being recognisable, and `viewBox` is free.
+ * Marks. One variant each, filled, on the grid each was drawn on: rescaling a logo by hand is how
+ * a logo stops being recognisable, and `viewBox` is free.
+ *
+ * Two kinds of thing live here for one reason. The social marks belong to somebody else, so they
+ * are not ours to redraw per skin. `logo` is ours and is single-variant on purpose: the OS sits
+ * above the skin, so it has to read the same in pinstripes as in monospace. Same shape of entry,
+ * same rule, opposite argument.
  */
 export const BRAND = {
+	/**
+	 * Mnemos, as a geometric M cut from a single filled path. The valley stops short of the
+	 * baseline and the outer strokes run full height, so it reads as a monogram at 96px and as a
+	 * mark at 24px, which is the only size test a logo has to pass. Nothing about it is skinned:
+	 * the tile it sits on carries the radius, the border, and the shadow, and that is where the
+	 * three skins differ.
+	 */
+	logo: {
+		box: '0 0 24 24',
+		d: 'M3 21V3h3.6L12 11.1 17.4 3H21v18h-3.6V9.4l-4.4 6.4h-2L6.6 9.4V21z'
+	},
 	github: {
 		box: '0 0 48 48',
 		d: 'M44,24c0,8.96-5.88,16.54-14,19.08V38c0-1.71-0.72-3.24-1.86-4.34c5.24-0.95,7.86-4,7.86-9.66c0-2.45-0.5-4.39-1.48-5.9 c0.44-1.71,0.7-4.14-0.52-6.1c-2.36,0-4.01,1.39-4.98,2.53C27.57,14.18,25.9,14,24,14c-1.8,0-3.46,0.2-4.94,0.61 C18.1,13.46,16.42,12,14,12c-1.42,2.28-0.84,4.74-0.3,6.12C12.62,19.63,12,21.57,12,24c0,5.66,2.62,8.71,7.86,9.66 c-0.67,0.65-1.19,1.44-1.51,2.34H16c-1.44,0-2-0.64-2.77-1.68c-0.77-1.04-1.6-1.74-2.59-2.03c-0.53-0.06-0.89,0.37-0.42,0.75 c1.57,1.13,1.68,2.98,2.31,4.19C13.1,38.32,14.28,39,15.61,39H18v4.08C9.88,40.54,4,32.96,4,24C4,12.95,12.95,4,24,4 S44,12.95,44,24z'

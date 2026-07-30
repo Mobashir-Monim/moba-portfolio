@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { activators } from '$lib/activate';
-	import type { Kind } from '$lib/os';
+	import type { NodeKind } from '$lib/os';
 	import { move } from '$lib/roving';
 	import Icon from './Icon.svelte';
 
@@ -10,20 +10,13 @@
 		kind = 'folder',
 		selected = false,
 		open = false,
-		layout = 'tile',
 		onopen,
 		onselect
 	}: {
 		name: string;
 		href: string;
-		kind?: Kind;
+		kind?: NodeKind;
 		selected?: boolean;
-		/**
-		 * `tile` stacks the label under the glyph and sits in a grid, which is every folder.
-		 * `row` puts it beside, which is the desktop's list down the left edge. A variant, not a
-		 * second component: the markup is identical and only the axis changes.
-		 */
-		layout?: 'tile' | 'row';
 		/** The item has a window open. Draws the open glyph and announces it. */
 		open?: boolean;
 		/**
@@ -61,14 +54,15 @@
 <a
 	{href}
 	class="tile"
-	class:row={layout === 'row'}
 	class:selected
 	class:open
 	aria-current={selected ? 'true' : undefined}
 	onkeydown={move}
 	{...activate}
 >
-	<Icon name={glyph} size={layout === 'row' ? 20 : 40} />
+	<!-- The glyph is sized in CSS, not in script, because `--icon-glyph` is what the desktop
+	     re-declares at each breakpoint: one token scales the tile and the mark it holds together. -->
+	<Icon name={glyph} size="var(--icon-glyph)" />
 	<span class="label">{name}</span>
 	{#if open}<span class="sr-only">, open</span>{/if}
 </a>
@@ -93,16 +87,6 @@
 		transition:
 			background-color var(--dur-fast) var(--ez-standard),
 			color var(--dur-fast) var(--ez-standard);
-	}
-
-	/* The row. Width shrinks to the label so the hit area is the item and not the column. */
-	.tile.row {
-		flex-direction: row;
-		align-items: center;
-		gap: 0.5rem;
-		width: auto;
-		padding: 0.25rem 0.5rem;
-		text-align: start;
 	}
 
 	.tile:hover {

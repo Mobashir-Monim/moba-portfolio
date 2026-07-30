@@ -8,8 +8,10 @@
 		class: klass = ''
 	}: {
 		name: IconName;
-		/** Rendered size in CSS px. Chrome glyphs are drawn on a 24-unit grid, so the stroke
-		 *  scales with this: a skin tunes weight through `--icon-stroke`, not through size. */
+		/** Rendered size. A number is CSS px; a string is any CSS length, including a `var()`, which
+		 *  is how the desktop and the dock scale their glyphs from a token instead of from script.
+		 *  Chrome glyphs are drawn on a 24-unit grid, so the stroke scales with this: a skin tunes
+		 *  weight through `--icon-stroke`, not through size. */
 		size?: number | string;
 		/** Accessible name. Omit when the icon sits beside text that already says it, which
 		 *  hides it from assistive tech instead of announcing the label twice. */
@@ -19,6 +21,12 @@
 
 	const chrome = $derived(isChrome(name) ? CHROME[name] : null);
 	const brand = $derived(isChrome(name) ? null : BRAND[name]);
+
+	/**
+	 * Applied as style rather than as the `width`/`height` attributes, because an attribute cannot
+	 * hold a `var()` and a presentation attribute is the weakest thing in the cascade anyway.
+	 */
+	const dim = $derived(typeof size === 'number' ? `${size}px` : size);
 
 	// `role="img"` with no name is worse than no role at all, so the two move together.
 	const a11y = $derived(
@@ -30,8 +38,8 @@
 	<svg
 		class="chrome {klass}"
 		viewBox="0 0 24 24"
-		width={size}
-		height={size}
+		style:width={dim}
+		style:height={dim}
 		fill="none"
 		stroke="currentColor"
 		{...a11y}
@@ -43,7 +51,14 @@
 		<path class="glass" d={chrome.glass} />
 	</svg>
 {:else if brand}
-	<svg class={klass} viewBox={brand.box} width={size} height={size} fill="currentColor" {...a11y}>
+	<svg
+		class={klass}
+		viewBox={brand.box}
+		style:width={dim}
+		style:height={dim}
+		fill="currentColor"
+		{...a11y}
+	>
 		<path d={brand.d} />
 	</svg>
 {/if}

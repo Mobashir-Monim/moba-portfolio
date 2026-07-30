@@ -4,12 +4,15 @@
 	import DesktopIcon from '$lib/components/DesktopIcon.svelte';
 	import Dock from '$lib/components/Dock.svelte';
 	import Head from '$lib/components/Head.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import IconGrid from '$lib/components/IconGrid.svelte';
 	import WindowLayer from '$lib/components/WindowLayer.svelte';
-	import { APP_KIND, APPS, SETTINGS_ID } from '$lib/apps';
+	import { app, APP_KIND, APPS, SETTINGS_ID } from '$lib/apps';
 	import { about } from '$lib/content/about';
+	import { OS_NAME } from '$lib/os';
 	import { graph, PERSON as person } from '$lib/seo';
-	import { nodes, root, summary } from '$lib/tree';
-	import { windows } from '$lib/windows.svelte';
+	import { node, nodes, root, summary } from '$lib/tree';
+	import { current, windows } from '$lib/windows.svelte';
 
 	/** Desktop selection. Purely a view state, and the desktop has no sidebar to feed. */
 	let selected = $state<string | undefined>();
@@ -24,6 +27,19 @@
 	}
 
 	const aboutNode = nodes[about.slug];
+
+	/**
+	 * What the dock draws, which is one entry per open window rather than a count per kind. The
+	 * name is the window's current title, the same string its title bar carries, so the context
+	 * menu names what you would actually be looking at and not what the window was opened from.
+	 */
+	const openWindows = $derived(
+		windows.all.map((w) => ({
+			id: w.id,
+			kind: w.kind,
+			name: app(w.id)?.name ?? node(current(w))?.name ?? w.id
+		}))
+	);
 </script>
 
 <!-- The root graph is the person and the site and nothing else. Every other page carries the same
@@ -40,40 +56,52 @@
 <svelte:window {onkeydown} />
 
 <div class="shell">
-	<!--
-		The page still needs a heading, and the desktop in the 1.1 mockups carries no masthead.
-		Visually hidden resolves both: the name is the boot screen's job, and the corner block that
-		used to be here was invented rather than drawn.
-	-->
-	<h1 class="sr-only">{person}, {about.title}</h1>
-
 	<Desktop class="ground">
-		{#each root as id (id)}
-			{@const item = nodes[id]}
-			<DesktopIcon
-				name={item.name}
-				href={item.href}
-				kind={item.kind}
-				layout="row"
-				selected={selected === id}
-				open={windows.byId(id) !== undefined}
-				onopen={() => windows.open(id, item.kind)}
-				onselect={() => (selected = id)}
-			/>
-		{/each}
+		{#snippet masthead()}
+			<!--
+				The mark, and under it the heading the page owes anyway. It used to be visually hidden
+				with the icons in a column down the left edge, which on a wide screen is where nobody
+				looks: the four places to go were the entire product and half the visitors never found
+				them. Centring the pair puts both where the eye already is, and the `h1` stops being a
+				thing only a crawler reads.
+
+				A drawn mark rather than the name set large: a wordmark in the chrome face is what the
+				boot screen already is, and repeating it here made the desktop read as a second boot
+				screen. The tile is where the skins differ, and the glyph is deliberately not skinned,
+				because the OS sits above the skin.
+			-->
+			<div class="masthead">
+				<span class="mark"><Icon name="logo" label={OS_NAME} size="var(--logo-glyph)" /></span>
+				<h1>{person}, {about.title}</h1>
+			</div>
+		{/snippet}
+
+		<IconGrid>
+			{#each root as id (id)}
+				{@const item = nodes[id]}
+				<DesktopIcon
+					name={item.name}
+					href={item.href}
+					kind={item.kind}
+					selected={selected === id}
+					open={windows.byId(id) !== undefined}
+					onopen={() => windows.open(id, item.kind)}
+					onselect={() => (selected = id)}
+				/>
+			{/each}
+		</IconGrid>
 	</Desktop>
 
 	<WindowLayer />
 
 	<div class="dock-slot">
 		<Dock
-			folders={windows.counts.folder}
-			documents={windows.counts.document}
+			open={openWindows}
 			apps={APPS}
 			onlaunch={(id) => windows.open(id, APP_KIND)}
 			onsettings={() => windows.open(SETTINGS_ID, APP_KIND)}
-			onfolders={() => windows.restoreKind('folder')}
-			ondocuments={() => windows.restoreKind('document')}
+			onrestore={(id) => windows.restore(id)}
+			onrestorekind={(kind) => windows.restoreKind(kind)}
 		/>
 	</div>
 </div>
@@ -96,12 +124,65 @@
 		padding-bottom: calc(var(--dock-h) + 2rem);
 	}
 
+	.masthead {
+		--logo-glyph: 2.75rem;
+
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.875rem;
+		text-align: center;
+	}
+
+	/*
+	   The tile, which is the whole of what the skins get to say about the logo: `--r-lg` squares it
+	   off in retro and rounds it hard in glass, `--elev-1` is a hard 2px offset there and a soft
+	   blur here, and the bevel resolves to `none` in the two skins that have no bevels.
+
+	   Inverted, and that is what makes it read as a mark rather than as a letter someone set large:
+	   a solid tile with the glyph knocked out of it is what an application icon has always been.
+	   `--c-fg-1` on `--c-surface-1` is the pair table's own 4.5:1 guarantee read backwards, so it
+	   holds in both polarities, and it flips with them: a black tile in light, a white one in dark.
+
+	   No accent, in any skin. A coloured mark would be a third place retro spends a budget that
+	   stops at the title bar and the selection, and the OS sits above the skin anyway.
+	*/
+	.mark {
+		display: grid;
+		place-items: center;
+		width: calc(var(--logo-glyph) + 1.75rem);
+		height: calc(var(--logo-glyph) + 1.75rem);
+		color: var(--c-surface-1);
+		background: var(--c-fg-1);
+		border-radius: var(--r-lg);
+		box-shadow: var(--elev-1);
+	}
+
+	@media (min-width: 48rem) {
+		.masthead {
+			--logo-glyph: 3.5rem;
+		}
+	}
+
+	.masthead h1 {
+		color: var(--c-fg-2);
+		font-family: var(--ff-ui);
+		font-size: var(--fs-sm);
+		font-weight: 400;
+		letter-spacing: var(--tracking-ui);
+	}
+
+	/*
+	   Fixed to the middle and exactly as wide as it is, not a full-width strip with the dock
+	   centred inside it. The strip was a transparent band across the bottom of the screen that
+	   still swallowed every press that landed on it, so the desktop under it was dead to the
+	   pointer for the strip's whole width.
+	*/
 	.dock-slot {
 		position: fixed;
 		inset-block-end: 0.75rem;
-		inset-inline: 0;
-		display: flex;
-		justify-content: center;
-		padding-inline: 0.75rem;
+		inset-inline-start: 50%;
+		translate: -50%;
+		max-width: calc(100vw - 1.5rem);
 	}
 </style>

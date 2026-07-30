@@ -125,6 +125,15 @@
 		'busso',
 		'case-studies'
 	] as const;
+
+	/** What the dock is handed: one entry per open window, so it can group, badge, and list them. */
+	const SCENE_DOCK = [
+		{ id: 'projects', kind: 'folder', name: 'Projects' },
+		{ id: 'lightsaml', kind: 'document', name: 'lightsaml' },
+		{ id: 'busso', kind: 'document', name: 'busso' },
+		{ id: 'bout', kind: 'document', name: 'bout' },
+		{ id: 'app:terminal', kind: 'app', name: 'Terminal' }
+	] as const;
 </script>
 
 <svelte:head>
@@ -452,21 +461,22 @@
 			inversion in retro only because its radius is 0.
 		</p>
 		<p class="mb-4 text-sm text-fg-2">
-			Two layouts, one component. <code>row</code> is the desktop's list down the left edge;
-			<code>tile</code> is what every folder draws in an <code>IconGrid</code>. The markup is
-			identical and only the axis changes, so there is no second icon to keep in step.
+			One tile, both places. The desktop centres its grid under the mark and scales the tile with
+			the viewport; a folder window packs from the start and keeps the base size, since a folder
+			window is narrow whatever the display is. Same component, two declarations of one token.
 		</p>
 		<Desktop class="mb-4 rounded-md border border-line">
-			{#each DESKTOP as item (item.name)}
-				<DesktopIcon
-					name={item.name}
-					href="#desktop"
-					kind={item.kind}
-					layout="row"
-					open={item.open}
-					selected={item.selected}
-				/>
-			{/each}
+			<IconGrid>
+				{#each DESKTOP as item (item.name)}
+					<DesktopIcon
+						name={item.name}
+						href="#desktop"
+						kind={item.kind}
+						open={item.open}
+						selected={item.selected}
+					/>
+				{/each}
+			</IconGrid>
 		</Desktop>
 		<IconGrid class="rounded-md border border-line bg-surface-1 p-4">
 			{#each DESKTOP as item (item.name)}
@@ -523,9 +533,11 @@
 		</p>
 		<div class="relative h-[30rem] overflow-hidden rounded-md border border-line">
 			<Desktop class="h-full">
-				{#each SCENE_ROOT as item (item.name)}
-					<DesktopIcon name={item.name} href="#composition" kind={item.kind} layout="row" />
-				{/each}
+				<IconGrid>
+					{#each SCENE_ROOT as item (item.name)}
+						<DesktopIcon name={item.name} href="#composition" kind={item.kind} />
+					{/each}
+				</IconGrid>
 			</Desktop>
 
 			<div class="absolute top-6 left-[26%] h-[21rem] w-[70%]">
@@ -561,7 +573,7 @@
 			</div>
 
 			<div class="absolute inset-x-0 bottom-3 flex justify-center">
-				<Dock folders={1} documents={3} onsettings={() => {}} />
+				<Dock open={SCENE_DOCK} onsettings={() => {}} />
 			</div>
 		</div>
 	</section>
@@ -569,17 +581,21 @@
 	<section aria-labelledby="dock" class="mb-12">
 		<h2 id="dock" class="mb-4 text-xl font-semibold">Dock</h2>
 		<p class="mb-4 text-sm text-fg-2">
-			Apps, settings, then one group per kind of open window with its count, worded. A group at zero
-			is absent rather than empty. Apps opens the launcher, and is disabled when the roster it is
-			handed is empty, which is the second dock below.
+			Apps, settings, then one group per kind of open window: folders, documents, and apps, each a
+			glyph with its count badged on it. A group at zero is absent rather than empty. Apps opens the
+			launcher, and is disabled when the roster it is handed is empty, which is the second dock
+			below.
 		</p>
 		<p class="mb-4 text-sm text-fg-2">
-			The launcher is a native popover, so it lives in the top layer and positions itself against
-			the viewport rather than against the dock it belongs to. On the desktop that is exact, since
-			the dock is fixed to the bottom too. Here it opens above where a real dock would be.
+			Clicking a group brings the whole kind back. Right-clicking it, or pressing Shift+F10 on it,
+			opens a menu of the windows in that group so one can be picked out by name. Both the launcher
+			and that menu are native popovers, so they live in the top layer and position themselves
+			against the viewport rather than against the dock they belong to. On the desktop that is
+			exact, since the dock is fixed to the bottom too. Here they open above where a real dock would
+			be.
 		</p>
 		<div class="flex flex-wrap items-end gap-6">
-			<Dock folders={3} documents={2} apps={APPS} onlaunch={() => {}} onsettings={() => {}} />
+			<Dock open={SCENE_DOCK} apps={APPS} onlaunch={() => {}} onsettings={() => {}} />
 			<Dock onsettings={() => {}} />
 		</div>
 	</section>

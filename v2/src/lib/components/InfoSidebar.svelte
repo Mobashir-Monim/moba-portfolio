@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formatSize } from '$lib/fs';
-	import { FILE_TYPE, PERMISSIONS, type Kind } from '$lib/os';
+	import { FILE_TYPE, PERMISSIONS, type NodeKind } from '$lib/os';
 
 	let {
 		name,
@@ -11,7 +11,7 @@
 		items
 	}: {
 		name: string;
-		kind: Kind;
+		kind: NodeKind;
 		/** Bytes. Invented, like the rest of the filesystem, but formatted like a real one. */
 		size: number;
 		author: string;

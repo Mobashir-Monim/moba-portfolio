@@ -251,8 +251,8 @@
 	--bw-strong: 1px;
 
 	--chrome-h: 34px;
-	--dock-h: 56px;
-	--icon-tile: 72px;
+	--dock-base: 60px;
+	--icon-base: 76px;
 	--icon-stroke: 1.5;
 	--icon-cap: round;
 	--icon-join: round;
@@ -339,8 +339,8 @@
 
 	/* Chrome follows the type. A 22px title bar around 14px text clips the descenders. */
 	--chrome-h: 26px;
-	--dock-h: 48px;
-	--icon-tile: 72px;
+	--dock-base: 54px;
+	--icon-base: 76px;
 	--icon-stroke: 1;
 	/* Butt caps and mitred corners: a hairline that ends square and turns square. */
 	--icon-cap: butt;
@@ -417,8 +417,8 @@
 	--bw-strong: 1px;
 
 	--chrome-h: 44px;
-	--dock-h: 68px;
-	--icon-tile: 80px;
+	--dock-base: 72px;
+	--icon-base: 84px;
 	--icon-stroke: 1.75;
 	--icon-cap: round;
 	--icon-join: round;
@@ -484,6 +484,93 @@
    If a rule does land here later, it belongs in this section with a note on
    which token was tried first.
    -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   Derived metrics: the skin says how big a thing is, the viewport says how
+   much bigger.
+
+   A skin sets `--dock-base` and `--icon-base`, never the sizes themselves,
+   because a skin block and `:root` have the same specificity: whichever comes
+   last wins outright, and a skin that set `--dock-h` here would simply be
+   overwritten. The indirection is what lets one media query scale all three
+   skins while each keeps its own proportions.
+
+   `--ui-scale` is declared on the same element as the tokens that read it, so
+   the media queries below genuinely change them. Moving either to a different
+   selector silently freezes the other at 1.
+   -------------------------------------------------------------------------- */
+
+:root {
+	--ui-scale: 1;
+	--dock-h: calc(var(--dock-base) * var(--ui-scale));
+	/* The dock's glyphs, which were 20px in a 56px dock and read as decoration rather than as
+	   controls. Proportional to the dock, so a skin with a taller dock gets larger marks. */
+	--dock-icon: calc(var(--dock-base) * 0.46 * var(--ui-scale));
+	/* Inside a window the tile stays at its base size: a folder window is narrow whatever the
+	   screen is, and the desktop re-declares both of these per breakpoint. */
+	--icon-tile: var(--icon-base);
+	--icon-glyph: calc(var(--icon-base) * 0.55);
+}
+
+@media (min-width: 48rem) {
+	:root {
+		--ui-scale: 1.12;
+	}
+}
+
+@media (min-width: 90rem) {
+	:root {
+		--ui-scale: 1.25;
+	}
+}
+
+/* --------------------------------------------------------------------------
+   Scrollbars
+
+   Two mechanisms for one look. The standard properties are all Firefox has;
+   the `::-webkit-` pseudo-elements are what Safari has and what Chrome
+   prefers, and Chrome ignores them outright the moment `scrollbar-width` is
+   set. So the `@supports` gate hands each engine exactly one of the two,
+   rather than setting both and letting Chrome pick the plain one.
+
+   Every value is a token, which is the whole point: the gutter is `surface-2`
+   like every other recessed surface, the thumb takes `--r-lg` and so squares
+   itself off in retro, and the bevel is the same recipe the dock and the boot
+   thermometer use.
+   -------------------------------------------------------------------------- */
+
+@layer base {
+	@supports not selector(::-webkit-scrollbar) {
+		* {
+			scrollbar-width: thin;
+			scrollbar-color: var(--c-line-strong) var(--c-surface-2);
+		}
+	}
+
+	::-webkit-scrollbar {
+		width: 12px;
+		height: 12px;
+	}
+
+	::-webkit-scrollbar-track,
+	::-webkit-scrollbar-corner {
+		background: var(--c-surface-2);
+		box-shadow: var(--bevel-in);
+	}
+
+	::-webkit-scrollbar-thumb {
+		/* Padding-box clipping is what turns a transparent border into a gutter inset, so the
+		   thumb is narrower than the track without a second element to hold the gap. */
+		background: var(--c-line-strong);
+		background-clip: padding-box;
+		border: 3px solid transparent;
+		border-radius: var(--r-lg);
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background-color: var(--c-fg-2);
+	}
+}
 
 /* --------------------------------------------------------------------------
    Tailwind bridge. `inline` so utilities emit `var(--c-surface-1)` directly

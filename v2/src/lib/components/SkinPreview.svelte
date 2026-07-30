@@ -28,7 +28,7 @@
 		width: 100%;
 		overflow: hidden;
 		background: var(--window-bg);
-		border: var(--bw-strong) solid var(--c-line-strong);
+		border: var(--bw-strong) solid var(--c-line);
 		border-radius: var(--r-md);
 		box-shadow: var(--elev-1);
 	}

@@ -18,7 +18,14 @@
 <style>
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, var(--icon-tile));
+		/*
+		   `auto-fit`, not `auto-fill`. Both lay out the same number of items; the difference is what
+		   happens to the tracks nothing lands in. `auto-fill` keeps them, so a centred grid centres
+		   five icons across six tracks and the row sits visibly off to one side with a phantom tile
+		   of dead space at the end. `auto-fit` collapses the empty tracks to zero, which changes
+		   nothing where the grid packs from the start and is the whole fix where it centres.
+		*/
+		grid-template-columns: repeat(auto-fit, var(--icon-tile));
 		align-content: start;
 		justify-content: start;
 		gap: 0.5rem;

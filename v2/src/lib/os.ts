@@ -14,7 +14,15 @@ export const OS_NAME = 'Mnemos';
 export const OS_VERSION = '2.0';
 
 /** The two things the filesystem holds. Everything with a route is one or the other. */
-export type Kind = 'folder' | 'document';
+export type NodeKind = 'folder' | 'document';
+
+/**
+ * What a window can be of. An app is the third member: it has no node, no route, and no info
+ * sidebar, but it is its own thing on the dock rather than a document wearing a document's glyph.
+ * `NodeKind` stays the narrower type so the tree, the info sidebar, and the folder views keep
+ * being unable to hold one.
+ */
+export type Kind = NodeKind | 'app';
 
 /**
  * The invented type names the info sidebar shows. They lean on the `M` of Mnemos, which is why
@@ -23,7 +31,8 @@ export type Kind = 'folder' | 'document';
  */
 export const FILE_TYPE: Record<Kind, string> = {
 	folder: 'MDir Folder',
-	document: 'MDoc File'
+	document: 'MDoc File',
+	app: 'MApp Program'
 };
 
 /**

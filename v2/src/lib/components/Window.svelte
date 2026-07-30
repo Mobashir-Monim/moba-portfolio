@@ -152,7 +152,7 @@
 		background: var(--window-bg);
 		backdrop-filter: blur(var(--bl-chrome));
 		color: var(--c-fg-1);
-		border: var(--bw-strong) solid var(--c-line-strong);
+		border: var(--bw-strong) solid var(--c-line);
 		border-radius: var(--r-md);
 		box-shadow: var(--elev-1);
 		transition: box-shadow var(--dur-base) var(--ez-out);

@@ -37,6 +37,9 @@
 		position: absolute;
 		inset: 0;
 		overflow: hidden;
+		/* A size container, which is what lets a window that has never been dragged centre itself
+		   in `cq` units. Its own size comes from the insets above, so containment costs nothing. */
+		container-type: size;
 		/* Inert, so the desktop underneath keeps its clicks. Each frame opts itself back in. */
 		pointer-events: none;
 		/* The windows' own stacking context, so a tenth window cannot climb over the boot screen

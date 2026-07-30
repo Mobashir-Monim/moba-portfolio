@@ -4,7 +4,7 @@ import { caseStudies } from './content/case-studies';
 import { experiences } from './content/experiences';
 import { projectList } from './content/projects';
 import { resume } from './content/resume';
-import { SITE_MODIFIED, type Kind } from './os';
+import { SITE_MODIFIED, type NodeKind } from './os';
 import type { About } from './types/about';
 import type { Certification, Degree, Publication } from './types/attainment';
 import type { CaseStudy } from './types/case-study';
@@ -27,7 +27,7 @@ type Base = {
 	/** Unique across the whole tree. Doubles as the window id and as the content slug. */
 	id: string;
 	name: string;
-	kind: Kind;
+	kind: NodeKind;
 	href: string;
 	/**
 	 * Bytes, for the info sidebar. Invented, in that no file exists, but never arbitrary: it is

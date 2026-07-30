@@ -3,7 +3,14 @@
 	import { clampSize, clampToDesktop, gesture, type Bounds } from '$lib/gesture';
 	import { OWNER } from '$lib/os';
 	import { node, type Node } from '$lib/tree';
-	import { canBack, canForward, current, windows, type WindowRecord } from '$lib/windows.svelte';
+	import {
+		canBack,
+		canForward,
+		current,
+		windows,
+		WRAP,
+		type WindowRecord
+	} from '$lib/windows.svelte';
 	import { untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { scale } from 'svelte/transition';
@@ -144,6 +151,9 @@
 	const w = $derived(size?.w ?? record.w);
 	const h = $derived(size?.h ?? record.h);
 
+	/** Which step of the cascade this window sits on, while it is still where CSS put it. */
+	const n = $derived(record.seq % WRAP);
+
 	/**
 	 * The desktop the window is being moved or stretched inside. Read at pointerdown rather than
 	 * on mount, so a resized viewport is measured again: ledger #5 was exactly the opposite,
@@ -160,9 +170,14 @@
 		if ((event.target as Element).closest('button')) return;
 
 		const bounds = desktop();
-		if (!frame || !bounds) return;
+		if (!frame?.parentElement || !bounds) return;
 
-		const from = { x: record.x, y: record.y };
+		// Measured, not read off the record, because a window that has never been dragged carries
+		// no position: it is wherever the stylesheet centred it. One expression covers both cases,
+		// and the drag stays in the absolute pixels `clampToDesktop` already speaks.
+		const box = frame.getBoundingClientRect();
+		const layer = frame.parentElement.getBoundingClientRect();
+		const from = { x: box.left - layer.left, y: box.top - layer.top };
 		const width = frame.offsetWidth;
 		pos = from;
 
@@ -212,8 +227,10 @@
 		property applied is `translate3d`, never `left`/`top` (ledger #24).
 	-->
 	<!--
-		A window that has never been resized sets no `--w`, so the default below stays a CSS
-		expression against the viewport rather than a number frozen at open time.
+		A window that has never been resized sets no `--w`, and one that has never been dragged sets
+		no `--x`, so both defaults below stay CSS expressions against the desktop rather than numbers
+		frozen at open time. That is what puts a new window in the middle of the screen: `--n` is its
+		step of the cascade, so a second window opens just off the first rather than on top of it.
 	-->
 	<!--
 		`|global`, and it is load-bearing rather than decorative (2.14). A Svelte 5 transition is
@@ -226,10 +243,11 @@
 	<div
 		bind:this={frame}
 		class="frame"
-		style:--x="{x}px"
-		style:--y="{y}px"
+		style:--x={x === undefined ? null : `${x}px`}
+		style:--y={y === undefined ? null : `${y}px`}
 		style:--w={w ? `${w}px` : null}
 		style:--h={h ? `${h}px` : null}
+		style:--n={n}
 		style:z-index={z}
 		transition:scale|global={motion}
 	>
@@ -290,12 +308,28 @@
 
 <style>
 	.frame {
+		/* One step of the cascade, and how far the middle sits above the dock. */
+		--step: 28px;
+
 		position: absolute;
 		inset-block-start: 0;
 		inset-inline-start: 0;
 		width: var(--w, min(46rem, calc(100vw - 2rem)));
 		height: var(--h, min(30rem, calc(100dvh - var(--dock-h) - 4rem)));
-		transform: translate3d(var(--x), var(--y), 0);
+		/*
+		   The fallbacks centre the window in the desktop: `50cq*` is half the layer, `50%` is half
+		   this element, and the two together put the middle of one on the middle of the other
+		   whatever size either turns out to be. The layer is a size container so that resolves; the
+		   dock is discounted so the window is centred in the space a visitor can actually see.
+
+		   A dragged window sets `--x` and `--y` and the fallbacks stop applying, which is why drag
+		   measures where it starts rather than reading a number off the record.
+		*/
+		transform: translate3d(
+			var(--x, calc(50cqw - 50% + (var(--n) - 2.5) * var(--step))),
+			var(--y, calc(50cqh - 50% - var(--dock-h) / 2 + (var(--n) - 2.5) * var(--step))),
+			0
+		);
 		/* The layer itself is inert so the desktop under it stays clickable; each window opts
 		   back in. */
 		pointer-events: auto;

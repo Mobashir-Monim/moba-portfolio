@@ -1,3 +1,4 @@
+import type { ChromeName } from './icons';
 import type { Kind } from './os';
 
 /**
@@ -14,6 +15,8 @@ import type { Kind } from './os';
 export type App = {
 	id: string;
 	name: string;
+	/** Its own mark, never the document glyph. The launcher is a wall of these, so they carry it. */
+	icon: ChromeName;
 };
 
 /**
@@ -26,20 +29,20 @@ export const SYSINFO_ID = 'app:sysinfo';
 
 export const TERMINAL_ID = 'app:terminal';
 
-/** Declaration order is menu order. */
+/** Declaration order is launcher order. */
 export const APPS: readonly App[] = [
-	{ id: SETTINGS_ID, name: 'Settings' },
-	{ id: TERMINAL_ID, name: 'Terminal' },
-	{ id: SYSINFO_ID, name: 'System Info' }
+	{ id: SETTINGS_ID, name: 'Settings', icon: 'settings' },
+	{ id: TERMINAL_ID, name: 'Terminal', icon: 'terminal' },
+	{ id: SYSINFO_ID, name: 'System Info', icon: 'sysinfo' }
 ];
 
 /**
- * Apps open as documents, because the dock groups windows by `Kind` and an app is much closer to
- * a document than to a folder: it is a thing you look at, not a place you go. Giving `Kind` a
- * third member would ripple through the tree, the file-type labels, and the info sidebar to buy
- * one more heading in the dock.
+ * An app is its own kind of window. It used to open as a document so the dock had somewhere to
+ * count it, which meant Settings claimed a document glyph and a `MDoc File` type it is not; the
+ * third `Kind` member costs the tree nothing, because the tree is typed on `NodeKind` and cannot
+ * hold one.
  */
-export const APP_KIND: Kind = 'document';
+export const APP_KIND: Kind = 'app';
 
 export function app(id: string): App | undefined {
 	return APPS.find((a) => a.id === id);

@@ -1,0 +1,2462 @@
+<html>
+    <head>
+        <!-- frame-runtime -->
+        <base href="/_f/1785304287-2280/" />
+        <script>
+            window.__FRAME_PREAMBLE = {
+                capabilities: {
+                    downloads: 'downloads.BABDwU1K.js',
+                    mcp: 'mcp.hoz5jxDa.js',
+                    permissions: 'permissions.ByA9Fd8x.js',
+                    self: 'self.D3u1zjZe.js',
+                    user: 'user.Cp1-RnjB.js',
+                },
+                transforms: '_transforms.DYk1Ltlh.js',
+                comments: '_comments.DiwQajF_.js',
+                translate: '_translate.C5leZL2A.js',
+            };
+        </script>
+        <script>
+            (function () {
+                'use strict';
+                const Ee = 'modulepreload',
+                    we = function (e) {
+                        return '/' + e;
+                    },
+                    Se = {},
+                    ee = function (t, n, l) {
+                        let i = Promise.resolve();
+                        function s(f) {
+                            const c = new Event('vite:preloadError', {
+                                cancelable: !0,
+                            });
+                            if (
+                                ((c.payload = f),
+                                window.dispatchEvent(c),
+                                !c.defaultPrevented)
+                            )
+                                throw f;
+                        }
+                        return i.then((f) => {
+                            for (const c of f || [])
+                                c.status === 'rejected' && s(c.reason);
+                            return t().catch(s);
+                        });
+                    },
+                    te = ['light', 'dark', 'system'];
+                function ne(e) {
+                    if (e === null || typeof e != 'object') return !1;
+                    const t = e.__frame_init;
+                    return t !== null && typeof t == 'object';
+                }
+                function W(e) {
+                    return (
+                        e !== null &&
+                        typeof e == 'object' &&
+                        e.__frame_size_poke === !0
+                    );
+                }
+                function re(e) {
+                    if (e === null || typeof e != 'object') return !1;
+                    const t = e.__frame_theme;
+                    if (t === null || typeof t != 'object') return !1;
+                    const n = t.theme;
+                    return typeof n == 'string' && te.includes(n);
+                }
+                function se(e) {
+                    try {
+                        typeof reportError == 'function'
+                            ? reportError(e)
+                            : setTimeout(() => {
+                                  throw e;
+                              }, 0);
+                    } catch {}
+                }
+                const oe = Object.freeze(
+                    Object.assign(Object.create(null), {
+                        user: Object.freeze(
+                            Object.assign(Object.create(null), {
+                                id: null,
+                                isOwner: !1,
+                                canEdit: !1,
+                                name: null,
+                                avatarUrl: null,
+                                email: null,
+                            }),
+                        ),
+                    }),
+                );
+                function Y(e) {
+                    if (
+                        window === top ||
+                        (e.type === 'auxclick' && e.button !== 1)
+                    )
+                        return;
+                    const t = e.composedPath ? e.composedPath() : [e.target];
+                    let n = null;
+                    for (let f = 0; f < t.length; f++) {
+                        const c = t[f];
+                        if (c && c.matches && c.matches('a[href],area[href]')) {
+                            n = c;
+                            break;
+                        }
+                    }
+                    if (
+                        (!n &&
+                            e.target &&
+                            e.target.closest &&
+                            (n = e.target.closest('a[href],area[href]')),
+                        !n)
+                    )
+                        return;
+                    const l = n.getAttribute('href');
+                    if (!l) return;
+                    let i, s;
+                    try {
+                        ((i = new URL(l, document.baseURI)),
+                            (s = new URL(document.baseURI).origin));
+                    } catch {
+                        return;
+                    }
+                    (i.protocol === 'http:' || i.protocol === 'https:') &&
+                        i.origin !== s &&
+                        (e.preventDefault(),
+                        parent.postMessage(
+                            { __frame_nav: !0, url: i.href },
+                            '*',
+                        ));
+                }
+                const K = {};
+                function D(e) {
+                    if (window === top) return;
+                    const t = Date.now();
+                    t - (K[e] || 0) < 500 ||
+                        ((K[e] = t),
+                        parent.postMessage(
+                            { __frame_engaged: !0, kind: e },
+                            '*',
+                        ));
+                }
+                const ie = 2e3,
+                    x = [
+                        'wheel',
+                        'touchstart',
+                        'touchmove',
+                        'keydown',
+                        'pointerdown',
+                    ];
+                let J = 0;
+                function ae(e) {
+                    e.isTrusted && (J = Date.now());
+                }
+                function ce() {
+                    (addEventListener('click', Y, !0),
+                        addEventListener('auxclick', Y, !0));
+                }
+                function le() {
+                    for (let e = 0; e < x.length; e++)
+                        addEventListener(x[e], ae, {
+                            capture: !0,
+                            passive: !0,
+                        });
+                    (addEventListener(
+                        'scroll',
+                        (e) => {
+                            e.isTrusted && Date.now() - J < ie && D('scroll');
+                        },
+                        { capture: !0, passive: !0 },
+                    ),
+                        addEventListener(
+                            'pointermove',
+                            (e) => {
+                                e.isTrusted && D('pointer');
+                            },
+                            { capture: !0, passive: !0 },
+                        ),
+                        addEventListener(
+                            'click',
+                            (e) => {
+                                e.isTrusted && D('click');
+                            },
+                            { capture: !0, passive: !0 },
+                        ));
+                }
+                const I = '__frame_scroll',
+                    ue = 150,
+                    fe = 310,
+                    de = 160,
+                    me = 3e4;
+                function pe() {
+                    let e = 0,
+                        t = !1,
+                        n = !1,
+                        l = !1,
+                        i = 0;
+                    const s = (a) => {
+                            try {
+                                sessionStorage.setItem(
+                                    I,
+                                    JSON.stringify({ y: a }),
+                                );
+                            } catch {}
+                        },
+                        f = () => {
+                            if (t) {
+                                t = !1;
+                                return;
+                            }
+                            ((n = !0),
+                                clearTimeout(e),
+                                (e = setTimeout(() => s(scrollY), ue)));
+                        };
+                    try {
+                        (addEventListener('scroll', f, { passive: !0 }),
+                            addEventListener('pagehide', () => {
+                                (clearTimeout(e), s(scrollY));
+                            }));
+                    } catch {}
+                    const c = () => {
+                        let a;
+                        try {
+                            a = sessionStorage.getItem(I);
+                        } catch {
+                            return null;
+                        }
+                        if (a === null) return null;
+                        let _;
+                        try {
+                            _ = JSON.parse(a);
+                        } catch {
+                            _ = null;
+                        }
+                        const m = _?.y;
+                        if (
+                            !(
+                                typeof m == 'number' &&
+                                Number.isFinite(m) &&
+                                m >= 0
+                            )
+                        ) {
+                            try {
+                                sessionStorage.removeItem(I);
+                            } catch {}
+                            return null;
+                        }
+                        return m;
+                    };
+                    let g = !1;
+                    const p = (a) => {
+                            try {
+                                const _ = scrollY;
+                                (scrollTo({
+                                    top: a,
+                                    left: 0,
+                                    behavior: 'instant',
+                                }),
+                                    (i = a),
+                                    (l = !0),
+                                    s(a));
+                                const m = scrollY;
+                                (m !== _ && (t = !0),
+                                    m !== a &&
+                                        !g &&
+                                        ((g = !0),
+                                        addEventListener(
+                                            'load',
+                                            () => {
+                                                try {
+                                                    if (scrollY === m) {
+                                                        const y = c();
+                                                        p(y !== null ? y : i);
+                                                    }
+                                                } catch {}
+                                            },
+                                            { once: !0 },
+                                        )));
+                            } catch {}
+                        },
+                        o = () => {
+                            try {
+                                return !!location.hash;
+                            } catch {
+                                return !0;
+                            }
+                        };
+                    let u = !1;
+                    const d = () => {
+                        try {
+                            if (u || innerWidth > fe || innerHeight > de)
+                                return;
+                            u = !0;
+                            const a = Date.now(),
+                                _ = () => {
+                                    try {
+                                        removeEventListener('resize', _);
+                                    } catch {}
+                                    if (Date.now() - a > me || n || o()) return;
+                                    const m = c();
+                                    p(m !== null ? m : i);
+                                };
+                            addEventListener('resize', _);
+                        } catch {}
+                    };
+                    let h = !1,
+                        b = !1;
+                    return {
+                        restore() {
+                            if (h || ((h = !0), o())) return;
+                            const a = c();
+                            a !== null && (p(a), d());
+                        },
+                        promoted() {
+                            if (b || ((b = !0), o())) return;
+                            const a = c();
+                            a !== null ? (p(a), d()) : l && p(i);
+                        },
+                    };
+                }
+                function he(e, t, n) {
+                    const l = [...t.values()].filter((i) =>
+                        i.targets.some((s) => s.startsWith(e + '.')),
+                    );
+                    return {
+                        wrap(i, s) {
+                            const f = `${e}.${i}`,
+                                c = l.filter((g) => g.targets.includes(f));
+                            return c.length === 0
+                                ? (...g) => {
+                                      try {
+                                          return s(...g);
+                                      } catch (p) {
+                                          return Promise.reject(p);
+                                      }
+                                  }
+                                : (...g) => {
+                                      let p = g;
+                                      for (const u of c) {
+                                          const d = u.module.parameters;
+                                          if (d)
+                                              try {
+                                                  p = d(p);
+                                              } catch {
+                                                  return Promise.reject({
+                                                      code: 'transform_error',
+                                                      id: u.id,
+                                                      scope: e,
+                                                      message:
+                                                          'parameters transform failed',
+                                                  });
+                                              }
+                                      }
+                                      let o;
+                                      try {
+                                          o = s(...p);
+                                      } catch (u) {
+                                          o = Promise.reject(u);
+                                      }
+                                      return o.then(
+                                          (u) => {
+                                              for (
+                                                  let d = c.length - 1;
+                                                  d >= 0;
+                                                  d--
+                                              ) {
+                                                  const h = c[d],
+                                                      b = h.module.returns;
+                                                  if (b)
+                                                      try {
+                                                          u = b(u);
+                                                      } catch {
+                                                          return (
+                                                              n({
+                                                                  id: h.id,
+                                                                  scope: e,
+                                                                  leg: 'returns',
+                                                              }),
+                                                              u
+                                                          );
+                                                      }
+                                              }
+                                              return u;
+                                          },
+                                          (u) => {
+                                              for (
+                                                  let d = c.length - 1;
+                                                  d >= 0;
+                                                  d--
+                                              ) {
+                                                  const h = c[d],
+                                                      b = h.module.throws;
+                                                  if (b)
+                                                      try {
+                                                          u = b(u);
+                                                      } catch {
+                                                          return (
+                                                              n({
+                                                                  id: h.id,
+                                                                  scope: e,
+                                                                  leg: 'throws',
+                                                              }),
+                                                              Promise.reject(u)
+                                                          );
+                                                      }
+                                              }
+                                              return Promise.reject(u);
+                                          },
+                                      );
+                                  };
+                        },
+                    };
+                }
+                function ge(e, t, n, l = () => {}) {
+                    const i = new Set(e.changes ?? []),
+                        s = new Map();
+                    for (const f of i) {
+                        const c = t[f];
+                        c && s.set(f, c);
+                    }
+                    return {
+                        contract: e.contract,
+                        changes: i,
+                        flags: new Set(e.flags ?? []),
+                        capabilities: e.capabilities ?? {},
+                        capBudgets: e.capBudgets ?? {},
+                        transforms: s,
+                        shellOrigin: n.shellOrigin,
+                        mount: n.mount,
+                        pipe: (f) => he(f, s, l),
+                    };
+                }
+                (function () {
+                    const e = Object.defineProperty,
+                        t = globalThis,
+                        n = [
+                            'RTCPeerConnection',
+                            'webkitRTCPeerConnection',
+                            'RTCDataChannel',
+                            'RTCIceCandidate',
+                            'RTCSessionDescription',
+                            'RTCRtpSender',
+                            'RTCRtpReceiver',
+                        ];
+                    let l = 0;
+                    for (let i = 0; i < n.length; i++) {
+                        const s = n[i];
+                        try {
+                            e(t, s, {
+                                value: void 0,
+                                writable: !1,
+                                configurable: !1,
+                            });
+                        } catch {
+                            try {
+                                delete t[s];
+                            } catch {}
+                            try {
+                                e(t, s, {
+                                    value: void 0,
+                                    writable: !1,
+                                    configurable: !0,
+                                });
+                            } catch {}
+                        }
+                        typeof t[s] == 'function' && l++;
+                    }
+                    if (l && window !== top)
+                        try {
+                            parent.postMessage(
+                                { __frame_rtc_lockdown_failed: l },
+                                '*',
+                            );
+                        } catch {}
+                })();
+                const _e = 1e4,
+                    ye = Object.freeze([
+                        ...(window.__FRAME_PREAMBLE?.origins ?? [
+                            'https://claude.ai',
+                            'https://preview.claude.ai',
+                        ]),
+                    ]);
+                function G(e) {
+                    for (const t of ye)
+                        if (t.endsWith(':*'))
+                            try {
+                                const n = new URL(e);
+                                if (`${n.protocol}//${n.hostname}:*` === t)
+                                    return !0;
+                            } catch {}
+                        else if (e === t) return !0;
+                    return !1;
+                }
+                const R = Object.freeze({
+                        ...window.__FRAME_PREAMBLE?.capabilities,
+                    }),
+                    U = window.__FRAME_PREAMBLE?.transforms,
+                    z = window.__FRAME_PREAMBLE?.comments,
+                    $ = window.__FRAME_PREAMBLE?.translate,
+                    T = /^[\w.-]+\.js$/,
+                    be = /^[a-z][a-z0-9_-]{0,63}$/;
+                let V = null,
+                    j = null;
+                function q(e, t, n) {
+                    try {
+                        Object.defineProperty(e, t, {
+                            value: n,
+                            writable: !1,
+                            configurable: !1,
+                            enumerable: !0,
+                        });
+                    } catch {
+                        try {
+                            Object.defineProperty(e, t, {
+                                value: n,
+                                writable: !1,
+                                configurable: !0,
+                                enumerable: !0,
+                            });
+                        } catch {}
+                    }
+                }
+                let B = !1;
+                function X(e) {
+                    const t = document.documentElement;
+                    e === 'light' || e === 'dark'
+                        ? ((t.dataset.theme = e),
+                          (t.style.colorScheme = e),
+                          (B = !0))
+                        : B &&
+                          (delete t.dataset.theme,
+                          (t.style.colorScheme = ''),
+                          (B = !1));
+                }
+                const A = Object.assign(Object.create(null), {
+                        mcp: Object.assign(Object.create(null), {
+                            watchTool: { handlerArg: 3 },
+                        }),
+                    }),
+                    M = new Map();
+                function Q(e, t) {
+                    const n = M.get(e);
+                    if (!n) return;
+                    const l = Object.assign(Object.create(null), t);
+                    (Object.assign(n.impl, l),
+                        (n.impl.__settled = () =>
+                            Promise.reject({
+                                code: 'capability_removed',
+                                message: `${e}: method not in this runtime`,
+                            })));
+                    const i = n.queue;
+                    n.queue = [];
+                    for (const s of i) {
+                        const f = l[s.method];
+                        if (f)
+                            if (A[e]?.[s.method])
+                                try {
+                                    s.resolve(f(...s.args));
+                                } catch {
+                                    k(s, A[e][s.method].handlerArg, {
+                                        code: 'transform_error',
+                                        message: `${e}.${s.method} rejected its arguments`,
+                                    });
+                                }
+                            else f(...s.args).then(s.resolve, s.reject);
+                        else {
+                            const c = {
+                                    code: 'capability_removed',
+                                    message: `${e}.${s.method} is not in this runtime`,
+                                },
+                                g = A[e]?.[s.method];
+                            if (g) {
+                                k(s, g.handlerArg, c);
+                                continue;
+                            }
+                            s.reject(c);
+                        }
+                    }
+                }
+                function ve(e, t) {
+                    const n = M.get(e);
+                    if (!n) return;
+                    n.impl.__settled = () => Promise.reject(t);
+                    const l = n.queue;
+                    n.queue = [];
+                    for (const i of l) {
+                        const s = A[e]?.[i.method];
+                        if (s) {
+                            k(i, s.handlerArg, t);
+                            continue;
+                        }
+                        i.reject(t);
+                    }
+                }
+                function N(e, t) {
+                    const n = oe[e];
+                    if (!n) {
+                        ve(e, t);
+                        return;
+                    }
+                    Q(
+                        e,
+                        Object.fromEntries(
+                            Object.entries(n).map(([l, i]) => [
+                                l,
+                                () => Promise.resolve(i),
+                            ]),
+                        ),
+                    );
+                }
+                function k(e, t, n) {
+                    if (e.syncState?.dead) return;
+                    const l = e.args[t];
+                    typeof l == 'function' &&
+                        queueMicrotask(() => {
+                            if (!e.syncState?.dead)
+                                try {
+                                    l({ type: 'error', error: n });
+                                } catch (i) {
+                                    se(i);
+                                }
+                        });
+                }
+                const F = Object.getOwnPropertyDescriptor(window, 'claude');
+                if (window !== top && !(F && F.writable === !1)) {
+                    (ce(), le());
+                    let e = null;
+                    try {
+                        e = pe();
+                    } catch {}
+                    const t = F?.value ?? {};
+                    q(window, 'claude', t);
+                    const n = (o) => {
+                        const u = { impl: Object.create(null), queue: [] };
+                        M.set(o, u);
+                        const d = u.impl,
+                            h = new Proxy(d, {
+                                get: (b, a) => {
+                                    if (
+                                        typeof a != 'string' ||
+                                        a === 'then' ||
+                                        a === 'toJSON' ||
+                                        a === 'valueOf'
+                                    )
+                                        return;
+                                    if (a === 'toString')
+                                        return Object.prototype.toString;
+                                    const _ = A[o]?.[a];
+                                    return _
+                                        ? (...m) => {
+                                              if (
+                                                  typeof m[_.handlerArg] !=
+                                                  'function'
+                                              )
+                                                  throw new TypeError(
+                                                      `${o}.${a} requires a handler function`,
+                                                  );
+                                              const y = d[a];
+                                              if (y) return y(...m);
+                                              if (d.__settled) {
+                                                  const v = { dead: !1 },
+                                                      P = {
+                                                          args: [...m],
+                                                          syncState: v,
+                                                      };
+                                                  return (
+                                                      d
+                                                          .__settled()
+                                                          .catch((C) =>
+                                                              k(
+                                                                  P,
+                                                                  _.handlerArg,
+                                                                  C,
+                                                              ),
+                                                          ),
+                                                      () => {
+                                                          v.dead = !0;
+                                                      }
+                                                  );
+                                              }
+                                              let E = null;
+                                              const S = { dead: !1 };
+                                              return (
+                                                  u.queue.push({
+                                                      method: a,
+                                                      args: m,
+                                                      resolve: (v) => {
+                                                          ((E =
+                                                              typeof v ==
+                                                              'function'
+                                                                  ? v
+                                                                  : null),
+                                                              S.dead && E?.());
+                                                      },
+                                                      reject: () => {},
+                                                      syncState: S,
+                                                  }),
+                                                  () => {
+                                                      ((S.dead = !0), E?.());
+                                                  }
+                                              );
+                                          }
+                                        : (...m) => {
+                                              const y = d[a] ?? d.__settled;
+                                              return y
+                                                  ? y(...m)
+                                                  : new Promise((E, S) => {
+                                                        u.queue.push({
+                                                            method: a,
+                                                            args: m,
+                                                            resolve: E,
+                                                            reject: S,
+                                                        });
+                                                    });
+                                          };
+                                },
+                                set: () => !1,
+                            });
+                        q(t, o, h);
+                    };
+                    for (const o of Object.keys(R)) {
+                        if (t[o] !== void 0) {
+                            q(t, o, t[o]);
+                            continue;
+                        }
+                        n(o);
+                    }
+                    let l = null,
+                        i = null,
+                        s = 0;
+                    const f = (o) => {
+                        o.source !== parent ||
+                            !G(o.origin) ||
+                            (ne(o.data) &&
+                                ((l = o.data.__frame_init),
+                                (j = o.origin),
+                                removeEventListener('message', f),
+                                clearTimeout(s),
+                                i?.()));
+                    };
+                    (addEventListener('message', f),
+                        parent.postMessage({ __frame_connect: !0 }, '*'));
+                    const c = new Promise((o) => {
+                            ((i = o),
+                                (s = setTimeout(() => {
+                                    (removeEventListener('message', f), o());
+                                }, _e)));
+                        }),
+                        g =
+                            document.readyState === 'loading'
+                                ? new Promise((o) =>
+                                      document.addEventListener(
+                                          'DOMContentLoaded',
+                                          () => o(),
+                                          { once: !0 },
+                                      ),
+                                  )
+                                : Promise.resolve();
+                    g.then(() => {
+                        try {
+                            e?.restore();
+                        } catch {}
+                    });
+                    const p = (o) => {
+                        if (
+                            !(o.source !== parent || !G(o.origin)) &&
+                            W(o.data)
+                        ) {
+                            removeEventListener('message', p);
+                            try {
+                                e?.promoted();
+                            } catch {}
+                        }
+                    };
+                    (addEventListener('message', p),
+                        c.then(async () => {
+                            if (!l || !j) {
+                                for (const r of M.keys())
+                                    N(r, {
+                                        code: 'not_granted',
+                                        message:
+                                            'frame initialization did not arrive - capability unavailable',
+                                    });
+                                return;
+                            }
+                            X(l.theme);
+                            const o = j;
+                            let u = !1,
+                                d = !1;
+                            addEventListener('message', (r) => {
+                                if (r.source !== parent || r.origin !== o)
+                                    return;
+                                re(r.data) && X(r.data.__frame_theme.theme);
+                                const w = r.data?.__fc_mode;
+                                w &&
+                                    typeof w == 'object' &&
+                                    !u &&
+                                    z &&
+                                    T.test(z) &&
+                                    ((u = !0),
+                                    h(z)
+                                        .then((H) =>
+                                            H.install?.(o, w.on === !0),
+                                        )
+                                        .catch(() => {}));
+                                const O = r.data?.__ft_cmd;
+                                O &&
+                                    typeof O == 'object' &&
+                                    !d &&
+                                    $ &&
+                                    T.test($) &&
+                                    ((d = !0),
+                                    h($)
+                                        .then((H) => H.install?.(o, O))
+                                        .catch(() => {}));
+                            });
+                            const h = (r) =>
+                                    ee(() => import('/_runtime/' + r), void 0),
+                                b = Object.keys(l.capabilities ?? {});
+                            for (const r of b)
+                                Object.hasOwn(R, r) ||
+                                    (be.test(r) &&
+                                        t[r] === void 0 &&
+                                        (n(r),
+                                        N(r, {
+                                            code: 'capability_disabled',
+                                            message:
+                                                'capability not in this runtime generation',
+                                        })));
+                            const a = b
+                                    .filter((r) => Object.hasOwn(R, r))
+                                    .map((r) => [r, R[r]])
+                                    .filter(
+                                        (r) =>
+                                            typeof r[1] == 'string' &&
+                                            T.test(r[1]),
+                                    ),
+                                [_, ...m] = await Promise.allSettled([
+                                    U && T.test(U) ? h(U) : Promise.resolve({}),
+                                    ...a.map(([, r]) => h(r)),
+                                ]),
+                                y = j;
+                            V = ge(
+                                l,
+                                (_.status === 'fulfilled' &&
+                                    _.value?.TRANSFORMS) ||
+                                    {},
+                                { shellOrigin: y, mount: Q },
+                                (r) =>
+                                    parent.postMessage(
+                                        { __frame_cap_telemetry: r },
+                                        y,
+                                    ),
+                            );
+                            const E = (r) =>
+                                    parent.postMessage(
+                                        {
+                                            __frame_cap_telemetry: {
+                                                kind: 'cap-load-error',
+                                                cap: r,
+                                            },
+                                        },
+                                        y,
+                                    ),
+                                S = V;
+                            m.forEach((r, w) => {
+                                const O = a[w][0];
+                                if (r.status !== 'fulfilled') {
+                                    E(O);
+                                    return;
+                                }
+                                try {
+                                    r.value?.install?.(S);
+                                } catch {
+                                    E(O);
+                                }
+                            });
+                            for (const [r, w] of M)
+                                if (
+                                    !(
+                                        w.queue.length === 0 &&
+                                        Object.keys(w.impl).length > 0
+                                    )
+                                ) {
+                                    if (b.includes(r)) {
+                                        N(r, {
+                                            code: 'capability_disabled',
+                                            message:
+                                                'capability not available in this session',
+                                        });
+                                        continue;
+                                    }
+                                    N(r, {
+                                        code: 'not_granted',
+                                        message:
+                                            'capability not available in this session',
+                                    });
+                                }
+                            (await g,
+                                parent.postMessage({ __frame_ready: !0 }, j));
+                            let v = -1,
+                                P = 0;
+                            const C = () => {
+                                    P = 0;
+                                    const r = Math.max(
+                                        document.documentElement.scrollHeight,
+                                        document.body
+                                            ? document.body.scrollHeight
+                                            : 0,
+                                    );
+                                    r !== v &&
+                                        ((v = r),
+                                        parent.postMessage(
+                                            { __frame_size: !0, h: r },
+                                            y,
+                                        ));
+                                },
+                                L = () => {
+                                    P || (P = setTimeout(C, 200));
+                                },
+                                Z = new ResizeObserver(L);
+                            (Z.observe(document.documentElement),
+                                document.body && Z.observe(document.body),
+                                document.addEventListener('load', L, !0),
+                                document.fonts?.ready.then(L, () => {}),
+                                addEventListener('beforeprint', () => {
+                                    ((v = -1), C());
+                                }),
+                                L(),
+                                addEventListener('message', (r) => {
+                                    if (
+                                        !(
+                                            r.source !== parent ||
+                                            r.origin !== y
+                                        ) &&
+                                        W(r.data)
+                                    ) {
+                                        try {
+                                            e?.promoted();
+                                        } catch {}
+                                        ((v = -1), L());
+                                    }
+                                }));
+                        }));
+                }
+            })();
+        </script>
+        <!-- /frame-runtime -->
+        <meta charset="utf8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <style>
+            :root {
+                color-scheme: light;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                font:
+                    14px -apple-system,
+                    BlinkMacSystemFont,
+                    sans-serif;
+                background: #faf9f5;
+                color: #141413;
+            }
+            img {
+                max-width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <title>Portfolio OS: three aesthetic directions</title>
+
+        <style>
+            /* ---------------------------------------------------------------
+	   Shell tokens. The shell carries no accent colour on purpose:
+	   the only colour on this page belongs to the three directions,
+	   so nothing here biases the comparison.
+	   --------------------------------------------------------------- */
+            :root {
+                --paper: #f6f6f4;
+                --ink: #141518;
+                --muted: #66676b;
+                --line: #e2e2de;
+                --well: #edede9;
+
+                --sans:
+                    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+                    sans-serif;
+                --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+                --mono:
+                    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+                    monospace;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --paper: #111214;
+                    --ink: #e7e7e4;
+                    --muted: #8a8b8f;
+                    --line: #26272b;
+                    --well: #191a1d;
+                }
+            }
+
+            :root[data-theme='dark'] {
+                --paper: #111214;
+                --ink: #e7e7e4;
+                --muted: #8a8b8f;
+                --line: #26272b;
+                --well: #191a1d;
+            }
+
+            :root[data-theme='light'] {
+                --paper: #f6f6f4;
+                --ink: #141518;
+                --muted: #66676b;
+                --line: #e2e2de;
+                --well: #edede9;
+            }
+
+            body {
+                margin: 0;
+                background: var(--paper);
+                color: var(--ink);
+                font-family: var(--serif);
+                font-size: 17px;
+                line-height: 1.65;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            .wrap {
+                max-width: 1120px;
+                margin: 0 auto;
+                padding: 0 24px 96px;
+            }
+
+            /* --- shell typography --- */
+            .eyebrow {
+                font-family: var(--mono);
+                font-size: 11px;
+                font-weight: 500;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            h1 {
+                font-family: var(--sans);
+                font-size: clamp(30px, 5vw, 46px);
+                font-weight: 700;
+                letter-spacing: -0.025em;
+                line-height: 1.08;
+                text-wrap: balance;
+                margin: 14px 0 0;
+            }
+
+            h2 {
+                font-family: var(--sans);
+                font-size: clamp(23px, 3.2vw, 30px);
+                font-weight: 700;
+                letter-spacing: -0.02em;
+                line-height: 1.15;
+                text-wrap: balance;
+                margin: 0;
+            }
+
+            h3 {
+                font-family: var(--mono);
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--muted);
+                margin: 0 0 8px;
+            }
+
+            p {
+                margin: 0;
+                max-width: 66ch;
+            }
+
+            .lede {
+                font-size: 19px;
+                color: var(--muted);
+                margin-top: 18px;
+            }
+
+            header.page {
+                padding: 72px 0 40px;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .facts {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px 28px;
+                margin-top: 28px;
+                font-family: var(--mono);
+                font-size: 12px;
+                color: var(--muted);
+            }
+            .facts span::before {
+                content: '';
+                display: inline-block;
+                width: 5px;
+                height: 5px;
+                margin-right: 9px;
+                vertical-align: 2px;
+                background: currentColor;
+            }
+
+            /* --- section scaffolding --- */
+            section.dir {
+                padding: 64px 0;
+                border-bottom: 1px solid var(--line);
+                display: flex;
+                flex-direction: column;
+                gap: 32px;
+            }
+
+            .dir-head {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .dir-rank {
+                font-family: var(--mono);
+                font-size: 11px;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+            .dir-thesis {
+                font-size: 19px;
+                color: var(--muted);
+            }
+
+            figure {
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            figcaption {
+                font-family: var(--mono);
+                font-size: 11px;
+                letter-spacing: 0.06em;
+                color: var(--muted);
+            }
+
+            .scroller {
+                overflow-x: auto;
+                border: 1px solid var(--line);
+                background: var(--well);
+            }
+
+            .notes {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 32px;
+                padding-top: 8px;
+            }
+            .notes ul {
+                margin: 0;
+                padding-left: 18px;
+                display: flex;
+                flex-direction: column;
+                gap: 9px;
+            }
+            .notes li {
+                font-size: 16px;
+                line-height: 1.55;
+            }
+
+            footer.page {
+                padding: 64px 0 0;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            /* ===============================================================
+	   MOCKUPS
+	   The DOM is identical in all three directions. Every difference
+	   you see below is CSS, which is the point: it isolates the
+	   treatment from the content.
+	   =============================================================== */
+
+            .canvas {
+                min-width: 880px;
+                height: 452px;
+                position: relative;
+                display: block;
+            }
+
+            .desk {
+                position: absolute;
+                inset: 0;
+                padding: 26px 30px;
+            }
+
+            .desk-icons {
+                display: flex;
+                gap: 30px;
+                width: 190px;
+                flex-direction: column;
+            }
+            .dicon {
+                display: flex;
+                align-items: center;
+                gap: 11px;
+            }
+            .dicon svg {
+                width: 26px;
+                height: 26px;
+                flex: none;
+            }
+
+            .win {
+                position: absolute;
+                left: 226px;
+                top: 40px;
+                width: 604px;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .win-bar {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 0 12px;
+                height: 34px;
+                flex: none;
+            }
+            .win-ctl {
+                display: flex;
+                gap: 7px;
+                flex: none;
+            }
+            .win-ctl i {
+                display: block;
+                width: 12px;
+                height: 12px;
+            }
+            .win-title {
+                flex: 1;
+            }
+            .win-nav {
+                display: flex;
+                gap: 6px;
+                flex: none;
+            }
+            .win-nav i {
+                display: grid;
+                place-items: center;
+                width: 20px;
+                height: 18px;
+                font-style: normal;
+                font-size: 12px;
+                line-height: 1;
+            }
+
+            .win-path {
+                height: 26px;
+                display: flex;
+                align-items: center;
+                padding: 0 12px;
+                flex: none;
+            }
+
+            .win-body {
+                display: flex;
+                height: 246px;
+            }
+            .grid {
+                flex: 1;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                align-content: start;
+                gap: 6px;
+                padding: 14px;
+            }
+            .item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 7px;
+                padding: 10px 4px;
+                text-align: center;
+            }
+            .item svg {
+                width: 34px;
+                height: 34px;
+            }
+            .item span {
+                display: block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .side {
+                width: 194px;
+                flex: none;
+                padding: 14px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .side dl {
+                margin: 0;
+                display: grid;
+                grid-template-columns: auto 1fr;
+                gap: 5px 12px;
+            }
+            .side dt,
+            .side dd {
+                margin: 0;
+            }
+            .side dd {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .dock {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 7px 10px;
+            }
+            .dock b {
+                display: grid;
+                place-items: center;
+                width: 30px;
+                height: 30px;
+                font-weight: 400;
+            }
+            .dock em {
+                font-style: normal;
+                padding: 0 9px;
+                height: 30px;
+                display: grid;
+                place-items: center;
+            }
+            .dock hr {
+                width: 1px;
+                height: 20px;
+                border: 0;
+                margin: 0 2px;
+            }
+
+            /* boot strip */
+            .boot {
+                min-width: 880px;
+                height: 128px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 14px;
+            }
+            .boot-logo {
+                display: flex;
+                gap: 5px;
+                height: 30px;
+            }
+            .boot-logo i {
+                display: block;
+                width: 7px;
+                height: 30px;
+            }
+            .boot-logo i:last-child {
+                transform: rotate(-25deg);
+            }
+            .boot-track {
+                width: 320px;
+                height: 6px;
+                overflow: hidden;
+            }
+            .boot-fill {
+                display: block;
+                height: 100%;
+                width: 62%;
+            }
+
+            /* ---------------------------------------------------------------
+	   A. Modern base, technical detailing
+	   --------------------------------------------------------------- */
+            .dir-a .canvas,
+            .dir-a .boot {
+                background:
+                    linear-gradient(
+                            rgba(255, 255, 255, 0.022) 1px,
+                            transparent 1px
+                        )
+                        0 0 / 32px 32px,
+                    linear-gradient(
+                            90deg,
+                            rgba(255, 255, 255, 0.022) 1px,
+                            transparent 1px
+                        )
+                        0 0 / 32px 32px,
+                    radial-gradient(
+                        120% 110% at 50% -10%,
+                        #182029 0%,
+                        #0b0e12 68%
+                    );
+                color: #cdd3d9;
+                font-family: var(--sans);
+                font-size: 13px;
+            }
+            .dir-a .dicon,
+            .dir-a .item span,
+            .dir-a .win-title,
+            .dir-a .win-path,
+            .dir-a .side,
+            .dir-a .dock,
+            .dir-a .boot {
+                font-family: var(--mono);
+            }
+            .dir-a .dicon {
+                font-size: 12px;
+                letter-spacing: 0.04em;
+            }
+            .dir-a .dicon svg {
+                stroke: #8f9aa5;
+                fill: none;
+                stroke-width: 1.5;
+            }
+
+            .dir-a .win {
+                background: rgba(19, 24, 31, 0.86);
+                backdrop-filter: blur(18px);
+                border: 1px solid rgba(255, 255, 255, 0.09);
+                border-radius: 10px;
+                box-shadow:
+                    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+                    0 26px 60px -20px rgba(0, 0, 0, 0.85);
+            }
+            .dir-a .win-bar {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+                background: rgba(255, 255, 255, 0.022);
+            }
+            .dir-a .win-ctl i {
+                width: 10px;
+                height: 10px;
+                border: 1px solid #5c666f;
+                border-radius: 2px;
+            }
+            .dir-a .win-ctl i:last-child {
+                border-color: #7e6a52;
+            }
+            .dir-a .win-title {
+                font-size: 11px;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+                color: #e4e9ee;
+            }
+            .dir-a .win-nav i {
+                border: 1px solid rgba(255, 255, 255, 0.11);
+                border-radius: 3px;
+                color: #97a2ad;
+            }
+            .dir-a .win-path {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+                font-size: 11px;
+                letter-spacing: 0.05em;
+                color: #7f8a95;
+            }
+            .dir-a .item svg {
+                stroke: #96a2ad;
+                fill: none;
+                stroke-width: 1.5;
+            }
+            .dir-a .item span {
+                font-size: 11px;
+                letter-spacing: 0.03em;
+                color: #b9c2ca;
+            }
+            .dir-a .item.sel {
+                background: rgba(63, 191, 168, 0.11);
+                border: 1px solid rgba(63, 191, 168, 0.4);
+                border-radius: 6px;
+                padding: 9px 3px;
+            }
+            .dir-a .item.sel svg {
+                stroke: #3fbfa8;
+            }
+            .dir-a .item.sel span {
+                color: #d9f2ec;
+            }
+
+            .dir-a .side {
+                border-left: 1px solid rgba(255, 255, 255, 0.07);
+                background: rgba(0, 0, 0, 0.2);
+                font-size: 11px;
+            }
+            .dir-a .side h4 {
+                margin: 0;
+                font-size: 11px;
+                font-weight: 500;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+                color: #3fbfa8;
+            }
+            .dir-a .side dt {
+                color: #6d7883;
+            }
+            .dir-a .side dd {
+                color: #c3ccd4;
+            }
+
+            .dir-a .dock {
+                background: rgba(19, 24, 31, 0.8);
+                backdrop-filter: blur(18px);
+                border: 1px solid rgba(255, 255, 255, 0.09);
+                border-radius: 10px;
+                font-size: 11px;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: #97a2ad;
+            }
+            .dir-a .dock b {
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 6px;
+            }
+            .dir-a .dock b svg {
+                width: 15px;
+                height: 15px;
+                stroke: #b6c0c9;
+                fill: none;
+                stroke-width: 1.5;
+            }
+            .dir-a .dock hr {
+                background: rgba(255, 255, 255, 0.12);
+            }
+
+            .dir-a .boot {
+                font-size: 11px;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+                color: #7f8a95;
+            }
+            .dir-a .boot-logo i {
+                background: #cdd3d9;
+            }
+            .dir-a .boot-track {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 99px;
+            }
+            .dir-a .boot-fill {
+                background: #3fbfa8;
+                border-radius: 99px;
+            }
+
+            /* ---------------------------------------------------------------
+	   B. Full retro
+	   --------------------------------------------------------------- */
+            .dir-b .canvas,
+            .dir-b .boot {
+                background: repeating-conic-gradient(
+                        #9a9a9a 0 25%,
+                        #b0b0b0 0 50%
+                    )
+                    0 0 / 4px 4px;
+                color: #000;
+                font-family: Geneva, Verdana, Tahoma, sans-serif;
+                font-size: 12px;
+            }
+            .dir-b .dicon {
+                font-size: 11px;
+            }
+            .dir-b .dicon span {
+                background: #fff;
+                padding: 1px 4px;
+                border: 1px solid #000;
+            }
+            .dir-b .dicon svg {
+                stroke: #000;
+                fill: #fff;
+                stroke-width: 2;
+            }
+
+            .dir-b .win {
+                background: #fff;
+                border: 1px solid #000;
+                box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.55);
+            }
+            .dir-b .win-bar {
+                height: 22px;
+                border-bottom: 1px solid #000;
+                background: repeating-linear-gradient(#000 0 1px, #fff 1px 2px);
+            }
+            .dir-b .win-ctl i {
+                width: 11px;
+                height: 11px;
+                border: 1px solid #000;
+                background: #fff;
+                box-shadow: inset -1px -1px 0 #808080;
+            }
+            .dir-b .win-title {
+                flex: 0 1 auto;
+                margin: 0 auto;
+                background: #fff;
+                padding: 0 8px;
+                font-size: 12px;
+                font-weight: 700;
+            }
+            .dir-b .win-nav i {
+                border: 1px solid #000;
+                background: #fff;
+                box-shadow: inset -1px -1px 0 #808080;
+                font-weight: 700;
+            }
+            .dir-b .win-path {
+                height: 22px;
+                border-bottom: 1px solid #000;
+                background: #fff;
+                font-size: 11px;
+                font-weight: 700;
+            }
+            .dir-b .item svg {
+                stroke: #000;
+                fill: #fff;
+                stroke-width: 2;
+            }
+            .dir-b .item span {
+                font-size: 11px;
+            }
+            .dir-b .item.sel svg {
+                filter: invert(1);
+            }
+            .dir-b .item.sel span {
+                background: #000;
+                color: #fff;
+                padding: 0 3px;
+            }
+
+            .dir-b .side {
+                border-left: 1px solid #000;
+                background: #dcdcdc;
+                font-size: 11px;
+            }
+            .dir-b .side h4 {
+                margin: 0;
+                font-size: 11px;
+                font-weight: 700;
+                border-bottom: 1px solid #000;
+                padding-bottom: 4px;
+            }
+            .dir-b .side dt {
+                font-weight: 700;
+            }
+
+            .dir-b .dock {
+                background: #dcdcdc;
+                border: 1px solid #000;
+                box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+                font-size: 11px;
+                border-radius: 0;
+            }
+            .dir-b .dock b {
+                border: 1px solid #000;
+                background: #fff;
+                box-shadow: inset -1px -1px 0 #808080;
+            }
+            .dir-b .dock b svg {
+                width: 15px;
+                height: 15px;
+                stroke: #000;
+                fill: #fff;
+                stroke-width: 2;
+            }
+            .dir-b .dock em {
+                border: 1px solid #000;
+                background: #fff;
+                box-shadow: inset -1px -1px 0 #808080;
+            }
+            .dir-b .dock hr {
+                background: #000;
+            }
+
+            .dir-b .boot {
+                background: #000;
+                color: #fff;
+                font-family: var(--mono);
+                font-size: 12px;
+            }
+            .dir-b .boot-logo i {
+                background: #fff;
+            }
+            .dir-b .boot-track {
+                border: 1px solid #fff;
+                height: 10px;
+            }
+            .dir-b .boot-fill {
+                background: repeating-linear-gradient(
+                    90deg,
+                    #fff 0 3px,
+                    #000 3px 5px
+                );
+            }
+
+            /* ---------------------------------------------------------------
+	   C. Full glass
+	   --------------------------------------------------------------- */
+            .dir-c .canvas,
+            .dir-c .boot {
+                background:
+                    radial-gradient(
+                        58% 78% at 14% 18%,
+                        rgba(167, 139, 250, 0.55),
+                        transparent 62%
+                    ),
+                    radial-gradient(
+                        52% 70% at 86% 26%,
+                        rgba(34, 211, 238, 0.45),
+                        transparent 62%
+                    ),
+                    radial-gradient(
+                        66% 88% at 52% 104%,
+                        rgba(244, 114, 182, 0.34),
+                        transparent 62%
+                    ),
+                    linear-gradient(158deg, #eef2ff, #faf5ff);
+                color: #2b2740;
+                font-family: var(--sans);
+                font-size: 13px;
+            }
+            .dir-c .dicon {
+                font-size: 12.5px;
+            }
+            .dir-c .dicon svg {
+                fill: rgba(255, 255, 255, 0.75);
+                stroke: rgba(93, 78, 148, 0.45);
+                stroke-width: 1.25;
+            }
+
+            .dir-c .win {
+                background: rgba(255, 255, 255, 0.52);
+                backdrop-filter: blur(26px) saturate(150%);
+                border: 1px solid rgba(255, 255, 255, 0.75);
+                border-radius: 20px;
+                box-shadow: 0 30px 70px -24px rgba(63, 46, 122, 0.5);
+            }
+            .dir-c .win-bar {
+                height: 42px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+            }
+            .dir-c .win-ctl i {
+                border-radius: 99px;
+                background: rgba(120, 105, 175, 0.28);
+            }
+            .dir-c .win-title {
+                text-align: center;
+                font-size: 13.5px;
+                font-weight: 600;
+                letter-spacing: 0.01em;
+            }
+            .dir-c .win-nav i {
+                border-radius: 99px;
+                width: 22px;
+                background: rgba(255, 255, 255, 0.6);
+                color: #6b5fa8;
+            }
+            .dir-c .win-path {
+                height: 28px;
+                font-size: 12px;
+                color: #6f6890;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            }
+            .dir-c .item svg {
+                fill: rgba(255, 255, 255, 0.8);
+                stroke: rgba(93, 78, 148, 0.4);
+                stroke-width: 1.25;
+            }
+            .dir-c .item span {
+                font-size: 12px;
+            }
+            .dir-c .item.sel {
+                background: rgba(255, 255, 255, 0.66);
+                border-radius: 14px;
+                box-shadow: 0 6px 18px -8px rgba(63, 46, 122, 0.5);
+            }
+
+            .dir-c .side {
+                border-left: 1px solid rgba(255, 255, 255, 0.55);
+                background: rgba(255, 255, 255, 0.32);
+                font-size: 12px;
+            }
+            .dir-c .side h4 {
+                margin: 0;
+                font-size: 13px;
+                font-weight: 600;
+                background: linear-gradient(90deg, #22d3ee, #a78bfa);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+            .dir-c .side dt {
+                color: #7a7398;
+            }
+
+            .dir-c .dock {
+                background: rgba(255, 255, 255, 0.5);
+                backdrop-filter: blur(26px) saturate(150%);
+                border: 1px solid rgba(255, 255, 255, 0.75);
+                border-radius: 18px;
+                box-shadow: 0 18px 40px -18px rgba(63, 46, 122, 0.5);
+                font-size: 12px;
+                color: #574f80;
+            }
+            .dir-c .dock b {
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.62);
+            }
+            .dir-c .dock b svg {
+                width: 16px;
+                height: 16px;
+                fill: rgba(255, 255, 255, 0.9);
+                stroke: rgba(93, 78, 148, 0.5);
+                stroke-width: 1.25;
+            }
+            .dir-c .dock hr {
+                background: rgba(93, 78, 148, 0.2);
+            }
+
+            .dir-c .boot {
+                color: #5b5386;
+                font-size: 13px;
+            }
+            .dir-c .boot-logo i {
+                background: linear-gradient(180deg, #22d3ee, #a78bfa);
+                border-radius: 99px;
+            }
+            .dir-c .boot-track {
+                background: rgba(255, 255, 255, 0.6);
+                border-radius: 99px;
+            }
+            .dir-c .boot-fill {
+                background: linear-gradient(90deg, #22d3ee, #a78bfa);
+                border-radius: 99px;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                * {
+                    animation: none !important;
+                    transition: none !important;
+                }
+            }
+        </style>
+
+        <svg
+            width="0"
+            height="0"
+            style="position: absolute"
+            aria-hidden="true"
+            focusable="false"
+        >
+            <!-- A: geometric, stroked, square -->
+            <symbol id="fa" viewBox="0 0 24 24">
+                <path d="M2.75 6.25h6.5l2 2.5h10v11.5H2.75z"></path>
+                <path d="M2.75 6.25V3.75h6.5v2.5"></path>
+            </symbol>
+            <symbol id="da" viewBox="0 0 24 24">
+                <path d="M5 2.75h9l5 5v13.5H5z"></path>
+                <path d="M14 2.75v5h5"></path>
+                <path d="M8 12.5h8M8 16h8"></path>
+            </symbol>
+            <!-- B: blocky, hard-edged, filled -->
+            <symbol id="fb" viewBox="0 0 24 24">
+                <path d="M2 5h8v2h12v14H2z"></path>
+                <path d="M2 9h20"></path>
+            </symbol>
+            <symbol id="db" viewBox="0 0 24 24">
+                <path d="M5 2h10v4h4v16H5z"></path>
+                <path d="M15 2h4v4"></path>
+                <path d="M8 12h8M8 16h8"></path>
+            </symbol>
+            <!-- C: soft, rounded, filled -->
+            <symbol id="fc" viewBox="0 0 24 24">
+                <path
+                    d="M3 7a2.5 2.5 0 012.5-2.5h3.2l2.3 2.6h7.5A2.5 2.5 0 0121 9.6v8.4a2.5 2.5 0 01-2.5 2.5h-13A2.5 2.5 0 013 18z"
+                ></path>
+            </symbol>
+            <symbol id="dc" viewBox="0 0 24 24">
+                <path
+                    d="M5.5 4.5A2 2 0 017.5 2.5h6L19 8v13.5a2 2 0 01-2 2H7.5a2 2 0 01-2-2z"
+                ></path>
+                <path d="M13.5 2.5V8H19"></path>
+            </symbol>
+            <!-- shared UI glyphs -->
+            <symbol id="apps" viewBox="0 0 24 24">
+                <path
+                    d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"
+                ></path>
+            </symbol>
+            <symbol id="cog" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3.2"></circle>
+                <path
+                    d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"
+                ></path>
+            </symbol>
+        </svg>
+
+        <div class="wrap">
+            <header class="page">
+                <p class="eyebrow">
+                    Build plan 1.1 · blocks the rest of phase 1
+                </p>
+                <h1>Three aesthetic directions for the portfolio OS</h1>
+                <p class="lede">
+                    Same window, same folder, same five repositories, same
+                    sidebar metadata, same dock, same boot screen. The markup
+                    underneath all three is byte-for-byte identical, so
+                    everything that differs below is treatment, not content.
+                </p>
+                <p class="facts">
+                    <span>Scene: /projects, lightsaml selected</span>
+                    <span>Each is drawn, not described</span>
+                    <span>Pick one, the OS name follows from it</span>
+                </p>
+            </header>
+
+            <!-- =========================== A =========================== -->
+            <section class="dir dir-a">
+                <div class="dir-head">
+                    <p class="dir-rank">Direction one · recommended</p>
+                    <h2>Modern base, technical detailing</h2>
+                    <p class="dir-thesis">
+                        Keep the blur, the radii, and the depth. Make the chrome
+                        speak monospace and draw the icons on a grid.
+                        Contemporary surface, systems-tool voice.
+                    </p>
+                </div>
+
+                <figure>
+                    <div class="scroller">
+                        <div class="canvas">
+                            <div class="desk">
+                                <div class="desk-icons">
+                                    <div class="dicon">
+                                        <svg><use href="#fa"></use></svg
+                                        ><span>About Me</span>
+                                    </div>
+                                    <div class="dicon">
+                                        <svg><use href="#fa"></use></svg
+                                        ><span>Experiences</span>
+                                    </div>
+                                    <div class="dicon">
+                                        <svg><use href="#fa"></use></svg
+                                        ><span>Attainments</span>
+                                    </div>
+                                </div>
+
+                                <div class="win">
+                                    <div class="win-bar">
+                                        <div class="win-ctl">
+                                            <i></i><i></i>
+                                        </div>
+                                        <div class="win-title">Projects</div>
+                                        <div class="win-nav">
+                                            <i>‹</i><i>›</i>
+                                        </div>
+                                    </div>
+                                    <div class="win-path">~/projects</div>
+                                    <div class="win-body">
+                                        <div class="grid">
+                                            <div class="item">
+                                                <svg><use href="#da"></use></svg
+                                                ><span>bout</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#da"></use></svg
+                                                ><span>blober</span>
+                                            </div>
+                                            <div class="item sel">
+                                                <svg><use href="#da"></use></svg
+                                                ><span>lightsaml</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#da"></use></svg
+                                                ><span>mongol-tori</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#da"></use></svg
+                                                ><span>bracu-sso</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#fa"></use></svg
+                                                ><span>case-studies</span>
+                                            </div>
+                                        </div>
+                                        <aside class="side">
+                                            <h4>lightsaml</h4>
+                                            <dl>
+                                                <dt>Kind</dt>
+                                                <dd>MDoc File</dd>
+                                                <dt>Size</dt>
+                                                <dd>18.4 KB</dd>
+                                                <dt>Perms</dt>
+                                                <dd>644</dd>
+                                                <dt>Owner</dt>
+                                                <dd>mobashir</dd>
+                                                <dt>Modified</dt>
+                                                <dd>2024-11-03</dd>
+                                            </dl>
+                                        </aside>
+                                    </div>
+                                </div>
+
+                                <div class="dock">
+                                    <b
+                                        ><svg><use href="#apps"></use></svg
+                                    ></b>
+                                    <b
+                                        ><svg><use href="#cog"></use></svg
+                                    ></b>
+                                    <hr />
+                                    <em>3 Documents</em>
+                                    <em>1 Folder</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <figcaption>
+                        Desktop, folder window, info sidebar, dock.
+                    </figcaption>
+                </figure>
+
+                <figure>
+                    <div class="scroller">
+                        <div class="boot">
+                            <div class="boot-logo"><i></i><i></i></div>
+                            <div class="boot-track">
+                                <span class="boot-fill"></span>
+                            </div>
+                            <p>Detecting storage devices…</p>
+                        </div>
+                    </div>
+                    <figcaption>Boot screen.</figcaption>
+                </figure>
+
+                <div class="notes">
+                    <div>
+                        <h3>What it buys</h3>
+                        <ul>
+                            <li>
+                                The Terminal and the BIOS boot screen stop
+                                reading as bolted on. Mono chrome is the same
+                                voice the shell already speaks.
+                            </li>
+                            <li>
+                                Cheap to draw. Every icon is strokes on a
+                                24-unit grid, so the whole set is one path map
+                                rather than 24 components.
+                            </li>
+                            <li>
+                                Tokens do the work, so four themes across dark
+                                and light stay tunable and contrast stays
+                                checkable.
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>What it costs</h3>
+                        <ul>
+                            <li>
+                                Less immediately charming than retro. It earns
+                                attention on detail rather than on nostalgia.
+                            </li>
+                            <li>
+                                Needs discipline: mono belongs to chrome only.
+                                The moment it leaks into prose the whole thing
+                                reads as a terminal emulator.
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Where it shows up</h3>
+                        <ul>
+                            <li>
+                                Title bars, sidebar metadata, dock counts, the
+                                Terminal prompt, and the file-type labels all
+                                share one typographic voice.
+                            </li>
+                            <li>
+                                The <code>MDir</code>, <code>MDoc</code>, and
+                                <code>644</code> gags stop being isolated jokes
+                                and start reading as one system.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =========================== B =========================== -->
+            <section class="dir dir-b">
+                <div class="dir-head">
+                    <p class="dir-rank">
+                        Direction two · highest charm, highest cost
+                    </p>
+                    <h2>Full retro</h2>
+                    <p class="dir-thesis">
+                        System 7 chrome. Pinstripe title bars, black hairlines,
+                        dithered desktop, hard drop shadows, selection by
+                        inversion. No translucency anywhere.
+                    </p>
+                </div>
+
+                <figure>
+                    <div class="scroller">
+                        <div class="canvas">
+                            <div class="desk">
+                                <div class="desk-icons">
+                                    <div class="dicon">
+                                        <svg><use href="#fb"></use></svg
+                                        ><span>About Me</span>
+                                    </div>
+                                    <div class="dicon">
+                                        <svg><use href="#fb"></use></svg
+                                        ><span>Experiences</span>
+                                    </div>
+                                    <div class="dicon">
+                                        <svg><use href="#fb"></use></svg
+                                        ><span>Attainments</span>
+                                    </div>
+                                </div>
+
+                                <div class="win">
+                                    <div class="win-bar">
+                                        <div class="win-ctl">
+                                            <i></i><i></i>
+                                        </div>
+                                        <div class="win-title">Projects</div>
+                                        <div class="win-nav">
+                                            <i>‹</i><i>›</i>
+                                        </div>
+                                    </div>
+                                    <div class="win-path">
+                                        File &nbsp; Edit &nbsp; View &nbsp;
+                                        Special
+                                    </div>
+                                    <div class="win-body">
+                                        <div class="grid">
+                                            <div class="item">
+                                                <svg><use href="#db"></use></svg
+                                                ><span>bout</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#db"></use></svg
+                                                ><span>blober</span>
+                                            </div>
+                                            <div class="item sel">
+                                                <svg><use href="#db"></use></svg
+                                                ><span>lightsaml</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#db"></use></svg
+                                                ><span>mongol-tori</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#db"></use></svg
+                                                ><span>bracu-sso</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#fb"></use></svg
+                                                ><span>case-studies</span>
+                                            </div>
+                                        </div>
+                                        <aside class="side">
+                                            <h4>lightsaml</h4>
+                                            <dl>
+                                                <dt>Kind</dt>
+                                                <dd>MDoc File</dd>
+                                                <dt>Size</dt>
+                                                <dd>18.4 KB</dd>
+                                                <dt>Perms</dt>
+                                                <dd>644</dd>
+                                                <dt>Owner</dt>
+                                                <dd>mobashir</dd>
+                                                <dt>Modified</dt>
+                                                <dd>2024-11-03</dd>
+                                            </dl>
+                                        </aside>
+                                    </div>
+                                </div>
+
+                                <div class="dock">
+                                    <b
+                                        ><svg><use href="#apps"></use></svg
+                                    ></b>
+                                    <b
+                                        ><svg><use href="#cog"></use></svg
+                                    ></b>
+                                    <hr />
+                                    <em>3 Documents</em>
+                                    <em>1 Folder</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <figcaption>
+                        Desktop, folder window, info sidebar, dock.
+                    </figcaption>
+                </figure>
+
+                <figure>
+                    <div class="scroller">
+                        <div class="boot">
+                            <div class="boot-logo"><i></i><i></i></div>
+                            <div class="boot-track">
+                                <span class="boot-fill"></span>
+                            </div>
+                            <p>Detecting storage devices…</p>
+                        </div>
+                    </div>
+                    <figcaption>Boot screen.</figcaption>
+                </figure>
+
+                <div class="notes">
+                    <div>
+                        <h3>What it buys</h3>
+                        <ul>
+                            <li>
+                                The strongest identity of the three, and the
+                                only one nobody will mistake for another
+                                portfolio.
+                            </li>
+                            <li>
+                                The BIOS boot screen stops being a joke and
+                                becomes the premise the whole site is built on.
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>What it costs</h3>
+                        <ul>
+                            <li>
+                                Every bezel, control, scrollbar, and icon is
+                                hand-drawn art, and it has to stay consistent
+                                across dozens of states.
+                            </li>
+                            <li>
+                                Bitmap chrome resists theming. Four colour
+                                themes across dark and light is exactly where
+                                this breaks, and the accessibility contract
+                                requires AA in all eight.
+                            </li>
+                            <li>
+                                It dates fast, and a faithful System 7 copy
+                                reads as pastiche rather than as yours.
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Where it shows up</h3>
+                        <ul>
+                            <li>
+                                Everywhere, which is the problem. This is a
+                                whole-site commitment with no partial version.
+                            </li>
+                            <li>
+                                The apps inherit it too: the Résumé viewer, the
+                                case study reader, and Mail all need
+                                period-correct chrome.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =========================== C =========================== -->
+            <section class="dir dir-c">
+                <div class="dir-head">
+                    <p class="dir-rank">
+                        Direction three · where the old site already is
+                    </p>
+                    <h2>Full glass</h2>
+                    <p class="dir-thesis">
+                        Lean all the way into translucency. Heavy backdrop blur,
+                        generous radii, soft light, a cyan-to-violet gradient
+                        carrying the accent.
+                    </p>
+                </div>
+
+                <figure>
+                    <div class="scroller">
+                        <div class="canvas">
+                            <div class="desk">
+                                <div class="desk-icons">
+                                    <div class="dicon">
+                                        <svg><use href="#fc"></use></svg
+                                        ><span>About Me</span>
+                                    </div>
+                                    <div class="dicon">
+                                        <svg><use href="#fc"></use></svg
+                                        ><span>Experiences</span>
+                                    </div>
+                                    <div class="dicon">
+                                        <svg><use href="#fc"></use></svg
+                                        ><span>Attainments</span>
+                                    </div>
+                                </div>
+
+                                <div class="win">
+                                    <div class="win-bar">
+                                        <div class="win-ctl">
+                                            <i></i><i></i>
+                                        </div>
+                                        <div class="win-title">Projects</div>
+                                        <div class="win-nav">
+                                            <i>‹</i><i>›</i>
+                                        </div>
+                                    </div>
+                                    <div class="win-path">Projects</div>
+                                    <div class="win-body">
+                                        <div class="grid">
+                                            <div class="item">
+                                                <svg><use href="#dc"></use></svg
+                                                ><span>bout</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#dc"></use></svg
+                                                ><span>blober</span>
+                                            </div>
+                                            <div class="item sel">
+                                                <svg><use href="#dc"></use></svg
+                                                ><span>lightsaml</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#dc"></use></svg
+                                                ><span>mongol-tori</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#dc"></use></svg
+                                                ><span>bracu-sso</span>
+                                            </div>
+                                            <div class="item">
+                                                <svg><use href="#fc"></use></svg
+                                                ><span>case-studies</span>
+                                            </div>
+                                        </div>
+                                        <aside class="side">
+                                            <h4>lightsaml</h4>
+                                            <dl>
+                                                <dt>Kind</dt>
+                                                <dd>MDoc File</dd>
+                                                <dt>Size</dt>
+                                                <dd>18.4 KB</dd>
+                                                <dt>Perms</dt>
+                                                <dd>644</dd>
+                                                <dt>Owner</dt>
+                                                <dd>mobashir</dd>
+                                                <dt>Modified</dt>
+                                                <dd>2024-11-03</dd>
+                                            </dl>
+                                        </aside>
+                                    </div>
+                                </div>
+
+                                <div class="dock">
+                                    <b
+                                        ><svg><use href="#apps"></use></svg
+                                    ></b>
+                                    <b
+                                        ><svg><use href="#cog"></use></svg
+                                    ></b>
+                                    <hr />
+                                    <em>3 Documents</em>
+                                    <em>1 Folder</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <figcaption>
+                        Desktop, folder window, info sidebar, dock.
+                    </figcaption>
+                </figure>
+
+                <figure>
+                    <div class="scroller">
+                        <div class="boot">
+                            <div class="boot-logo"><i></i><i></i></div>
+                            <div class="boot-track">
+                                <span class="boot-fill"></span>
+                            </div>
+                            <p>Detecting storage devices…</p>
+                        </div>
+                    </div>
+                    <figcaption>Boot screen.</figcaption>
+                </figure>
+
+                <div class="notes">
+                    <div>
+                        <h3>What it buys</h3>
+                        <ul>
+                            <li>
+                                Cheapest of the three to build, and the
+                                prettiest at first glance. No new art is needed.
+                            </li>
+                            <li>
+                                It is close enough to the old site that the
+                                reskin becomes a refinement rather than a
+                                redraw.
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>What it costs</h3>
+                        <ul>
+                            <li>
+                                Nothing distinguishes it from every other
+                                portfolio using a glass aesthetic. The concept
+                                carries all the personality and the surface
+                                carries none.
+                            </li>
+                            <li>
+                                It fights the two things that make the concept
+                                yours. A soft gradient boot screen is not a POST
+                                sequence, and a glass Terminal is a
+                                contradiction.
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Where it shows up</h3>
+                        <ul>
+                            <li>
+                                This is where the old site already is, so
+                                choosing it is choosing not to change.
+                            </li>
+                            <li>
+                                Heavy <code>backdrop-filter</code> on every
+                                window is also the most expensive of the three
+                                to composite once several are open.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="page">
+                <p class="eyebrow">Next</p>
+                <p>
+                    Pick a direction and the OS name follows from it. A name
+                    that fits pinstriped System 7 chrome is not the name that
+                    fits a monospace systems tool, which is why 1.2 sits behind
+                    this decision rather than beside it. Once it is chosen, the
+                    shortlist comes back drawn from the same world, and the boot
+                    sequence, the Terminal prompt, System Info, and the
+                    <code>MDir</code> and <code>MDoc</code> labels all get
+                    written against it.
+                </p>
+            </footer>
+        </div>
+    </body>
+</html>
