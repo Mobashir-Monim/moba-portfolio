@@ -959,7 +959,64 @@ Compose-and-send only, no inbox. The only app with a trust boundary, so it gets 
 
 ### 5.1 Snake (~0.5 day)
 
-Safe IP, small logic, best first game.
+- [x] Safe IP, small logic, best first game.
+
+      **The rules are a pure module.** `src/lib/snake.ts` is functions from a game to the next
+      game, the split `$lib/terminal` already uses, so every rule is an input-to-output assertion
+      and the component is left holding a clock, a keyboard, and a grid of spans. Randomness is a
+      parameter rather than a call to `Math.random`, which is the whole of what makes food
+      placement testable.
+
+      Three rules that the naive version of this file gets wrong, and each one has a test:
+
+      1. **A turn is measured against the direction last moved, not the one pending.** Two turns
+         inside a single tick are each legal against the pending direction and together they are a
+         reversal, so up-then-left while moving right folds the snake into its own neck. That is
+         why the record carries `dir` and `next` rather than one field.
+      2. **The tail cell is free to move into**, because it empties on the same tick unless the
+         snake is growing into it. Chasing your own tail is legal; a version that checks the head
+         against the whole body kills you for it.
+      3. **Food is picked from the free cells**, not from all of them, so it never spawns under the
+         snake. The last free cell taken is the win, which is the one ending that is not a death.
+
+      **The board is `role="application"`**, not a grid and not a button: a surface whose keys
+      belong to the app rather than to the reading cursor is the one thing that role is for, and it
+      carries its instructions in its own label because there is no visual affordance to infer them
+      from. Two a11y warnings are suppressed there, both of them the compiler's interactive-element
+      list not including that role; the alternative is calling the playfield a `<button>`, which is
+      a larger lie than the warnings are worth.
+
+      It takes the keyboard a frame after mount, for the reason `Terminal.svelte` gives at length: a
+      child's effect runs before its parent's, so doing it inline hands focus straight back to
+      `WindowFrame`. A four-button d-pad covers the pointer and the phone, where the window is full
+      screen with no keyboard at all, and each button hands focus back to the board.
+
+      **Nothing animates.** The snake moves by rendering discrete cells on a `setInterval` the
+      `$effect` owns, so there is no transition to cap and `prefers-reduced-motion` has nothing to
+      reach. That is deliberate: a clock a visitor started by pressing an arrow key is not
+      decoration, and a game that refuses to move is not a slower game.
+
+      The initial board is placed deterministically and re-placed on mount, because `/styleguide`
+      renders every app in the roster at build time and a random position at init is one position
+      on the server and another in the browser.
+
+      Only the food is coloured, `--c-select` rather than `--c-accent`, for the reason the boot
+      thermometer and the reader's progress bar already give: the selection highlight is inside
+      every skin's accent budget, retro's included. The snake itself is drawn in the theme's ink.
+
+      Minimizing ends the game, because the frame unmounts its content and the game state is
+      component-local. Putting it on the window record the way `view` is (2.11) is what that would
+      cost, and a tier-2 toy does not earn a field on every window in the store.
+
+      Verified by driving headless Chrome over CDP against the preview build, in all three skins:
+      the launcher opens Snake, focus lands on the board, the first arrow starts the clock and the
+      snake walks, Space pauses and the board holds still, resuming runs it into the wall and the
+      status reads Game over, the d-pad steers and hands focus back, and the overlay button starts
+      a new game. No page errors in any skin.
+
+      **One bug found on the way that is not this task's**, recorded as 2.15: Escape closes a
+      window in the store but leaves its frame in the DOM. It reproduces on `dacc093` with no part
+      of this task present, and it is what makes the Escape leg of the check above read wrong.
 
 ### 5.2 Calculator with the Pro paywall gag (~1 day)
 

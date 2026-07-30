@@ -99,9 +99,9 @@ export const CHROME = {
 			'M6.5 4.5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2zM5.5 17.5h4v3h-4zM10 17.5h4v3h-4zM14.5 17.5h4v3h-4z'
 	},
 	/*
-	   The three app glyphs. An app is not a document, so it does not wear a document's mark: that
-	   is the whole of what "settings, terminal and system info should have their own icon" asks
-	   for, and `app` is the dock group the three of them land in.
+	   The app glyphs. An app is not a document, so it does not wear a document's mark: that is the
+	   whole of what "settings, terminal and system info should have their own icon" asks for, and
+	   `app` is the dock group all of them land in.
 
 	   `app` is a window, because a window is what an app is on this desktop, and it has to stay
 	   readable beside `folder` and `document` at dock size.
@@ -127,6 +127,15 @@ export const CHROME = {
 			'M5.5 5.5h13v13h-13zM8.5 8.5h7v7h-7zM8.5 5.5V2.5M15.5 5.5V2.5M8.5 21.5V18.5M15.5 21.5V18.5M5.5 8.5H2.5M5.5 15.5H2.5M21.5 8.5H18.5M21.5 15.5H18.5',
 		glass:
 			'M8 5.5h8a2.5 2.5 0 0 1 2.5 2.5v8a2.5 2.5 0 0 1-2.5 2.5h-8a2.5 2.5 0 0 1-2.5-2.5v-8a2.5 2.5 0 0 1 2.5-2.5zM10.5 10.5h3v3h-3zM9.5 5.5V3M14.5 5.5V3M9.5 21V18.5M14.5 21V18.5M5.5 9.5H3M5.5 14.5H3M21 9.5H18.5M21 14.5H18.5'
+	},
+	// The game as its own board: a body folded twice with the food ahead of the head, which reads
+	// at 16px where a snake drawn as an animal does not.
+	snake: {
+		modern:
+			'M4.5 5.5h8a3 3 0 0 1 0 6h-5a3 3 0 0 0 0 6h8M19.5 16a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z',
+		retro: 'M2.5 5.5h9v6h-6v6h9M18.5 16.5h3v3h-3z',
+		glass:
+			'M3.5 5.5h9a3.5 3.5 0 0 1 0 7h-4a3.5 3.5 0 0 0 0 7h8M20 15.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z'
 	},
 	// Named for what it opens, not for what it draws: retro shows the System 7 control panel's
 	// sliders rather than a cog, because a cog is not a thing that shipped in 1991.

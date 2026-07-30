@@ -44,6 +44,7 @@ describe('chrome glyphs are skin-owned', () => {
 			'app',
 			'terminal',
 			'sysinfo',
+			'snake',
 			'settings'
 		]);
 	});
