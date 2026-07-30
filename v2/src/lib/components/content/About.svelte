@@ -33,6 +33,7 @@
 					<a
 						href={social.href}
 						rel="noreferrer noopener external"
+						target="_blank"
 						class="flex items-center gap-1.5 rounded-sm border border-line bg-surface-2 px-2 py-1 font-ui text-xs capitalize"
 					>
 						<Icon name={social.label} size={14} />

@@ -8,7 +8,8 @@ import { browser } from '$app/environment';
  * applied, so the duplication is the price of not flashing. Change one, change the other.
  */
 export const SKINS = ['modern', 'retro', 'glass'] as const;
-export const THEMES = ['ferrite', 'phosphor', 'halide', 'selenium'] as const;
+/** One theme per usable hue cluster in sRGB. The hues and the names are argued in gen-palette.ts. */
+export const THEMES = ['ferrite', 'phosphor', 'cyanotype', 'anthotype'] as const;
 export const APPEARANCES = ['light', 'dark', 'auto'] as const;
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Emits the four theme blocks for app.css and reports the WCAG contrast of every
+ * Emits the theme blocks for app.css and reports the WCAG contrast of every
  * pair the test in src/lib/tokens.test.ts enforces.
  *
  * Not part of the build. Run it when a hue needs revising:
@@ -12,51 +12,113 @@
  */
 import { contrast } from '../src/lib/contrast';
 
-/** Per-theme accent hue, in OKLCH degrees. Names track what stores an image. */
+/**
+ * Two hues per theme, in OKLCH degrees. Names track what stores an image.
+ *
+ * `accent` dresses the accent, the selection, and the focus ring. `chrome` dresses everything
+ * else: the surfaces, the ink, the rules. They are separate numbers because running the whole
+ * ramp off one hue is what made the earlier palettes read flat. When the ground is a desaturated
+ * shade of the accent, the accent is not a colour on the page, it is the same colour turned up,
+ * and nothing pops. Give the chrome its own hue and the accent has something to be different
+ * from.
+ *
+ * Two rules on the pairing, and every row below follows both:
+ *
+ *   far apart      at least 100 degrees, so the two never read as one hue at two saturations.
+ *   chrome reads   grey, which in practice means the 250-265 band (cool grey) or the 70-90 band
+ *                  (warm greige). Those are the two places a low-chroma cast still says "grey"
+ *                  rather than naming a colour. `cyanotype` and `anthotype` sit in the warm band
+ *                  because their accents are already cool, and the cool band is spoken for.
+ *
+ * The accent hues themselves were picked by sweeping all 360 degrees through the ramps below and
+ * measuring how much of the authored chroma survives `fit()`. Contrast almost never decides this:
+ * sRGB does. At these lightnesses the gamut delivers all of the asked-for chroma around 320, most
+ * of it around 140, roughly three quarters in the warm band, and barely half through the cyan and
+ * teal stretch from 165 to 235. That stretch is why there is no teal theme. The four below take
+ * one hue from each usable cluster, which is also what keeps them apart.
+ */
 const THEMES = {
-	ferrite: 34, // warm red, core-memory rust
-	phosphor: 148, // CRT green
-	halide: 248, // cool blue, silver-halide film
-	selenium: 300 // violet, selenium drum
+	ferrite: { accent: 40, chrome: 250 }, // iron-oxide burnt orange on cool grey
+	phosphor: { accent: 140, chrome: 265 }, // P1 CRT green on cool grey
+	cyanotype: { accent: 245, chrome: 78 }, // Prussian blue on warm paper
+	anthotype: { accent: 328, chrome: 88 } // petal-juice magenta on warm greige
 } as const;
 
 /** Lightness and chroma per token. Hue comes from the theme. */
 type Spec = Record<string, [L: number, C: number]>;
 
+/** Tokens drawn from the theme's accent hue. Everything else takes the chrome hue. */
+const ACCENT_TOKENS = new Set([
+	'accent',
+	'accent-hover',
+	'on-accent',
+	'select',
+	'on-select',
+	'focus'
+]);
+
+/*
+ * Harshness is lightness, vibrancy is chroma, and separation is hue. Three axes, and every way
+ * this ramp has been wrong was one axis on its own. Hue is handled by the pairing above; the two
+ * below are what these specs set.
+ *
+ * The first ramp was harsh: the ground sat at the very bottom of the range (L 0.125 to 0.155 in
+ * dark, pure #ffffff in light), so every window was near-white type on near-black. That is the
+ * right amount of contrast for a 1-bit display and too much for `modern` and `glass`.
+ *
+ * Pulling the ground off both ends fixed that. Pulling chroma down at the same time did not fix
+ * anything: it only made the result dull, because a desaturated accent on a desaturated ground
+ * is a palette with nothing in it. So chroma went back up and the lightness structure stayed.
+ *
+ * Where each axis now sits:
+ *
+ *   L, the soft part    dark surfaces run 0.19 to 0.31 rather than 0.125 to 0.255; light
+ *                       surfaces stop at 0.995 rather than pure white. fg-1 on surface-1 lands
+ *                       near 13.5:1 rather than 16.3:1.
+ *   C, the alive part   accents at 0.145 to 0.15, which is as far as sRGB goes at these
+ *                       lightnesses for most of the six hues. Surfaces and ink carry roughly
+ *                       twice the tint they did, so the greys belong to the theme rather than
+ *                       reading as neutral graphite laid over it.
+ *
+ * Ink lightness stays near the ends of the range on purpose: it is what carries retro's crunch,
+ * and retro's character is otherwise pure shape.
+ */
 const DARK: Spec = {
-	'surface-0': [0.155, 0.014],
-	'surface-1': [0.205, 0.014],
-	'surface-2': [0.255, 0.014],
-	'surface-3': [0.125, 0.014],
-	'fg-1': [0.965, 0.008],
-	'fg-2': [0.815, 0.008],
-	'fg-3': [0.705, 0.008],
-	line: [0.33, 0.016],
-	'line-strong': [0.575, 0.02],
-	accent: [0.72, 0.145],
-	'accent-hover': [0.8, 0.13],
-	'on-accent': [0.16, 0.03],
+	'surface-0': [0.225, 0.024],
+	'surface-1': [0.265, 0.022],
+	'surface-2': [0.31, 0.024],
+	'surface-3': [0.19, 0.022],
+	'fg-1': [0.95, 0.016],
+	'fg-2': [0.8, 0.02],
+	'fg-3': [0.7, 0.024],
+	line: [0.375, 0.028],
+	'line-strong': [0.6, 0.032],
+	accent: [0.75, 0.145],
+	'accent-hover': [0.83, 0.13],
+	'on-accent': [0.19, 0.05],
 	select: [0.52, 0.15],
-	'on-select': [0.985, 0.01],
-	focus: [0.76, 0.15]
+	'on-select': [0.99, 0.01],
+	focus: [0.78, 0.145]
 };
 
 const LIGHT: Spec = {
-	'surface-0': [0.865, 0.012],
-	'surface-1': [0.99, 0.006],
-	'surface-2': [0.945, 0.01],
-	'surface-3': [1.0, 0.0],
-	'fg-1': [0.23, 0.012],
-	'fg-2': [0.44, 0.012],
-	'fg-3': [0.52, 0.012],
-	line: [0.855, 0.014],
-	'line-strong': [0.55, 0.018],
-	accent: [0.5, 0.15],
-	'accent-hover': [0.43, 0.15],
+	'surface-0': [0.905, 0.02],
+	'surface-1': [0.975, 0.013],
+	'surface-2': [0.945, 0.016],
+	// Not 1.0: pure white is the one value in the ramp with no tint at all, and it reads as a
+	// hole punched in a tinted palette. 0.995 is still the brightest surface.
+	'surface-3': [0.995, 0.007],
+	'fg-1': [0.27, 0.035],
+	'fg-2': [0.46, 0.034],
+	'fg-3': [0.525, 0.034],
+	line: [0.89, 0.022],
+	'line-strong': [0.575, 0.03],
+	accent: [0.515, 0.15],
+	'accent-hover': [0.45, 0.16],
 	'on-accent': [0.99, 0.005],
-	select: [0.5, 0.15],
+	select: [0.515, 0.15],
 	'on-select': [0.99, 0.005],
-	focus: [0.5, 0.15]
+	focus: [0.53, 0.15]
 };
 
 /**
@@ -76,7 +138,10 @@ const PAIRS: [fg: string, bg: string, min: number][] = [
 	['on-accent', 'accent-hover', 4.5],
 	['on-select', 'select', 4.5],
 	['accent', 'surface-1', 3],
-	['accent', 'surface-2', 3],
+	// 4.5, not 3: the info sidebar's heading is accent-coloured text on the panel, which is the
+	// one place outside the title bar a skin spends accent on letterforms. tokens.test.ts holds
+	// that separately, and this line is what stops a softened accent from failing it there.
+	['accent', 'surface-2', 4.5],
 	['line-strong', 'surface-0', 3],
 	['line-strong', 'surface-1', 3],
 	['line-strong', 'surface-2', 3],
@@ -134,19 +199,24 @@ function hex(L: number, C: number, h: number): string {
 	);
 }
 
-function build(spec: Spec, hue: number): Record<string, string> {
-	return Object.fromEntries(Object.entries(spec).map(([name, [L, C]]) => [name, hex(L, C, hue)]));
+function build(spec: Spec, hues: { accent: number; chrome: number }): Record<string, string> {
+	return Object.fromEntries(
+		Object.entries(spec).map(([name, [L, C]]) => [
+			name,
+			hex(L, C, ACCENT_TOKENS.has(name) ? hues.accent : hues.chrome)
+		])
+	);
 }
 
 function css(): string {
 	const out: string[] = [];
-	for (const [theme, hue] of Object.entries(THEMES)) {
+	for (const [theme, hues] of Object.entries(THEMES)) {
 		// Compound, not descendant: `dark` and `data-theme` both live on <html>.
 		for (const [mode, spec] of [
 			['', LIGHT],
 			['.dark', DARK]
 		] as const) {
-			const ramp = build(spec, hue);
+			const ramp = build(spec, hues);
 			out.push(`${mode}[data-theme='${theme}'] {`);
 			for (const [name, value] of Object.entries(ramp)) out.push(`\t--c-${name}: ${value};`);
 			out.push('}\n');
@@ -158,12 +228,12 @@ function css(): string {
 function report(): string {
 	const rows: string[] = [];
 	let failures = 0;
-	for (const [theme, hue] of Object.entries(THEMES)) {
+	for (const [theme, hues] of Object.entries(THEMES)) {
 		for (const [mode, spec] of [
 			['light', LIGHT],
 			['dark', DARK]
 		] as const) {
-			const ramp = build(spec, hue);
+			const ramp = build(spec, hues);
 			for (const [fg, bg, min] of PAIRS) {
 				const ratio = contrast(ramp[fg], ramp[bg]);
 				const ok = ratio >= min;

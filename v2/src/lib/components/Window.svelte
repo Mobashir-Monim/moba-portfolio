@@ -170,7 +170,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		min-height: 1.75rem;
-		padding: 0.125rem 0.375rem 0.125rem 0.75rem;
+		padding: 0.25rem 0.375rem 0.25rem 0.75rem;
 		background: var(--c-surface-1);
 		border-bottom: var(--bw) solid var(--c-line);
 	}

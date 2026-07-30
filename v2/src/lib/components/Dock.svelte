@@ -183,13 +183,14 @@
 		padding: 0.375rem;
 		color: var(--c-fg-1);
 		border-radius: var(--r-md);
-		box-shadow: var(--bevel-out);
+		box-shadow: var(--bevel-in);
 		cursor: pointer;
-		transition: background-color var(--dur-fast) var(--ez-standard);
+		background: color-mix(in oklab, var(--c-fg-1) 8%, transparent);
+		transition: all var(--dur-fast) var(--ez-standard);
 	}
 
 	.slot:hover:not(:disabled) {
-		background: color-mix(in oklab, var(--c-fg-1) 8%, transparent);
+		background: color-mix(in oklab, var(--c-fg-1) 25%, transparent);
 	}
 
 	.slot:active:not(:disabled) {

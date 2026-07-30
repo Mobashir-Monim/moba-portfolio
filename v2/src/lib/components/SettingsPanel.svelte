@@ -201,7 +201,12 @@
 
 	.tile.on,
 	.row.on {
-		background: var(--c-select);
+		background: color-mix(in oklab, var(--c-select) 25%, transparent);
+		box-shadow:
+			1px 1px 0px var(--c-select),
+			1px -1px 0px var(--c-select),
+			-1px 1px 0px var(--c-select),
+			-1px -1px 0px var(--c-select);
 		color: var(--c-on-select);
 	}
 

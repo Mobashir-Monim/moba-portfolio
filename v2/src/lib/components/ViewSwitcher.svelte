@@ -18,7 +18,7 @@
 			aria-pressed={view === value}
 			onclick={() => onview(value)}
 		>
-			<Icon name="view-{value}" size={14} />
+			<Icon name="view-{value}" size={18} />
 			<span class="sr-only">{VIEW_LABEL[value]}</span>
 		</button>
 	{/each}

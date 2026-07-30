@@ -19,7 +19,7 @@ const boot = await Bun.file(new URL('./components/Boot.svelte', import.meta.url)
 const staticDir = new URL('../../static/', import.meta.url);
 
 const SKINS = ['modern', 'retro', 'glass'] as const;
-const THEMES = ['ferrite', 'phosphor', 'halide', 'selenium'] as const;
+const THEMES = ['ferrite', 'phosphor', 'cyanotype', 'anthotype'] as const;
 const MODES = ['light', 'dark'] as const;
 
 /** `--name: value;` pairs from the block opened by `selector` at the start of a line. */

@@ -47,14 +47,22 @@
 <div class="titlebar" class:focused class:grabbable={handle} {...handle}>
 	<div class="group">
 		{#if onclose}
-			<button type="button" class="control" onclick={onclose}>
-				<Icon name="close" size={14} />
+			<button
+				type="button"
+				class="control border border-red-600 bg-red-600/15 hover:bg-red-600/50!"
+				onclick={onclose}
+			>
+				<!-- <Icon name="close" size={14} /> -->
 				<span class="sr-only">Close {title}</span>
 			</button>
 		{/if}
 		{#if onminimize}
-			<button type="button" class="control" onclick={onminimize}>
-				<Icon name="minimize" size={14} />
+			<button
+				type="button"
+				class="control border border-yellow-600 bg-yellow-600/15 hover:bg-yellow-600/50!"
+				onclick={onminimize}
+			>
+				<!-- <Icon name="minimize" size={14} /> -->
 				<span class="sr-only">Minimize {title}</span>
 			</button>
 		{/if}
@@ -101,7 +109,7 @@
 		font-size: var(--fs-sm);
 		letter-spacing: var(--tracking-ui);
 		transition:
-			background-color var(--dur-fast) var(--ez-standard),
+			all var(--dur-fast) var(--ez-standard),
 			color var(--dur-fast) var(--ez-standard);
 	}
 
@@ -131,7 +139,7 @@
 		align-items: center;
 		justify-content: var(--title-align);
 		font-size: inherit;
-		font-weight: 600;
+		font-weight: 100;
 	}
 
 	.chip {
@@ -142,27 +150,26 @@
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
-		background: var(--_bg);
+		/* background: var(--_bg); */
 	}
 
 	.group {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.375rem;
 	}
 
 	.control {
 		display: grid;
 		place-items: center;
 		align-self: center;
-		width: 1.25rem;
-		height: 1.25rem;
-		color: inherit;
-		background: var(--_bg);
-		border-radius: var(--r-sm);
+		width: 0.95rem;
+		height: 0.95rem;
+		/* background: var(--_bg); */
+		border-radius: var(--r-xs);
 		box-shadow: var(--bevel-out);
 		cursor: pointer;
-		transition: opacity var(--dur-fast) var(--ez-standard);
+		transition: all var(--dur-fast) var(--ez-standard);
 	}
 
 	/* Greyscale on purpose. Retro's accent budget is the title bar's paint and the selection
