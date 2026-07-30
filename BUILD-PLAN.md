@@ -690,6 +690,33 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       the DOM order holds still; the dock still counts a minimized window and its group still
       restores it; the dock still draws over the windows; and Escape still closes the focused window.
 
+- [ ] 2.15 Escape closes a window in the store and leaves its frame in the DOM, and every window
+      opened afterwards is invisible. Found while verifying 5.1 and reproduced with nothing from
+      that task involved.
+
+      Open About from the desktop and press Escape. The dock's group disappears, so the record is
+      gone from the store, but `.frame` is still in the layer at `opacity: 0`, `pointer-events:
+      auto`, with its controls still in the tab order. From that point the layer is broken: opening
+      Projects renders it at `opacity: 0` too, and it stays that way.
+
+      The Close button is unaffected. A real pointer press on it empties the dock and removes the
+      frame, in the same session, immediately before the Escape that ghosts one. So the two paths
+      call the same `windows.close` and only one of them completes the removal, which is where to
+      start rather than in the store.
+
+      Not the transition, which was the first guess: under emulated `prefers-reduced-motion` the
+      component asks for `duration: 0` and Svelte starts no animation at all, and the frame still
+      stays. Nothing is thrown, in the page or over CDP. The outro that does run reports `finished`
+      on the ghost, so the animation completed and the removal did not follow it.
+
+      Measured on the preview build of `dacc093`, which is the commit 2.14 signed off, so this
+      predates the two off-plan commits after it and is not a regression from either. 2.14's own
+      close check went through the Close button, which is why it passed.
+
+      Severity is the reason this is not filed lower: 2.9 made Escape the keyboard way to close a
+      window, so the first Escape a keyboard visitor presses breaks the desktop for the rest of the
+      session.
+
 **Exit criteria:** fully operable by keyboard alone; readable and navigable with JS off; no
 ledger defect reintroduced.
 
