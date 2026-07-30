@@ -690,32 +690,43 @@ with no tree to open, 2.3 would be wired against a placeholder that this phase t
       the DOM order holds still; the dock still counts a minimized window and its group still
       restores it; the dock still draws over the windows; and Escape still closes the focused window.
 
-- [ ] 2.15 Escape closes a window in the store and leaves its frame in the DOM, and every window
-      opened afterwards is invisible. Found while verifying 5.1 and reproduced with nothing from
-      that task involved.
+- [x] 2.15 **Withdrawn. There is no defect here, and what there was instead is worth more than the
+      bug would have been.** Filed while verifying 5.1 as "Escape closes a window in the store and
+      leaves its frame in the DOM, and every window opened after it is invisible", reproduced on
+      the preview build of `dacc093`, and wrong.
 
-      Open About from the desktop and press Escape. The dock's group disappears, so the record is
-      gone from the store, but `.frame` is still in the layer at `opacity: 0`, `pointer-events:
-      auto`, with its controls still in the tab order. From that point the layer is broken: opening
-      Projects renders it at `opacity: 0` too, and it stays that way.
+      The symptom was real and repeatable: close from the store or by the Close button and the
+      frame goes; press Escape and the record leaves the store, the dock's group disappears, and
+      the `.frame` stays at `opacity: 0` for good, with every later window arriving at `opacity: 0`
+      too. The narrowing was real as well. Only key events did it, whatever they were bound to: a
+      plain `keydown` listener closing the window ghosts it, a plain `click` listener doing the
+      same thing does not, and `stopPropagation`, the deferral to a microtask or a task, and the
+      Svelte handler itself all made no difference.
 
-      The Close button is unaffected. A real pointer press on it empties the dock and removes the
-      frame, in the same session, immediately before the Escape that ghosts one. So the two paths
-      call the same `windows.close` and only one of them completes the removal, which is where to
-      start rather than in the store.
+      **What separated the two was not the app.** A `KeyboardEvent` dispatched from the page does
+      not ghost the window; the same key dispatched over CDP does. That is the line between an
+      untrusted event and real input, and it points at the browser rather than at anything in
+      `src/`.
 
-      Not the transition, which was the first guess: under emulated `prefers-reduced-motion` the
-      component asks for `duration: 0` and Svelte starts no animation at all, and the frame still
-      stays. Nothing is thrown, in the page or over CDP. The outro that does run reports `finished`
-      on the ghost, so the animation completed and the removal did not follow it.
+      **Headless Chrome stops producing frames after real input unless the renderer believes it is
+      focused.** Measured directly: 45 rAF callbacks in 600ms before a key press, 1 after, with
+      `document.timeline.currentTime` frozen across the same window. A Svelte transition is a WAAPI
+      animation (2.14), so a stopped timeline means the outro never finishes, the effect is never
+      destroyed, and the node is never removed. Every observation in the paragraph above follows
+      from that one fact, including the later windows stuck at `opacity: 0`: those are intros that
+      never got a frame either.
 
-      Measured on the preview build of `dacc093`, which is the commit 2.14 signed off, so this
-      predates the two off-plan commits after it and is not a regression from either. 2.14's own
-      close check went through the Close button, which is why it passed.
+      The fix is one CDP call in the harness, `Emulation.setFocusEmulationEnabled`, plus the three
+      backgrounding flags. With it, 136 frames in the same 600ms after the same key press, and
+      Escape closes a window in all three skins with focus landing back where it came from.
 
-      Severity is the reason this is not filed lower: 2.9 made Escape the keyboard way to close a
-      window, so the first Escape a keyboard visitor presses breaks the desktop for the rest of the
-      session.
+      **What this changes for every other task in this file:** any verification that pressed a key
+      and then judged whether something animated, or whether something animated away, was measuring
+      a frozen clock unless the harness enabled focus emulation. Pointer input does not trigger it.
+      2.10 and 2.14 both read the Animation domain and both reported live animations in their
+      control runs, so their frames were running; nothing here says they are wrong. It does say
+      that the next keyboard-plus-motion check must turn focus emulation on before it can claim
+      anything, which is what this entry exists to carry forward.
 
 **Exit criteria:** fully operable by keyboard alone; readable and navigable with JS off; no
 ledger defect reintroduced.
@@ -1038,12 +1049,14 @@ Compose-and-send only, no inbox. The only app with a trust boundary, so it gets 
       Verified by driving headless Chrome over CDP against the preview build, in all three skins:
       the launcher opens Snake, focus lands on the board, the first arrow starts the clock and the
       snake walks, Space pauses and the board holds still, resuming runs it into the wall and the
-      status reads Game over, the d-pad steers and hands focus back, and the overlay button starts
-      a new game. No page errors in any skin.
+      status reads Game over, the d-pad steers and hands focus back, the overlay button starts a
+      new game, and Escape closes the window and returns focus to the launcher. No page errors in
+      any skin.
 
-      **One bug found on the way that is not this task's**, recorded as 2.15: Escape closes a
-      window in the store but leaves its frame in the DOM. It reproduces on `dacc093` with no part
-      of this task present, and it is what makes the Escape leg of the check above read wrong.
+      **One thing found on the way that is not this task's**, recorded as 2.15 and withdrawn there:
+      Escape appeared to close a window in the store while leaving its frame in the DOM. It was the
+      harness, not the shell, and the entry is kept for what it says about verifying motion from a
+      keyboard at all.
 
 ### 5.2 Calculator with the Pro paywall gag (~1 day)
 
