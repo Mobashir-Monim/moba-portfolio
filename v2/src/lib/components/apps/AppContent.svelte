@@ -2,6 +2,7 @@
 	import { isDark, settings, update } from '$lib/appearance.svelte';
 	import {
 		CALCULATOR_ID,
+		MINES_ID,
 		SETTINGS_ID,
 		SNAKE_ID,
 		SYSINFO_ID,
@@ -10,6 +11,7 @@
 	} from '$lib/apps';
 	import SettingsPanel from '../SettingsPanel.svelte';
 	import Calculator from './Calculator.svelte';
+	import Mines from './Mines.svelte';
 	import Snake from './Snake.svelte';
 	import SystemInfo from './SystemInfo.svelte';
 	import Terminal from './Terminal.svelte';
@@ -46,4 +48,6 @@
 	<Calculator />
 {:else if id === TILES_ID}
 	<Tiles />
+{:else if id === MINES_ID}
+	<Mines />
 {/if}

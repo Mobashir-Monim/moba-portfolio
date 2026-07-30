@@ -145,6 +145,13 @@ export const CHROME = {
 		glass:
 			'M6.5 5.5h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2zM6.5 13.5h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2zM15 6.5h3a2.5 2.5 0 0 1 2.5 2.5v6a2.5 2.5 0 0 1-2.5 2.5h-3a2.5 2.5 0 0 1-2.5-2.5v-6a2.5 2.5 0 0 1 2.5-2.5z'
 	},
+	// The mine itself, four spikes and no more: eight is what the drawing wants and what stops it
+	// reading as anything at all at 16px. Retro's body is square, which is how a 1-bit bomb was drawn.
+	mines: {
+		modern: 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10ZM12 3v3.5M12 17.5V21M3 12h3.5M17.5 12H21',
+		retro: 'M8.5 8.5h7v7h-7zM12 3.5v5M12 15.5v5M3.5 12h5M15.5 12h5',
+		glass: 'M12 6.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM12 2.5v3.5M12 18v3.5M2.5 12H6M18 12h3.5'
+	},
 	// A body, a screen, and two rows of keys. Drawn narrow, because a wide one reads as a phone.
 	calculator: {
 		modern:

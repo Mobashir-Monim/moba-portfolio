@@ -39,6 +39,8 @@ export const SNAKE_ID = 'app:snake';
  */
 export const TILES_ID = 'app:tiles';
 
+export const MINES_ID = 'app:mines';
+
 export const CALCULATOR_ID = 'app:calculator';
 
 /** Declaration order is launcher order: the tools first, then the toys. */
@@ -48,7 +50,8 @@ export const APPS: readonly App[] = [
 	{ id: SYSINFO_ID, name: 'System Info', icon: 'sysinfo' },
 	{ id: CALCULATOR_ID, name: 'Calculator', icon: 'calculator' },
 	{ id: SNAKE_ID, name: 'Snake', icon: 'snake' },
-	{ id: TILES_ID, name: '2048', icon: 'tiles' }
+	{ id: TILES_ID, name: '2048', icon: 'tiles' },
+	{ id: MINES_ID, name: 'Minesweeper', icon: 'mines' }
 ];
 
 /**

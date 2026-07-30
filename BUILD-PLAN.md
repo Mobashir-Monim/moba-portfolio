@@ -1176,7 +1176,68 @@ costs a day and buys a third game.
       instead. It reads as a focus bug. The harness now scrolls the target into view and checks
       `elementFromPoint` before pressing, which any later CDP pass over a windowed control wants.
 
-- [ ] **Minesweeper.** Generic concept, no enforcement history.
+- [x] **Minesweeper.** Generic concept, no enforcement history, and the only name on the list that
+      is a description of the game rather than a brand.
+
+      **The rules are a pure module.** `src/lib/mines.ts`, the same split, and randomness as a
+      parameter buys more here than a testable spawn: the mines are placed by it, so "the first click
+      is never a mine" is checkable by handing in the worst draw there is instead of playing until it
+      happens.
+
+      Four rules the naive version gets wrong, and each one has a test:
+
+      1. **A neighbour is not `i ± 1`.** One to the left of column 0 is the last cell of the row
+         above. That wrap is invisible until a count beside an edge reads one too high, and then it
+         is invisible in a way that looks like bad luck.
+      2. **The mines do not exist until the first reveal**, and they are then kept off the pressed
+         cell and off its neighbours. Excluding the neighbours too is what makes the first press open
+         a region rather than a lone number, which is the difference between a game and a guess.
+      3. **The flood marks a cell as it is pushed, not as it is popped.** Marked on pop, an open field
+         is walked into once from every neighbour it has, which is slow on this board and a blown
+         stack on a larger one. It is a stack rather than recursion for the same reason.
+      4. **A flag is a lock.** It stops the flood and it refuses a press, which is the whole job of
+         planting one. Revealing a flagged cell and losing to it is the bug this prevents.
+
+      The win is every cell that is not a mine, whatever the flags say. Losing reveals every mine, or
+      the player is told they lost and not what by.
+
+      **Cells are plain buttons and the tab stop roves.** Not `role="grid"`, which promises a
+      composite widget with rows and cells of its own, and 2.9 settled that a role announcing
+      behaviour nothing implements is worse than no role. A button is already reachable and already
+      opens on Enter and Space; the arrows are `nextIndex` from `$lib/roving`, the arithmetic 2.9
+      wrote and tested, with the column count declared because this grid does not wrap. One tab stop
+      rather than eighty-one: eighty-one is the conventional reading of the rule and it puts the whole
+      board between the keyboard and everything after it.
+
+      Each cell carries its own name, `Row 4, column 7, 2 mines nearby`, which is the reason to make
+      it a button at all: closed, flagged, empty and a count look different and would otherwise all
+      announce as an unlabelled control. Flagging is `F` on the focused cell, right-click for a mouse,
+      and a Flag mode toggle for a pointer with no second button, which on a phone is every pointer.
+
+      **Two drawing decisions that only the browser could settle.** The board is the well and the
+      closed cells are raised on it, not the other way round: the surface ramp is not a straight line
+      of lightness, and `--c-surface-3` is the darkest of the four in dark mode and the lightest in
+      light. Drawn the other way, a closed cell and an opened one were nearly identical in dark
+      modern, where there is no bevel to carry the difference either. And in light mode the two
+      surfaces are both a shade off white, so the closed cell takes a `--c-line` hairline, which is
+      what makes it a cell in both polarities.
+
+      Counts stay in the theme's ink. The traditional colour per number is eight hues nothing has
+      measured for contrast, and a retro that spends eight colours is not retro. Only the flag and the
+      mine are coloured, both `--c-select`.
+
+      **The class was called `hidden` for one revision**, which is a Tailwind utility for
+      `display: none`. It survived on scoped-selector specificity alone. Renamed to `closed`, because
+      a component class that only works because Svelte's hash outranks a global utility is a
+      coincidence, not a design.
+
+      Verified by driving headless Chrome over CDP against the preview build, in all three skins: the
+      launcher opens Minesweeper, the board is one tab stop with focus on the first cell, the arrows
+      walk it and a step off the edge stays put, F plants and lifts a flag and the counter follows, a
+      flagged cell refuses to open, the first press opens a region and is never a mine, flag mode
+      plants one by pointer, New game closes every cell, and Escape closes the window and returns
+      focus to the launcher. Checked again in light mode on a second theme, which is where both
+      drawing decisions above came from.
 
 Deferred, and deliberately: a falling-block puzzle (~2 days) and a maze chase (~4+ days). The
 maze chase is both the highest effort and the highest legal risk on the list. If either gets

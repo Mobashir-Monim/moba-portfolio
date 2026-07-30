@@ -46,6 +46,7 @@ describe('chrome glyphs are skin-owned', () => {
 			'sysinfo',
 			'snake',
 			'tiles',
+			'mines',
 			'calculator',
 			'settings'
 		]);
