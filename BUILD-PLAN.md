@@ -1244,6 +1244,123 @@ maze chase is both the highest effort and the highest legal risk on the list. If
 built, it ships under its own name with its own art. Mechanics are not copyrightable; names,
 character designs, and specific visual expression are, and both franchises enforce.
 
+### 5.4 Motion across all three games (~0.5 day)
+
+**Opened after the fact, at the reviewer's call: the games changed state without drawing the
+change.** Each of the three replaced a board between one frame and the next. Snake hopped a whole
+cell every 110ms, 2048 teleported every tile at once, and Minesweeper's flood opened a region of
+fifty cells in a single frame, which is what made it read as a screen redraw rather than as
+something the press caused.
+
+- [x] **Play is its own motion budget.** `--dur-play` and `--ez-play` per skin, beside the chrome
+      pair that was already there, and retro is the reason the split exists rather than a reuse of
+      `--dur-fast`. Its chrome durations are zero because System 7 did not animate a window growing
+      into place, and a sprite crossing a playfield is not that kind of flourish: a 1-bit machine
+      drew every frame of one. So retro spends 90ms with no easing curve, which is what a redraw
+      looked like, and never `steps()`, which would hold a tile still and then teleport it late.
+      Modern 120ms on the standard curve, glass 200ms on its softer one. `tokens.test.ts` already
+      holds every skin to the same token set, so adding the pair to one skin demanded it of all
+      three.
+
+- [x] **Snake interpolates the tick.** Placement moved from `inset-*` to `translate`, which is
+      ledger #24's rule and here it is also the only version that can move at all: an interpolated
+      `inset` is a layout pass per frame per segment. Keying by index already meant segment *n*
+      renders what segment *n-1* held, so every segment travels exactly one cell per tick and one
+      `transition: translate` is the whole crawl.
+
+      **Its duration is the one number in this task that is not a skin token, and it cannot be
+      one.** Shorter than the tick and the snake arrives early and sits still; longer and it never
+      finishes, so it trails its own logical position by a fixed amount for the rest of the game.
+      `TICK` goes to CSS as a custom property and the easing is linear, because this is not a
+      flourish over a state change, it is the state change drawn continuously.
+
+      The food is the exception the crawl would break: it never travels, it appears somewhere else,
+      and under one rule for every `.cell` it would sail across the board through a snake that had
+      been nowhere near it. So it keeps no transition and is wrapped in `{#key}` on its own
+      coordinates, which makes a respawn a new element and replays its pop.
+
+- [x] **2048 records what the move did.** Two boards a press apart do not say which tile came from
+      where, and that is exactly what has to be drawn. `move()` now returns a `Move` beside the
+      board: the distance travelled by the tile now at each index, which destinations are merges,
+      the consumed half of each merge, where the spawn landed, and the direction it was all along.
+
+      Distances rather than source indices, because a mover only ever travels toward index 0 of its
+      own line and the component knows the axis from `dir`. That is what lets the three animation
+      grids ride through the existing transposes untouched: `rows`, `transpose` and `flip` became
+      generic, a per-cell scalar reorients exactly like a value does, and there is no second mapping
+      to keep in step with the first.
+
+      **The ghost is the half of a merge with no cell of its own.** Two tiles land in one
+      destination and only one element is drawn there, so without a record of the other, a tile at
+      the far edge vanishes on the spot while nothing anywhere moves. It rides inside the
+      destination cell rather than loose on the board, so it needs no grid slot that would push the
+      sixteen real ones around, and it is gone on the frame the merge pops.
+
+      **The cells are keyed by the move count, which is what replays anything at all.** A CSS
+      animation starts when its element is created; changing a custom property on an element that is
+      already there changes nothing. Sixteen spans per press is the cost, and the alternative is
+      retriggering by hand across two frames. `moves` and not `score`, because a move that merges
+      nothing still scores nothing and still moved, and a blocked press increments neither, so the
+      board correctly holds still against a wall.
+
+- [x] **One Svelte defect found by measuring, and it generalises.** The two animation slots on a
+      tile were first switched by custom property, `animation: var(--a-move, none) …`, with `.slid`
+      and `.merged` setting the names. Nothing moved. Svelte renames a component's `@keyframes` to
+      a scoped name and rewrites the `animation` declarations that reference it, and a name arriving
+      through `var()` is a string it cannot see: the keyframes were scoped, the references were not,
+      and the only rule in the file that animated was the one literal reference. It looks exactly
+      like a slide that is too subtle, the way 5.3's `box-shadow` `none` looked exactly like a ring
+      that is too subtle. **An animation name goes where the compiler can read it**, which cost one
+      repeated declaration and source order between `.slid` and `.merged`.
+
+      It is also why the CDP harness matches keyframe names by suffix: what the Animation domain
+      reports is `svelte-1foej5q-tile-ghost`, not `tile-ghost`.
+
+- [x] **Minesweeper opens outward.** A revealed cell here is the board showing through, so there is
+      nothing to animate in: what moves is the closed cell that was covering it. Every opened cell
+      draws that lid as `::after` and takes it away on a delay set by the Chebyshev distance from
+      the press, so the flood arrives as a ring travelling out rather than as a region that was
+      always open.
+
+      The lid is in the same selector list as `.closed` rather than repeating its four
+      declarations, because a lid is by definition a closed cell and the moment those two drift the
+      reveal animates away something the board never showed. Base `opacity: 0` with the keyframes
+      holding it at 1, so it needs no fill mode to stay gone afterwards, only `backwards` to keep it
+      there through its own wait. The flag pops on the mark alone, since the cell it lands on was
+      already there.
+
+- [x] **Reduced motion needed nothing new, which was the point of doing all of it in CSS.** No new
+      `transition:` directive exists, so `motion.test.ts` is untouched and 2.14's `|global` rule
+      still holds every directive in the repo. The blanket rule in `app.css` reaches every one of
+      these, and 2.10's two delay lines, which nothing set at the time, are what keep the ripple and
+      the pop's wait from surviving the preference. Measured: every duration comes back at 1ms and
+      every delay at 0, in all three skins, and all three games stay fully playable at 1ms, which is
+      the same call `Snake.svelte` already made about its clock.
+
+- [x] **Tests.** `tiles.test.ts` gained the move record, which nothing in the game reads and which
+      is therefore only ever as right as its cases: distance to a destination, the same distance
+      whichever direction produced it, the mark on a merge, the ghost and its longer distance, a
+      move that merges nothing leaving none, and the two vertical cases that catch a record built
+      against the flat array, which lands its distances in the right row and the wrong column. Plus
+      an invariant inside the existing played-to-the-end game: a record can never point at an empty
+      cell, and a ghost belongs to a merge or to nothing.
+
+      Verified by driving headless Chrome over CDP against the preview build, reading the Animation
+      domain rather than computed styles, in all three skins with a reduced-motion control run.
+      Snake starts twelve 110ms `CSSTransition`s per press and its head sits at `1237.56%` mid-tick
+      where the reduced run reads `1300%` both samples; 2048 starts `tile-slide`, `tile-spawn`,
+      `tile-pop` and `tile-ghost` at the skin's own duration with the landing pair delayed by one
+      full duration and the ghost travelling alongside; Minesweeper starts one lid per opened cell,
+      41 to 64 of them, at five distinct ring delays that scale with the skin. No page errors in any
+      skin, and every tile on every board still a power of two.
+
+      **One harness fact worth carrying forward, in the spirit of 2.15.** Driving three apps in and
+      out of one long-lived document wedges the CDP session after the third window: the point it
+      stops moves with the script, so it is the session and not the page. A fresh document per app
+      costs a second and sidesteps it. The profile directory must also be unique per run, or a
+      second Chrome exits on the lock while its client waits forever on a socket nothing will
+      answer.
+
 ---
 
 ## Phase 6: Launch

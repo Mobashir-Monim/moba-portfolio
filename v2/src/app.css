@@ -282,6 +282,12 @@
 	--ez-standard: cubic-bezier(0.2, 0, 0, 1);
 	--ez-out: cubic-bezier(0.16, 1, 0.3, 1);
 
+	/* A playfield's own motion, which is a separate budget from chrome's: a tile sliding or a
+	   region opening is telling the player what just happened, so it survives in every skin,
+	   including the one whose chrome durations are zero. */
+	--dur-play: 120ms;
+	--ez-play: var(--ez-standard);
+
 	/* Chrome recipes. A slight frost over whatever the window sits on, which is what a native
 	   systems panel does, at the 12px blur above. */
 	--window-bg: color-mix(in oklab, var(--c-surface-1) 92%, transparent);
@@ -374,6 +380,14 @@
 	--ez-standard: steps(1, end);
 	--ez-out: steps(1, end);
 
+	/* The exception, and the reason play is its own pair: a window that grew in place is a
+	   flourish System 7 did without, but a sprite crossing a playfield is a sprite crossing a
+	   playfield, and a 1-bit machine drew every frame of it. Short and uncurved, which is what
+	   a redraw looked like, and never `steps()`, which would hold a tile still and then teleport
+	   it late. */
+	--dur-play: 90ms;
+	--ez-play: linear;
+
 	/* Chrome recipes. Opaque, because System 7 had no translucency at all.
 
 	   The desktop is a two-by-two ordered dither at 4px, which is how a 1-bit display faked a
@@ -449,6 +463,11 @@
 	--dur-slow: 460ms;
 	--ez-standard: cubic-bezier(0.32, 0.72, 0, 1);
 	--ez-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+	/* Slower and softer, the way everything else here is, and the one skin where a tile is
+	   allowed to arrive rather than land. */
+	--dur-play: 200ms;
+	--ez-play: var(--ez-out);
 
 	/* Chrome recipes. The window is genuinely see-through and leans on the 24px blur above;
 	   the desktop gives it something worth seeing through, an accent wash falling off into the

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { DIRS, GOAL, move, SIZE, start, stuck, type Dir, type Game } from './tiles';
+import { DIRS, GOAL, move, SIZE, start, stuck, type Dir, type Game, type Move } from './tiles';
 
 /**
  * The rules of the game, which is all of what `tiles.ts` is. Four of these cover a bug the naive
@@ -15,11 +15,20 @@ function fixed(...values: number[]): () => number {
 
 /** A board written out as rows, so a rule can be read in the test that asserts it. */
 function board(...grid: number[][]): Game {
-	return { cells: grid.flat(), score: 0, won: false, over: false };
+	return { cells: grid.flat(), score: 0, won: false, over: false, moves: 0, last: null };
 }
 
-const rowsOf = (game: Game): number[][] =>
-	Array.from({ length: SIZE }, (_, y) => [...game.cells.slice(y * SIZE, y * SIZE + SIZE)]);
+/** Any per-cell array cut into rows, so a move record can be read in the shape of the board it is about. */
+const linesOf = <T>(cells: readonly T[]): T[][] =>
+	Array.from({ length: SIZE }, (_, y) => [...cells.slice(y * SIZE, y * SIZE + SIZE)]);
+
+const rowsOf = (game: Game): number[][] => linesOf(game.cells);
+
+/** The move record. Absent only on a board nothing has been pressed on yet, which no case below is. */
+function record(game: Game): Move {
+	if (game.last === null) throw new Error('the move recorded nothing');
+	return game.last;
+}
 
 /**
  * A move whose spawn is parked in the last free cell of the board, which on these fixtures is the
@@ -94,6 +103,97 @@ describe('sliding', () => {
 	});
 });
 
+/**
+ * What the move did, which is the half of the state two boards a press apart cannot supply. Nothing
+ * in the game reads it, so it is only ever as right as these cases: a wrong distance draws a tile
+ * arriving from somewhere it never was, and the board it lands on is correct either way.
+ */
+describe('the move record', () => {
+	test('a tile records how far it travelled to where it now is', () => {
+		const game = press(board([2, 0, 0, 4], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]), 'left');
+
+		expect(rowsOf(game)[0]).toEqual([2, 4, 0, 0]);
+		// The 2 was already home. The 4 crossed two cells to sit beside it.
+		expect(linesOf(record(game).from)[0]).toEqual([0, 2, 0, 0]);
+	});
+
+	/** A distance is a magnitude along whichever axis `dir` names, so the two presses agree on 3. */
+	test('the distance is the same number whichever direction produced it', () => {
+		const left = press(board([0, 0, 0, 2], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]), 'left');
+		const right = press(board([2, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]), 'right');
+
+		expect(record(left).dir).toBe('left');
+		expect(record(left).from[0]).toBe(3);
+		expect(record(right).dir).toBe('right');
+		expect(record(right).from[SIZE - 1]).toBe(3);
+	});
+
+	test('a merge marks the cell it landed in', () => {
+		const game = press(board([2, 2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]), 'left');
+
+		expect(linesOf(record(game).merged)[0]).toEqual([true, false, false, false]);
+		// Measured against the leading half, which was already there.
+		expect(record(game).from[0]).toBe(0);
+	});
+
+	/**
+	 * The case the ghost exists for. Both 2s end up in cell 0, and only one of them has a cell of its
+	 * own to be drawn in: without the record of the other, a tile at the far edge vanishes on the spot
+	 * while nothing anywhere moves.
+	 */
+	test('the consumed half of a merge is recorded with the distance it had to cover', () => {
+		const game = press(board([2, 0, 0, 2], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]), 'left');
+
+		expect(rowsOf(game)[0][0]).toBe(4);
+		expect(record(game).ghosts).toEqual([{ at: 0, from: 3 }]);
+	});
+
+	test('a move that merges nothing leaves no ghost', () => {
+		const game = press(board([2, 0, 0, 4], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]), 'left');
+		expect(record(game).ghosts).toEqual([]);
+	});
+
+	/**
+	 * The record rides through the same transposes the values do, so a vertical press has to land its
+	 * distances in the same cells as its tiles. A record built against the flat array puts them in the
+	 * right row and the wrong column, which draws every tile on the board sliding sideways.
+	 */
+	test('a vertical move puts the record in the same cell as the tile', () => {
+		const game = press(board([0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 2, 0]), 'up');
+
+		expect(rowsOf(game)[0]).toEqual([0, 0, 2, 0]);
+		expect(linesOf(record(game).from)[0]).toEqual([0, 0, 3, 0]);
+	});
+
+	test('a vertical merge lands its mark and its ghost in the same column too', () => {
+		const game = press(board([0, 2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 2, 0, 0]), 'up');
+
+		expect(rowsOf(game)[0]).toEqual([0, 4, 0, 0]);
+		expect(record(game).merged[1]).toBe(true);
+		expect(record(game).ghosts).toEqual([{ at: 1, from: 3 }]);
+	});
+
+	/** The new tile arrived from nowhere, so it is drawn differently and must not read as a traveller. */
+	test('the spawn is recorded where it landed, and it neither travelled nor merged', () => {
+		const game = press(board([2, 0, 0, 4], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]), 'left');
+		const { spawn, from, merged } = record(game);
+
+		expect([2, 4]).toContain(game.cells[spawn]);
+		expect(from[spawn]).toBe(0);
+		expect(merged[spawn]).toBe(false);
+	});
+
+	test('moves counts moves, which is what replays the drawing', () => {
+		const before = board([2, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]);
+
+		expect(start(fixed(0)).moves).toBe(0);
+		expect(press(before, 'right').moves).toBe(1);
+		expect(press(press(before, 'right'), 'down').moves).toBe(2);
+		// The press that does nothing is not one of them, or the board redraws itself over a wall.
+		expect(move(before, 'left').moves).toBe(0);
+	});
+});
+
 describe('a press that changes nothing', () => {
 	test('is not a move, so it does not spawn', () => {
 		const before = board([2, 4, 8, 16], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]);
@@ -157,6 +257,14 @@ describe('endings', () => {
 			game = move(game, dir, fixed(0, 0.5));
 			expect(game.cells.length).toBe(SIZE * SIZE);
 			expect(game.cells.every((n) => n === 0 || Number.isInteger(Math.log2(n)))).toBe(true);
+
+			// The record cannot point at an empty cell: nothing travels into one and nothing merges in
+			// one, so this is the one way the board and the drawing of it can disagree over a whole game
+			// rather than over a fixture. A ghost belongs to a merge or it belongs to nothing.
+			const last = record(game);
+			expect(last.from.every((d, i) => d === 0 || game.cells[i] !== 0)).toBe(true);
+			expect(last.merged.every((m, i) => !m || game.cells[i] !== 0)).toBe(true);
+			expect(last.ghosts.every((g) => g.from > 0 && last.merged[g.at])).toBe(true);
 		}
 
 		expect(game.over).toBe(true);

@@ -34,8 +34,28 @@
 		game.over ? 'A mine. Game over.' : game.won ? 'Board cleared.' : 'Open a cell. F flags one.'
 	);
 
+	/**
+	 * Where the last reveal was pressed, which is where the ripple starts. A flood opens a whole
+	 * region in one frame, and one frame is the difference between a region opening and a region
+	 * having always been open: nothing on screen says the press caused it.
+	 */
+	let origin = $state(0);
+
+	/** Rings out from the press, so a diagonal neighbour arrives with the ones beside it. */
+	const ring = (i: number): number =>
+		Math.max(
+			Math.abs((i % COLS) - (origin % COLS)),
+			Math.abs(Math.floor(i / COLS) - Math.floor(origin / COLS))
+		);
+
 	function open(i: number): void {
-		game = flagMode ? flag(game, i) : reveal(game, i);
+		if (flagMode) {
+			game = flag(game, i);
+			return;
+		}
+
+		origin = i;
+		game = reveal(game, i);
 	}
 
 	function mark(event: Event, i: number): void {
@@ -121,8 +141,10 @@
 				class="cell"
 				class:closed={cell.state === 'hidden'}
 				class:flagged={cell.state === 'flagged'}
+				class:opened={cell.state === 'revealed'}
 				class:mine={cell.state === 'revealed' && cell.mine}
 				data-i={i}
+				style:--d={ring(i)}
 				tabindex={i === cursor ? 0 : -1}
 				aria-label={name(cell, i)}
 				onfocus={() => (cursor = i)}
@@ -199,6 +221,8 @@
 	   the closed cell on `--c-surface-3` and the open one on the board left the two nearly identical
 	   in dark modern, where there is no bevel to carry the difference either. */
 	.cell {
+		/* For the lid, which is the closed cell drawn over the open one and taken away. */
+		position: relative;
 		display: grid;
 		place-items: center;
 		padding: 0;
@@ -213,13 +237,60 @@
 	}
 
 	/* The hairline is what carries the difference in light mode, where the two surfaces this uses are
-	   both a shade off white and the gap between them alone is not enough to see a closed cell by. */
+	   both a shade off white and the gap between them alone is not enough to see a closed cell by.
+
+	   `.opened::after` is in the list rather than repeating the four declarations, because the lid is
+	   by definition a closed cell: the moment those two drift the reveal animates the wrong thing
+	   away. */
 	.closed,
-	.flagged {
+	.flagged,
+	.opened::after {
 		background: var(--c-surface-2);
 		border: var(--bw) solid var(--c-line);
 		border-radius: var(--r-xs);
 		box-shadow: var(--bevel-out);
+	}
+
+	/*
+	   The lid. A revealed cell is the board showing through, so there is nothing to animate in: what
+	   moves is the closed cell that was covering it, and it goes away on a delay set by how far the
+	   flood had to travel to get here. So a region opens outward from the press instead of appearing
+	   whole, which is the one frame that made a flood look like a screen redraw rather than a move.
+
+	   Base `opacity: 0` with the keyframes holding it at 1, so no fill mode is needed to keep the lid
+	   gone once it has lifted, only `backwards` to keep it there through its own wait. `pointer-events`
+	   off, or the first press after a reveal can land on a lid on its way out.
+	*/
+	.opened::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		opacity: 0;
+		pointer-events: none;
+		animation: lid-off var(--dur-play) var(--ez-play) calc(var(--d) * var(--dur-play) / 6) backwards;
+	}
+
+	@keyframes lid-off {
+		from {
+			opacity: 1;
+		}
+
+		to {
+			opacity: 0;
+			scale: 0.86;
+		}
+	}
+
+	/* The flag arrives on a cell that is already there, so the cell holds still and only the mark
+	   lands. */
+	.flagged span {
+		animation: mark-in var(--dur-play) var(--ez-play);
+	}
+
+	@keyframes mark-in {
+		from {
+			scale: 0;
+		}
 	}
 
 	/*

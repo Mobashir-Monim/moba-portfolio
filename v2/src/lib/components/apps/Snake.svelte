@@ -144,6 +144,7 @@
 			bind:this={board}
 			class="board"
 			style:--size={SIZE}
+			style:--tick="{TICK}ms"
 			tabindex="0"
 			role="application"
 			aria-label="Snake playfield. Arrow keys steer, space pauses."
@@ -152,7 +153,15 @@
 			{#each game.snake as cell, i (i)}
 				<span class="cell" class:head={i === 0} style:--x={cell.x} style:--y={cell.y}></span>
 			{/each}
-			<span class="cell food" style:--x={game.food.x} style:--y={game.food.y}></span>
+			<!--
+				Keyed on where the food is, so a respawn is a new element and its pop plays again. The
+				alternative is the same element moving, and the same element moving is what `.cell`
+				interpolates: the food would sail across the board to the cell it was drawn in next,
+				through a snake that has not been anywhere near it.
+			-->
+			{#key `${game.food.x},${game.food.y}`}
+				<span class="cell food" style:--x={game.food.x} style:--y={game.food.y}></span>
+			{/key}
 		</div>
 
 		{#if phase !== 'running'}
@@ -228,14 +237,28 @@
 		box-shadow: var(--bevel-in);
 	}
 
-	/* One cell of the board, placed by its grid coordinates. Percentages of the board rather than
-	   pixels, so the whole thing scales with the window and nothing has to be measured. */
+	/*
+	   One cell of the board, placed by its grid coordinates. Percentages rather than pixels, so the
+	   whole thing scales with the window and nothing has to be measured: the cell is exactly one
+	   cell wide, so a translate of `--x * 100%` is a translate of `--x` cells.
+
+	   Placed by `translate` and not by `inset-*`, which is ledger #24's rule and here it is also the
+	   only version that can move at all: an interpolated `inset` is a layout pass per frame across
+	   every segment of the snake.
+
+	   The duration is the tick and not `--dur-play`, which is the one place in this file that does
+	   not read a skin token. It cannot be one: shorter than the tick and the snake arrives early and
+	   sits still, longer and it never finishes, so it trails its own logical position by a fixed
+	   amount for the rest of the game. Linear for the same reason. This is not a flourish over a
+	   state change, it is the state change drawn continuously, so the clock owns it.
+	*/
 	.cell {
 		position: absolute;
+		inset: 0 auto auto 0;
 		width: calc(100% / var(--size));
 		height: calc(100% / var(--size));
-		inset-block-start: calc(var(--y) * 100% / var(--size));
-		inset-inline-start: calc(var(--x) * 100% / var(--size));
+		translate: calc(var(--x) * 100%) calc(var(--y) * 100%);
+		transition: translate var(--tick) linear;
 		background: var(--c-fg-2);
 		/* The ring is what separates two adjacent segments without a gap that would break the body. */
 		box-shadow: inset 0 0 0 1px var(--c-surface-2);
@@ -255,6 +278,17 @@
 		background: var(--c-select);
 		border-radius: 50%;
 		box-shadow: none;
+		/* It never travels, it appears, so the crawl above does not apply to it. */
+		transition: none;
+		animation: food-in var(--dur-play) var(--ez-play);
+	}
+
+	/* From nothing rather than from small, because the cell it lands in was empty a frame ago and
+	   there is nothing for a half-sized dot to read as. */
+	@keyframes food-in {
+		from {
+			scale: 0;
+		}
 	}
 
 	.overlay {
@@ -268,6 +302,15 @@
 		background: color-mix(in oklab, var(--c-surface-0) 82%, transparent);
 		border-radius: var(--r-md);
 		text-align: center;
+		/* The panel covers the board, so slamming it in is the harshest change in the app: the
+		   playfield is legible one frame and gone the next. */
+		animation: panel-in var(--dur-play) var(--ez-play);
+	}
+
+	@keyframes panel-in {
+		from {
+			opacity: 0;
+		}
 	}
 
 	.pad {
