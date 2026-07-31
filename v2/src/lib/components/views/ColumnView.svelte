@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { pickers } from '$lib/activate';
 	import Icon from '$lib/components/Icon.svelte';
+	import { move } from '$lib/roving';
 	import { childrenOf, node as lookup, type Node } from '$lib/tree';
 	import { windows } from '$lib/windows.svelte';
 
@@ -60,7 +61,11 @@
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
 <div class="columns {klass}">
 	{#each columns as column, index (index)}
-		<ul aria-label={column.label}>
+		<!-- Each list is its own set, so the vertical arrows walk this column rather than running
+		     off the end of it into the next one. The horizontal arrows walk it too, which is the
+		     ceiling `$lib/roving` names: crossing into the column to the right means picking on the
+		     way, because that column does not exist until something here is picked. -->
+		<ul data-roving aria-label={column.label}>
 			{#each column.items as child (child.id)}
 				{@const on =
 					trail[index] === child.id || (index === 0 && !trail.length && selected === child.id)}
@@ -70,6 +75,7 @@
 						href={child.href}
 						class:on
 						aria-current={on ? 'true' : undefined}
+						onkeydown={move}
 						{...pickers(onopen && (() => onopen(child)), () => pick(index, child))}
 					>
 						<Icon name={open ? `${child.kind}-open` : child.kind} size={16} />

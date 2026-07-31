@@ -2,6 +2,7 @@
 	import { pickers } from '$lib/activate';
 	import Icon from '$lib/components/Icon.svelte';
 	import NodeBody from '$lib/components/content/NodeBody.svelte';
+	import { move } from '$lib/roving';
 	import { summary, type Node } from '$lib/tree';
 	import { windows } from '$lib/windows.svelte';
 
@@ -53,7 +54,9 @@
 		</article>
 	{/if}
 
-	<ul class="strip" aria-label="{node.name} items">
+	<!-- The strip is the set the arrows walk, not the whole gallery: the preview pane above it
+	     renders the item's real write-up, and that prose has links of its own. -->
+	<ul class="strip" data-roving aria-label="{node.name} items">
 		{#each items as child (child.id)}
 			{@const on = preview?.id === child.id}
 			<li>
@@ -62,6 +65,7 @@
 					class:on
 					class:open={windows.byId(child.id) !== undefined}
 					aria-current={on ? 'true' : undefined}
+					onkeydown={move}
 					{...pickers(onopen && (() => onopen(child)), onselect && (() => onselect(child)))}
 				>
 					<Icon name={windows.byId(child.id) ? `${child.kind}-open` : child.kind} size={28} />

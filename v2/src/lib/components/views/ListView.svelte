@@ -3,6 +3,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import { formatSize } from '$lib/fs';
 	import { FILE_TYPE } from '$lib/os';
+	import { move } from '$lib/roving';
 	import type { Node } from '$lib/tree';
 	import { windows } from '$lib/windows.svelte';
 
@@ -44,7 +45,9 @@
 			<th scope="col">Modified</th>
 		</tr>
 	</thead>
-	<tbody>
+	<!-- The set the arrow keys walk. The header holds no links, so it is the body and not the
+	     table: see `$lib/roving`, and 7.4 for the three views this was missing from. -->
+	<tbody data-roving>
 		{#each items as child (child.id)}
 			{@const open = windows.byId(child.id) !== undefined}
 			{@const on = selected === child.id}
@@ -55,6 +58,7 @@
 					<a
 						href={child.href}
 						aria-current={on ? 'true' : undefined}
+						onkeydown={move}
 						{...activators(onopen && (() => onopen(child)), onselect && (() => onselect(child)))}
 					>
 						<Icon name={open ? `${child.kind}-open` : child.kind} size={16} />

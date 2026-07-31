@@ -1627,7 +1627,41 @@ Three complaints, all separate and all correct:
 
 - [ ] 7.3 **A welcome window on first visit.**
 
-- [ ] 7.4 **The arrow keys reach the other three views.**
+- [x] 7.4 **The arrow keys reach the other three views.** A real defect, and 6.2 walked straight
+      past it.
+
+      `move` found the set to walk with `link.parentElement`. That is the right element in exactly
+      one place, the icon grid, where the links are the grid's own children. Every other view wraps
+      each link in something first: a `th` in the list, an `li` in the columns and in the gallery
+      strip. So the lookup returned a parent holding one link, `indexOf` found it at 0 of 1, and
+      the arrows moved nowhere in three of the four views. The walker was never wrong; it could not
+      see past the wrapper.
+
+      The set is now whatever `[data-roving]` marks, found with `closest`. `IconGrid` marks the
+      grid, `ListView` its `tbody`, `GalleryView` its strip, and `ColumnView` marks each list
+      separately, which is what keeps the vertical arrows inside a column rather than running off
+      the end of it into the next.
+
+      **One measurement serves four layouts**, which is why nothing here needs to know which view
+      it is in. `columnsOf` reads where the second row starts: a wrapping grid measures its real
+      column count, a stack measures 1 so the vertical arrows step a row, and a strip that never
+      wraps measures the whole set so every step lands on the horizontal ones.
+
+      **The reported symptom was a different thing wearing the same face.** Up and down did nothing
+      on the desktop, and that part is correct: root holds four icons, a wide screen lays them in
+      one row, and a step out of range stays put by design rather than wrapping or sliding
+      sideways. From the visitor's chair that is indistinguishable from the bug above it, which is
+      the argument for the welcome window listing the keys.
+
+      **Column view keeps a ceiling**, marked in `roving.ts`. Its horizontal arrows walk the column
+      they are in rather than crossing into the next, because crossing means picking on the way:
+      the column to the right does not exist until something in this one is picked. That is a
+      handler in `ColumnView` and a `tick()`, not something a walker can measure.
+
+      Tested at the source level, because none of the ten cases over `nextIndex` could ever have
+      failed: they all passed while three views had no arrows at all. `roving.test.ts` now holds
+      `onkeydown={move}` and `data-roving` together across every component, so a fifth view cannot
+      ship with one and not the other. Mutated to confirm it bites.
 
 - [ ] 7.5 **A focus ring that survives the wallpaper.**
 

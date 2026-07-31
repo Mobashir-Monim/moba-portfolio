@@ -46,8 +46,21 @@ export function nextIndex(
 }
 
 /**
- * How many icons a row holds. Measured rather than declared: the grid wraps at whatever the
+ * How many links a row holds. Measured rather than declared: the grid wraps at whatever the
  * window is wide, so where the second row starts is the only honest source.
+ *
+ * It is also what makes one walker serve four different layouts without being told which it is
+ * in. A wrapping icon grid measures its real column count. A list is a stack, so the second link
+ * is already on a new row and it measures 1, which is what makes the vertical arrows step one
+ * row there. A gallery strip never wraps, so nothing has a different top and it measures the
+ * whole set, which puts every step on the horizontal arrows. The column view marks each of its
+ * lists separately and each measures 1, like the list view.
+ *
+ * ponytail: measuring only serves layouts whose rows are rows. The ceiling is the column view's
+ * horizontal arrows, which step within one list rather than crossing into the next, because the
+ * set they walk is one list by construction. Crossing needs the arrow to pick as it goes, since
+ * the column to the right does not exist until something in this one is picked, and that is a
+ * handler in `ColumnView` rather than anything this file can measure.
  */
 function columnsOf(items: HTMLElement[]): number {
 	const top = items[0]?.offsetTop;
@@ -56,12 +69,30 @@ function columnsOf(items: HTMLElement[]): number {
 }
 
 /**
- * The handler an icon carries. It sits on the link itself, so the element taking the key is an
- * interactive one and Svelte owns the listener; its siblings are the rest of the container.
+ * The set a link moves within: every link inside the nearest ancestor carrying `data-roving`.
+ *
+ * That attribute is the contract, and it exists because this used to read `link.parentElement`.
+ * That is only the right element in the icon grid, where the links are the grid's own children.
+ * Every other view wraps each link in something first, a `th` in the list, an `li` in the columns
+ * and the gallery strip, so the lookup found a parent holding exactly one link and the arrows did
+ * nothing at all in three of the four views. It looked like a walker that could not count and it
+ * was a walker that could not see: 7.4.
+ *
+ * A container that forgets the attribute gets no arrows rather than the wrong ones, and
+ * `roving.test.ts` holds the two halves together at the source level so a fifth view cannot ship
+ * with one and not the other.
+ */
+function setOf(link: HTMLElement): HTMLElement[] {
+	return [...(link.closest('[data-roving]')?.querySelectorAll<HTMLElement>('a') ?? [])];
+}
+
+/**
+ * The handler a link carries. It sits on the link itself, so the element taking the key is an
+ * interactive one and Svelte owns the listener.
  */
 export function move(event: KeyboardEvent): void {
 	const link = event.currentTarget as HTMLElement;
-	const items = [...(link.parentElement?.querySelectorAll<HTMLElement>('a') ?? [])];
+	const items = setOf(link);
 
 	const next = nextIndex(event.key, items.indexOf(link), items.length, columnsOf(items));
 	if (next === undefined) return;

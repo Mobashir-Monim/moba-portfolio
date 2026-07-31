@@ -12,8 +12,11 @@
 	No role, decided rather than deferred: the links inside are already reachable and operable, and
 	the arrows they were missing live on the links themselves. `$lib/roving` has the reasoning, and
 	it is also what measures this grid's column count, since only the layout knows where a row ends.
+
+	`data-roving` is what tells that walker where the set ends. It is not a role and it announces
+	nothing; it is the one thing a handler on a link cannot work out for itself.
 -->
-<div class="grid {klass}">{@render children()}</div>
+<div class="grid {klass}" data-roving>{@render children()}</div>
 
 <style>
 	.grid {

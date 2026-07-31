@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { readdirSync, readFileSync } from 'node:fs';
 import { nextIndex } from './roving';
 
 /**
@@ -58,5 +59,65 @@ describe('nextIndex', () => {
 	test('does nothing when the key came from outside the set', () => {
 		expect(grid('ArrowDown', -1)).toBeUndefined();
 		expect(nextIndex('ArrowDown', 0, 0, 1)).toBeUndefined();
+	});
+});
+
+/**
+ * The half of this that `nextIndex` cannot fail at, and the half that was actually broken.
+ *
+ * 7.4: `move` read `link.parentElement`, which is the right element in the icon grid and in
+ * nothing else. The list wraps each link in a `th`, the columns and the gallery strip in an `li`,
+ * so the lookup found a parent holding one link and the arrows moved nowhere in three of the four
+ * views. Every case above passed throughout, because the walker was never the part that was wrong.
+ *
+ * So this asserts the wiring instead, at the source level, the way `tokens.test.ts` asserts
+ * app.html against app.css. A handler with no container to walk is the defect that shipped; a
+ * container with no handler on its links is the same defect from the other end.
+ */
+describe('every view that moves on the arrows marks its own set', () => {
+	const dir = new URL('./components/', import.meta.url);
+
+	/** Every component under `components/`, nested ones included. */
+	const files = readdirSync(dir, { recursive: true, encoding: 'utf8' })
+		.filter((name) => name.endsWith('.svelte'))
+		.sort();
+
+	const wiring = new Map(
+		files.map((name) => {
+			const source = readFileSync(new URL(name, dir), 'utf8');
+			return [
+				name,
+				{ handler: source.includes('onkeydown={move}'), container: source.includes('data-roving') }
+			];
+		})
+	);
+
+	/**
+	 * The icon view is the one place the two halves live in different files: the container is the
+	 * shared grid and the link is `DesktopIcon`, which the desktop also uses on its own. Everywhere
+	 * else a view is one file and owes both.
+	 */
+	const SPLIT = ['IconGrid.svelte', 'DesktopIcon.svelte'];
+
+	test('a handler and a container always ship together', () => {
+		const half = files.filter(
+			(name) => !SPLIT.includes(name) && wiring.get(name)!.handler !== wiring.get(name)!.container
+		);
+		expect(half).toEqual([]);
+	});
+
+	test('all four folder views reach the walker', () => {
+		const reached = files.filter((name) => name.startsWith('views/') && wiring.get(name)!.handler);
+		// `IconView` is the fourth, through the two files in `SPLIT`, and `FolderView` is the
+		// switch that picks between them rather than a view of its own.
+		expect(reached).toEqual([
+			'views/ColumnView.svelte',
+			'views/GalleryView.svelte',
+			'views/ListView.svelte'
+		]);
+		expect(SPLIT.map((name) => wiring.get(name))).toEqual([
+			{ handler: false, container: true },
+			{ handler: true, container: false }
+		]);
 	});
 });
