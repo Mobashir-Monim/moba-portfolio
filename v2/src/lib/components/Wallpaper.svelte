@@ -126,7 +126,7 @@
 	-->
 	<svg class="defs" width="0" height="0" focusable="false">
 		<filter
-			id="mnemos-pixel"
+			id="mobos-pixel"
 			x="0"
 			y="0"
 			width="100%"

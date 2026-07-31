@@ -61,14 +61,21 @@ markup. Every difference was CSS.
 
 ### 1.2 Name the OS
 
-**Decided: Mnemos.** Version 2.0, matching the site.
+**Decided: mobOS.** Version 2.0, matching the site.
 
 The old site's operating system was unnamed, which is why the boot screen, the sidebar's
 `MDir`/`MDoc` types, and the `644` permissions read as isolated jokes instead of one world.
 
-Mnemos is Greek, memory. A portfolio is a record of work, so the name means what the site is. It
-earns the `M` prefix that `MDir` and `MDoc` already depend on, and it reads as native in
-pinstripes and in monospace alike, which the skin switcher requires.
+mobOS is the owner's handle wearing an operating system's suffix, so the name says whose machine
+this is. It keeps the `M` prefix that `MDir` and `MDoc` already depend on, and it reads as native
+in pinstripes and in monospace alike, which the skin switcher requires.
+
+**It was Mnemos until phase 6**, Greek for memory, argued from what a portfolio is rather than
+from whose it is. Renamed at the owner's call. The rename cost one constant plus the six strings
+that cannot import it: five `localStorage` keys, the boot session key, and an SVG filter id.
+That the constant held everything else is the whole of what this task bought, and the storage
+namespace moving is what discards every visitor's saved dress, which is deliberate: the defaults
+moved in the same change.
 
 Where it surfaces: the boot sequence, the Terminal prompt and hostname, System Info, the
 file-type labels, and the `404` voice. One exported constant in `src/lib/`, never a string
@@ -97,8 +104,8 @@ missing value is a build-time hole rather than a silent fallback.
 `wintry` / `modern`. All four are renamed and repalletted. `modern` in particular could not
 survive: it is now a skin name, and `data-skin="modern"` beside `data-theme="modern"` is a trap.
 
-Named for ways of storing or showing an image, which is what Mnemos means and what a portfolio
-does. Hue positions roughly track the old four so nothing feels lost.
+Named for ways of storing or showing an image, which is what a portfolio does. Hue positions
+roughly track the old four so nothing feels lost.
 
 | Theme | Accent | Replaces |
 |---|---|---|

@@ -582,7 +582,7 @@ describe('the wallpaper is a background, so it answers to the contrast contract'
 		const module = await Bun.file(new URL('./appearance.svelte.ts', import.meta.url)).text();
 		// Whitespace-tolerant, because the roster is long enough now that the formatter wraps the
 		// call across four lines and a one-line pattern would fail on a reformat rather than a defect.
-		const inHtml = html.match(/pick\(\s*'mnemos\.wallpaper',\s*\[([^\]]+)\],\s*'([\w-]+)'\s*\)/);
+		const inHtml = html.match(/pick\(\s*'mobos\.wallpaper',\s*\[([^\]]+)\],\s*'([\w-]+)'\s*\)/);
 		expect(inHtml).not.toBeNull();
 
 		const names = (s: string) => [...s.matchAll(/'([\w-]+)'/g)].map(([, v]) => v);

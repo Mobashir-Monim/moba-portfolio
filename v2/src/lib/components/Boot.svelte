@@ -15,7 +15,7 @@
 	 * decide that until after the paint it was supposed to prevent.
 	 */
 
-	const KEY = 'mnemos.booted';
+	const KEY = 'mobos.booted';
 
 	let step = $state(0);
 	let done = $state(false);

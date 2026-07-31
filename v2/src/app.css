@@ -526,7 +526,7 @@
 	   it on a machine that had one. Nothing hazes, for the same reason six-pixel blocks are the
 	   point: what survives quantising is separation, and a graded blur under it is a shade a 1-bit
 	   display could not make. */
-	--wall-fx: url('#mnemos-pixel');
+	--wall-fx: url('#mobos-pixel');
 	--wall-haze-far: none;
 	--wall-haze-mid: none;
 

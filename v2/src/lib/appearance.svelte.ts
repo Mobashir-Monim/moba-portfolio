@@ -43,12 +43,22 @@ export type Settings = {
 	clickMode: ClickMode;
 };
 
+/**
+ * Namespaced by the OS name, lowercased, the way the shell prompt and the 404 voice are.
+ * Written out rather than derived from `OS_NAME`, because the pre-paint script in `app.html`
+ * cannot import and would hold a literal either way; one source with a copy beside it is a
+ * smaller lie than two derivations that only look related.
+ *
+ * Renaming the namespace discards every saved choice, which is deliberate here: the defaults
+ * moved in the same change, and a returning visitor should see the site's new dress rather
+ * than a preference they never knowingly set.
+ */
 const KEY = {
-	skin: 'mnemos.skin',
-	theme: 'mnemos.theme',
-	appearance: 'mnemos.appearance',
-	wallpaper: 'mnemos.wallpaper',
-	clickMode: 'mnemos.click-mode'
+	skin: 'mobos.skin',
+	theme: 'mobos.theme',
+	appearance: 'mobos.appearance',
+	wallpaper: 'mobos.wallpaper',
+	clickMode: 'mobos.click-mode'
 };
 const DEFAULT: Settings = {
 	skin: 'modern',

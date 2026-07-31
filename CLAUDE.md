@@ -172,9 +172,10 @@ non-default user saw a flash.
 
 Carried over from the old site. The metaphor is the product; keep the personality.
 
-**The OS is called Mnemos**, version 2.0, matching the site. Greek, memory: a portfolio is a
-record of work, so the name means what the site is, and it earns the `M` that `MDir` and `MDoc`
-already lean on. It sits above the skin, so it reads the same in pinstripes as in monospace.
+**The OS is called mobOS**, version 2.0, matching the site. The owner's handle wearing an
+operating system's suffix, so the name says whose machine this is, and it keeps the `M` that
+`MDir` and `MDoc` already lean on. It sits above the skin, so it reads the same in pinstripes as
+in monospace.
 
 The name lives in one exported constant in `src/lib/`, never as a string literal in a component.
 It surfaces in the boot sequence, the Terminal prompt and hostname, System Info, the file-type

@@ -7,10 +7,10 @@ import { BUILT } from './build';
  * file-type labels, and the 404 voice. Those must never drift apart, so it lives here and
  * never as a string literal in a component.
  *
- * Mnemos is Greek, memory. A portfolio is a record of work, so the name means what the site
- * is, and it earns the `M` that `MDir` and `MDoc` already lean on.
+ * mobOS is the owner's handle wearing an operating system's suffix, so the name says whose
+ * machine this is, and it keeps the `M` that `MDir` and `MDoc` already lean on.
  */
-export const OS_NAME = 'Mnemos';
+export const OS_NAME = 'mobOS';
 export const OS_VERSION = '2.0';
 
 /** The two things the filesystem holds. Everything with a route is one or the other. */
@@ -25,7 +25,7 @@ export type NodeKind = 'folder' | 'document';
 export type Kind = NodeKind | 'app';
 
 /**
- * The invented type names the info sidebar shows. They lean on the `M` of Mnemos, which is why
+ * The invented type names the info sidebar shows. They lean on the `M` of mobOS, which is why
  * they live beside the name rather than inside the sidebar component: renaming the OS has to
  * rename these in the same edit or the world stops being one world.
  */

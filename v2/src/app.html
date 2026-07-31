@@ -28,18 +28,18 @@
 					}
 				};
 				const el = document.documentElement;
-				el.dataset.skin = pick('mnemos.skin', ['modern', 'retro', 'glass'], 'modern');
+				el.dataset.skin = pick('mobos.skin', ['modern', 'retro', 'glass'], 'modern');
 				el.dataset.theme = pick(
-					'mnemos.theme',
+					'mobos.theme',
 					['ferrite', 'phosphor', 'cyanotype', 'anthotype'],
 					'ferrite'
 				);
 				el.dataset.wallpaper = pick(
-					'mnemos.wallpaper',
+					'mobos.wallpaper',
 					['grove', 'night-scene', 'circuit-bottom', 'hive', 'none'],
 					'grove'
 				);
-				const appearance = pick('mnemos.appearance', ['light', 'dark', 'auto'], 'auto');
+				const appearance = pick('mobos.appearance', ['light', 'dark', 'auto'], 'auto');
 				const dark =
 					appearance === 'auto'
 						? matchMedia('(prefers-color-scheme: dark)').matches
@@ -55,7 +55,7 @@
 				// which is the harmless direction.
 				try {
 					if (
-						!sessionStorage.getItem('mnemos.booted') &&
+						!sessionStorage.getItem('mobos.booted') &&
 						!matchMedia('(prefers-reduced-motion: reduce)').matches
 					) {
 						el.dataset.boot = '';

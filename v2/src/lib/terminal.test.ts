@@ -66,7 +66,7 @@ describe('ls', () => {
 	});
 
 	test('a missing path is the 404 voice', () => {
-		expect(lines('ls nowhere')).toEqual(['mnemos: ls: nowhere: No such file or directory']);
+		expect(lines('ls nowhere')).toEqual(['mobos: ls: nowhere: No such file or directory']);
 	});
 });
 
@@ -79,16 +79,16 @@ describe('cat', () => {
 
 	test('an experience is a folder that still reads', () => {
 		expect(lines('cat eveneer-tech-wizard', '/experience')[0]).toBeString();
-		expect(lines('cat eveneer-tech-wizard', '/experience')[0]).not.toStartWith('mnemos:');
+		expect(lines('cat eveneer-tech-wizard', '/experience')[0]).not.toStartWith('mobos:');
 	});
 
 	test('an index folder and the root do not', () => {
-		expect(lines('cat projects')).toEqual(['mnemos: cat: projects: Is a directory']);
-		expect(lines('cat /')).toEqual(['mnemos: cat: /: Is a directory']);
+		expect(lines('cat projects')).toEqual(['mobos: cat: projects: Is a directory']);
+		expect(lines('cat /')).toEqual(['mobos: cat: /: Is a directory']);
 	});
 
 	test('a missing path is the 404 voice', () => {
-		expect(lines('cat nowhere')).toEqual(['mnemos: cat: nowhere: No such file or directory']);
+		expect(lines('cat nowhere')).toEqual(['mobos: cat: nowhere: No such file or directory']);
 	});
 });
 
@@ -110,7 +110,7 @@ describe('open', () => {
 	test('the desktop is not a window', () => {
 		const opened = run('open /', HOME);
 		expect(opened.effect).toBeUndefined();
-		expect(opened.lines).toEqual(['mnemos: open: /: Is the desktop']);
+		expect(opened.lines).toEqual(['mobos: open: /: Is the desktop']);
 	});
 });
 
@@ -142,7 +142,7 @@ describe('the rest', () => {
 	test('an unknown theme does not change one', () => {
 		const set = run('theme crimson', HOME);
 		expect(set.effect).toBeUndefined();
-		expect(set.lines).toEqual(['mnemos: theme: crimson: No such theme']);
+		expect(set.lines).toEqual(['mobos: theme: crimson: No such theme']);
 	});
 
 	test('clear is an effect, because the log is the component the shell has no access to', () => {
@@ -156,11 +156,11 @@ describe('the rest', () => {
 		expect(named).toContain('clear');
 		// Every command help prints is one that runs.
 		for (const name of named)
-			expect(lines(name)).not.toEqual([`mnemos: command not found: ${name}`]);
+			expect(lines(name)).not.toEqual([`mobos: command not found: ${name}`]);
 	});
 
 	test('an unknown command is the shell voice, not a crash', () => {
-		expect(lines('sudo')).toEqual(['mnemos: command not found: sudo']);
+		expect(lines('sudo')).toEqual(['mobos: command not found: sudo']);
 	});
 
 	test('an empty line does nothing at all', () => {
@@ -193,6 +193,6 @@ describe('completion', () => {
 
 	test('every candidate is something the command would then accept', () => {
 		for (const candidate of complete('ls ', HOME))
-			expect(lines(`ls ${candidate}`)[0]).not.toStartWith('mnemos:');
+			expect(lines(`ls ${candidate}`)[0]).not.toStartWith('mobos:');
 	});
 });
