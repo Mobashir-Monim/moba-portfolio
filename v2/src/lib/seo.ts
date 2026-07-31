@@ -21,10 +21,14 @@ import type { Project } from './types/project';
  * `og:url`, and a sitemap entry that disagree about the host are three different pages to Google.
  *
  * ponytail: hardcoded, not read from the request. The site prerenders, so there is no request at
- * build time, and a relative canonical is not a canonical. Moving to mobashirmonim.com is this
- * line and nothing else.
+ * build time, and a relative canonical is not a canonical.
+ *
+ * It moved to mobashirmonim.com in 6.8, and moving it was one line, which is what the constant
+ * was for. The workers.dev host still answers and still serves this canonical, which is correct:
+ * two hosts serving one site is exactly the case a canonical exists to resolve, and it points
+ * the deploy URL at the domain rather than leaving a duplicate to be picked between.
  */
-export const SITE_URL = 'https://moba-portfolio.m-monim.workers.dev';
+export const SITE_URL = 'https://mobashirmonim.com';
 
 export const PERSON = `${about.person.first} ${about.person.last}`;
 
