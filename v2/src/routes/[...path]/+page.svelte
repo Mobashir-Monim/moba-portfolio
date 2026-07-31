@@ -33,5 +33,21 @@
 		</a>
 	</nav>
 
+	<!--
+		An index is the one node type whose body renders nothing of itself, since what a folder has
+		to say is what it holds. That left the seven index routes as the only pages on the site with
+		no `h1`, found by 6.3's pass: a reader with no JavaScript got a breadcrumb and a bare list of
+		links with nothing naming the page they had landed on, and a crawler got the same on exactly
+		the pages 2.12 gave `CollectionPage` and `ItemList` to.
+
+		Here rather than in `NodeBody`, which is what keeps it off the shell: a folder window is
+		named by its own title bar, and adding a second visible name inside every one of them is a
+		composition change this task was not asked to make. A document needs no case either way,
+		because its content component has always rendered its own heading.
+	-->
+	{#if node.type === 'index'}
+		<h1 class="font-ui text-2xl font-semibold">{node.name}</h1>
+	{/if}
+
 	<NodeContent {node} />
 </div>
