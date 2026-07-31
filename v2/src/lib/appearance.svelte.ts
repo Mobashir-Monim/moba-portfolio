@@ -35,6 +35,12 @@ export const WALLPAPERS = [
 /**
  * Whether a desktop icon opens on one click or two. Persisted like the rest, but absent from
  * the pre-paint script above, because nothing about it is visible before the first paint.
+ *
+ * `single` is the default, and the reason is a visitor's first sentence: "this doesn't work".
+ * Double was the truer desktop metaphor and it cost more than it bought. A first-time visitor
+ * arrives with the web's own contract in hand, where one click follows a link, and the icons
+ * are the entire product: a mode that answers that click with a selection reads as a dead page,
+ * not as a stricter emulator. The setting stays for anyone who wants the Finder gesture back.
  */
 export const CLICK_MODES = ['single', 'double'] as const;
 
@@ -69,12 +75,13 @@ const KEY = {
 	wallpaper: 'mobos.wallpaper',
 	clickMode: 'mobos.click-mode'
 };
-const DEFAULT: Settings = {
+/** Exported so a test can pin the shipped defaults, which are otherwise a word nobody reads. */
+export const DEFAULT: Settings = {
 	skin: 'glass',
 	theme: 'anthotype',
 	appearance: 'auto',
 	wallpaper: 'night-scene',
-	clickMode: 'double'
+	clickMode: 'single'
 };
 
 function pick<T extends string>(

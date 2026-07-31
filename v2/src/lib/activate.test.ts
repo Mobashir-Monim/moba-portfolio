@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, test } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { activators, pickers } from './activate';
-import { settings, update } from './appearance.svelte';
+import { DEFAULT, settings, update } from './appearance.svelte';
 
 /**
  * The one branch every folder view shares. Ledger #10 was the old site racing a `setTimeout`
@@ -36,9 +36,19 @@ function counters() {
 	};
 }
 
-afterEach(() => update({ clickMode: 'double' }));
+afterEach(() => update({ clickMode: DEFAULT.clickMode }));
+
+/**
+ * Pinned, because it is one word in a defaults object and it is the difference between a visitor
+ * finding the site and a visitor reporting that clicking does nothing.
+ */
+test('a first-time visitor gets single-click', () => {
+	expect(DEFAULT.clickMode).toBe('single');
+});
 
 describe('double-click mode', () => {
+	beforeEach(() => update({ clickMode: 'double' }));
+
 	test('one click selects, two open', () => {
 		const a = counters();
 		a.onclick(click());

@@ -1578,6 +1578,45 @@ the defaults became **glass / anthotype / night-scene**. See 1.2 and 1.3.
 
 ---
 
+## Phase 7: The first visitor
+
+**~1 day.** Run after the first person who was not the author and not a harness opened the site.
+
+Their opening line was "my initial experience was *this doesn't work*", followed by "this is really
+cool though". Both halves matter. Every audit in Phase 6 was driven by something that already knew
+what the site was; this is the first report from someone who did not, and it found in one sitting
+what eight automated passes could not see, because none of them could be surprised.
+
+Three complaints, all separate and all correct:
+
+1. Clicking an icon did nothing, because double-click was the default.
+2. Nothing on the page said this was a desktop OS, so a folder icon read as a link to a page.
+3. Keyboard navigation was asked for, and it is largely there, which means it is invisible.
+
+- [x] 7.1 **Single click opens.** One word in `DEFAULT`, and the whole of complaint 1.
+
+      Double was the truer metaphor and it was the wrong default. A first-time visitor arrives
+      holding the web's contract, where one click follows a link, and on this site the icons are
+      the entire product: a mode that answers that click with a selection reads as a dead page
+      rather than as a stricter emulator. The setting stays, so the Finder gesture is one radio
+      away for anyone who wants it, and the mobile override from 6.4 is untouched.
+
+      `DEFAULT` is exported now and a test pins `clickMode`, because the value is one word in an
+      object literal and nothing else in the suite would notice it moving back. `activate.test.ts`
+      leaned on the old default: the double-click cases set nothing and passed on the module's
+      initial state, so flipping it turned two of them red. They set their own mode now, which is
+      what they should always have done.
+
+- [ ] 7.2 **The desktop says what it is.**
+
+- [ ] 7.3 **A welcome window on first visit.**
+
+- [ ] 7.4 **The arrow keys reach the other three views.**
+
+- [ ] 7.5 **A focus ring that survives the wallpaper.**
+
+---
+
 ## Sequencing notes
 
 - Phase 1 gates everything. Do not start the shell before the styleguide is signed off, or the
