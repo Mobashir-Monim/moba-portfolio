@@ -368,12 +368,12 @@
 	--ff-body: ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 	--ff-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
-	--fs-xs: 0.6875rem;
-	--fs-sm: 0.75rem;
-	--fs-base: 0.875rem;
-	--fs-lg: 1.0625rem;
-	--fs-xl: 1.375rem;
-	--fs-2xl: 1.875rem;
+	--fs-xs: calc(0.6875rem * var(--fs-scale));
+	--fs-sm: calc(0.75rem * var(--fs-scale));
+	--fs-base: calc(0.875rem * var(--fs-scale));
+	--fs-lg: calc(1.0625rem * var(--fs-scale));
+	--fs-xl: calc(1.375rem * var(--fs-scale));
+	--fs-2xl: calc(1.875rem * var(--fs-scale));
 	--lh-tight: 1.2;
 	--lh-normal: 1.55;
 	--tracking-ui: -0.005em;
@@ -457,12 +457,12 @@
 	   and lands unreadably small, so the ramp sits at parity with `modern` instead. Retro's
 	   character is the face, the zero radius, the bevels, and the pinstripes; none of it was
 	   ever carried by the point size. */
-	--fs-xs: 0.75rem;
-	--fs-sm: 0.8125rem;
-	--fs-base: 0.875rem;
-	--fs-lg: 1rem;
-	--fs-xl: 1.25rem;
-	--fs-2xl: 1.75rem;
+	--fs-xs: calc(0.75rem * var(--fs-scale));
+	--fs-sm: calc(0.8125rem * var(--fs-scale));
+	--fs-base: calc(0.875rem * var(--fs-scale));
+	--fs-lg: calc(1rem * var(--fs-scale));
+	--fs-xl: calc(1.25rem * var(--fs-scale));
+	--fs-2xl: calc(1.75rem * var(--fs-scale));
 	--lh-tight: 1.1;
 	--lh-normal: 1.4;
 	--tracking-ui: 0em;
@@ -554,12 +554,12 @@
 	--ff-body: Montserrat, ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 	--ff-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
-	--fs-xs: 0.75rem;
-	--fs-sm: 0.8125rem;
-	--fs-base: 0.9375rem;
-	--fs-lg: 1.1875rem;
-	--fs-xl: 1.5625rem;
-	--fs-2xl: 2.125rem;
+	--fs-xs: calc(0.75rem * var(--fs-scale));
+	--fs-sm: calc(0.8125rem * var(--fs-scale));
+	--fs-base: calc(0.9375rem * var(--fs-scale));
+	--fs-lg: calc(1.1875rem * var(--fs-scale));
+	--fs-xl: calc(1.5625rem * var(--fs-scale));
+	--fs-2xl: calc(2.125rem * var(--fs-scale));
 	--lh-tight: 1.15;
 	--lh-normal: 1.6;
 	--tracking-ui: -0.01em;
@@ -1017,6 +1017,12 @@
 
 :root {
 	--ui-scale: 1;
+	/* The type ramp works the same way: a skin declares its own proportions and multiplies each
+	   step by this, so one number takes all three ramps down on a phone. Mobile-first, so the
+	   narrow case is the declaration and the wider one is the override. Unlike `--ui-scale` it
+	   stops at the first step: type wants to be smaller on a handset, not larger on a 90rem
+	   monitor, where the reading distance has not changed. */
+	--fs-scale: 0.9;
 	--dock-h: calc(var(--dock-base) * var(--ui-scale));
 	/* The dock's glyphs, which were 20px in a 56px dock and read as decoration rather than as
 	   controls. Proportional to the dock, so a skin with a taller dock gets larger marks. */
@@ -1030,6 +1036,7 @@
 @media (min-width: 48rem) {
 	:root {
 		--ui-scale: 1.12;
+		--fs-scale: 1;
 	}
 }
 

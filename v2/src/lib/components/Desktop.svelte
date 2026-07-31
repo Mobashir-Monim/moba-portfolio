@@ -90,7 +90,7 @@
 	*/
 	.desktop.scene :global(:where(.label, .masthead h1)) {
 		padding: 0.125rem 0.4375rem;
-		background: var(--c-surface-1);
+		/* background: var(--c-surface-1); */
 		border-radius: var(--r-xs);
 	}
 
@@ -110,6 +110,26 @@
 	   it. Both tokens are re-declared together because a custom property computes where it is
 	   declared, so a `--icon-glyph` left at `:root` would keep resolving against the base tile.
 	*/
+	/*
+	   Below that, the tile goes the other way and gets wider than its own base, which reads
+	   backwards until you follow what the track count does. The grid is `repeat(auto-fit,
+	   var(--icon-tile))`, so the tile width is the column count: at the base 76px a 390px phone
+	   fits four, and four columns on a phone is where "Experience" breaks after the `c` and
+	   "Attainments" after the `e`. One step up drops it to three, and three columns is a wide
+	   enough track that the longest label in the tree sets on one line.
+
+	   ponytail: a width, not a column count, because that is the mechanism the grid already has.
+	   The ceiling is that a fixed width cannot pin one count across every phone: 320px still lands
+	   two, and a skin with a larger base reaches two sooner. Both are the graceful direction. If
+	   an exact three is ever required it needs `repeat(3, ...)` here plus a full-width tile in
+	   DesktopIcon, which is two rules and a specificity fight for a case nothing has asked for.
+	*/
+	@media (max-width: 47.999rem) {
+		.desktop {
+			--icon-tile: calc(var(--icon-base) * 1.25);
+		}
+	}
+
 	@media (min-width: 48rem) {
 		.desktop {
 			--icon-tile: calc(var(--icon-base) * 1.4);
