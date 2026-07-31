@@ -48,6 +48,7 @@
 		grove: 'Ranges behind a deep pine forest, in haze',
 		'night-scene': 'A wind-bent tree against the sun, over low hills',
 		'circuit-bottom': 'Board traces fanning out of the centre',
+		hive: 'A honeycomb assembling itself toward the right edge',
 		none: 'Plain ground, whatever the skin makes of it'
 	};
 

@@ -79,14 +79,15 @@
 		the chosen one would mean rendering the prerendered default and swapping at hydration, which
 		is defect #33 with a new name.
 
-		ponytail: that costs every scene's SVG in every page, and three scenes is 902KB of markup and
-		250KB over the wire for a page whose own content is a few kilobytes. Simplifying further will
+		ponytail: that costs every scene's SVG in every page, and four scenes is 931KB of markup and
+		260KB over the wire for a page whose own content is a few kilobytes. Simplifying further will
 		not buy it back: `night-scene`'s tree is already as coarse as the crown survives, and
 		`circuit-bottom` is mask geometry rather than path detail, so a fourfold looser tolerance moves
-		it five percent. This is the ceiling, and it is reached. The next scene, or any real complaint
-		about first paint, is the point where each one gets baked into one file per skin and fetched,
-		which trades this weight for a request. Do that rather than folding the choice into JavaScript,
-		which takes the flash back.
+		it five percent. This is the ceiling, and it is reached. `hive` was the fourth and cost 59KB of
+		it, because a comb is a few dozen hexagons rather than a traced coastline, so the trigger has
+		not moved: the next scene, or any real complaint about first paint, is the point where each one
+		gets baked into one file per skin and fetched, which trades this weight for a request. Do that
+		rather than folding the choice into JavaScript, which takes the flash back.
 
 		`{@html}` is the payload half of the inlining above, and it is safe here for the one reason
 		that makes it ever safe: there is no input. These are `?raw` imports of files this repo

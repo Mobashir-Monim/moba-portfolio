@@ -804,6 +804,56 @@
 	--wall-ink-5: var(--c-shade-50);
 }
 
+/*
+   `hive` is three bands and five stops, and it is the scene that carries its depth in density
+   rather than in terrain or in line weight. One honeycomb cut into three: cells scattered thin
+   across the middle far, a loose raft of them mid, a solid comb packed against the right edge
+   near. Read left to right the comb assembles itself, which is the composition, and it leaves the
+   top left corner empty, which is where the masthead and the first row of icons are.
+
+   The art arrived with its own ground, a full-frame wash under the far cells and a second gradient
+   over it. Both are gone. A drawn scene's ground is `--wall-sky` over the skin's own desktop, and
+   keeping a baked one would have meant an opaque slab at the back of the stack with retro's dither
+   and modern's graph paper sealed underneath it. The wash is not lost, it moved: the sky here runs
+   across rather than down, which is the one direction change in the file and the reason for it is
+   that this scene's own gradient is horizontal. The empty left stays the darker end, the comb sits
+   on the palest.
+
+   Every cell is a face and two rims, and the rims are the whole of the relief: the lit one takes
+   the band's crest and the shadowed one its base, offset by a few units, so the bevel is the same
+   two tokens the face is drawn from and no third value has to be invented for it. At the very top
+   of the frame the face has reached its crest and the lit rim goes quiet, at the very bottom the
+   shadowed one does. That is a hairline either way at the size this renders, and it is the price
+   of a bevel that costs the ramp nothing.
+
+   One scale for all three planes, `circuit-bottom`'s argument exactly: the comb is one drawing, a
+   cell in the far band abuts a cell in the mid one, and three scales would leave every one of
+   those joins landing somewhere else. The `vh` term is the art's own aspect, `5000` by `3000`, so
+   a tall viewport gets the whole composition rather than a strip of its bottom.
+*/
+[data-wallpaper='hive'] {
+	--wall-show-hive: flex;
+
+	--wall-w-far: max(100%, 60rem, 167vh);
+	--wall-w-mid: var(--wall-w-far);
+	--wall-w-near: var(--wall-w-far);
+
+	--wall-sky: linear-gradient(to right, var(--wall-ink-2), var(--wall-ink-1));
+	--wall-ink-1: var(--c-shade-50);
+	--wall-ink-2: var(--c-shade-100);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-300);
+	--wall-ink-5: var(--c-shade-400);
+}
+
+.dark[data-wallpaper='hive'] {
+	--wall-ink-1: var(--c-shade-400);
+	--wall-ink-2: var(--c-shade-300);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-100);
+	--wall-ink-5: var(--c-shade-50);
+}
+
 /* `none` is the opt-out, and the reason `--desktop-bg` survives: with no scene the skins are
    exactly the graph paper, the dither, and the wash they were. It sets no masks, and
    Wallpaper.svelte owns the rule that hides itself when there are none. */
