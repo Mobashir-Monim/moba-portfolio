@@ -70,6 +70,19 @@ type Scene = {
 	 * as authored, which is right for a layer already measured in kilobytes.
 	 */
 	tolerance: number;
+	/**
+	 * Whether to crop each layer to its own crest. Note 5, and it is right for every landscape:
+	 * a band's ink runs from its crest down to the frame floor, so moving the `viewBox` top down to
+	 * the content makes the element box the band and gives the gradient the band's own span.
+	 *
+	 * It is wrong for a scene that is one full-frame composition rather than a stack of terrain.
+	 * `Wallpaper.svelte` bottom-anchors every band, so a layer whose ink is a strip at the *top* of
+	 * the frame gets a tall box with the ink in its first fifth, and bottom-anchoring then carries
+	 * that strip clean off the top of the screen. Keeping the full frame makes every layer the same
+	 * box, which is what puts a composition back together: the layers were registered to each other
+	 * in the export and the crop is the only thing that un-registers them.
+	 */
+	crop?: boolean;
 };
 
 const SCENES: Scene[] = [
@@ -94,6 +107,22 @@ const SCENES: Scene[] = [
 		// between a scene that ships and one that doubles every page. Past this the crown starts
 		// rounding into a blob, which is the ceiling rather than a setting to keep turning up.
 		tolerance: 3
+	},
+	{
+		name: 'abstract-symbols-1',
+		width: 3200,
+		height: 2000,
+		layers: { far: 'far', mid: 'mid', near: 'near' },
+		// Zero, and measured rather than chosen: this art is axis-aligned rectangles and
+		// straight-edged chevrons, so there are no curves to flatten and Douglas-Peucker keeps every
+		// corner by construction. Sweeping 0 to 6 moves the three files by 0.2kB in total, which is
+		// the shape of a knob that does not apply. The weight here is the export's mask machinery,
+		// 288 luminance masks in `far` alone, one per mark, and simplification cannot reach it.
+		tolerance: 0,
+		// The one scene so far that is a composition rather than terrain, so it keeps its frame.
+		// Its layers interleave vertically instead of stacking: the marks of `far` are three rows
+		// across the top, `mid` is two rows across the bottom, and `near`'s chevrons cross both.
+		crop: false
 	}
 ];
 
@@ -319,8 +348,9 @@ for (const scene of SCENES) {
 		const svg = await Bun.file(new URL(`${scene.name}/${file}.svg`, SOURCE)).text();
 		const { body, top } = repaint(svg, scene, slot);
 		const id = `${scene.name}-${slot}`;
-		// Rounded down, so the crop never cuts into the crest it is cropping to.
-		const y = Math.floor(top);
+		// Rounded down, so the crop never cuts into the crest it is cropping to. A scene that opts
+		// out keeps the export's own frame, which is what holds its layers in register.
+		const y = scene.crop === false ? 0 : Math.floor(top);
 		const height = scene.height - y;
 		const out =
 			`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 ${y} ${scene.width} ${height}" width="${scene.width}" height="${height}">\n` +

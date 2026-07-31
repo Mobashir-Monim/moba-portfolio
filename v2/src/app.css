@@ -854,6 +854,49 @@
 	--wall-ink-5: var(--c-shade-50);
 }
 
+/*
+   `abstract-symbols-1` is three bands and five stops, and it is the first scene whose subject is
+   neither terrain nor a single object cut into depth: a field of small marks, glyph-like, scattered
+   thin far, denser mid, and a handful of large ones near. Depth is population and size rather than
+   line weight or density of one comb.
+
+   One scale for all three planes, `circuit-bottom`'s and `hive`'s argument and for once not about
+   a line crossing between layers. This scene's layers interleave vertically rather than stacking:
+   `far` is rows of marks across the top of the frame, `mid` is rows across the bottom, and `near`'s
+   chevrons cross both. The fan would slide those three registrations apart and scatter what was
+   laid out as one picture. It is also why this is the one scene that opts out of the crest crop in
+   `paint-wallpaper.ts`: the crop is what un-registers layers that were drawn on a shared frame.
+
+   The `vh` term is the art's own aspect, `3200` by `2000`, so a tall viewport gets the whole
+   composition rather than a strip of it.
+
+   The sky is the default vertical at the default quarter. A field of marks has no horizon to sit
+   under, so the sky is doing the same job it does for `circuit-bottom`: keeping the empty part of
+   the frame off a flat slab and letting the skin's own ground through.
+*/
+[data-wallpaper='abstract-symbols-1'] {
+	--wall-show-abstract-symbols-1: flex;
+
+	--wall-w-far: max(100%, 60rem, 160vh);
+	--wall-w-mid: var(--wall-w-far);
+	--wall-w-near: var(--wall-w-far);
+
+	--wall-sky: linear-gradient(var(--wall-ink-2), var(--wall-ink-1));
+	--wall-ink-1: var(--c-shade-50);
+	--wall-ink-2: var(--c-shade-100);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-300);
+	--wall-ink-5: var(--c-shade-400);
+}
+
+.dark[data-wallpaper='abstract-symbols-1'] {
+	--wall-ink-1: var(--c-shade-400);
+	--wall-ink-2: var(--c-shade-300);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-100);
+	--wall-ink-5: var(--c-shade-50);
+}
+
 /* `none` is the opt-out, and the reason `--desktop-bg` survives: with no scene the skins are
    exactly the graph paper, the dither, and the wash they were. It sets no masks, and
    Wallpaper.svelte owns the rule that hides itself when there are none. */

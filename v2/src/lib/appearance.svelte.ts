@@ -21,7 +21,14 @@ export const APPEARANCES = ['light', 'dark', 'auto'] as const;
  * the bands themselves are a folder under `lib/wallpapers/` that `Wallpaper.svelte` finds without
  * being told.
  */
-export const WALLPAPERS = ['grove', 'night-scene', 'circuit-bottom', 'hive', 'none'] as const;
+export const WALLPAPERS = [
+	'grove',
+	'night-scene',
+	'circuit-bottom',
+	'hive',
+	'abstract-symbols-1',
+	'none'
+] as const;
 
 /**
  * Whether a desktop icon opens on one click or two. Persisted like the rest, but absent from

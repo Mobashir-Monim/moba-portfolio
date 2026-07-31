@@ -49,6 +49,7 @@
 		'night-scene': 'A wind-bent tree against the sun, over low hills',
 		'circuit-bottom': 'Board traces fanning out of the centre',
 		hive: 'A honeycomb assembling itself toward the right edge',
+		'abstract-symbols-1': 'Chevrons and drifts of small marks, top and bottom',
 		none: 'Plain ground, whatever the skin makes of it'
 	};
 
