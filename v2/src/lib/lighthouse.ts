@@ -10,9 +10,9 @@ export const LIGHTHOUSE = {
 	route: '/',
 	preset: 'mobile',
 	scores: {
-		performance: 69,
-		accessibility: 100,
+		'performance': 56,
+		'accessibility': 100,
 		'best-practices': 100,
-		seo: 100
+		'seo': 100
 	}
 } as const;
