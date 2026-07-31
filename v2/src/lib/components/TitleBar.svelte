@@ -153,13 +153,17 @@
 		/* background: var(--_bg); */
 	}
 
+	/* Wide enough that two neighbouring 24px targets do not overlap: the glyphs are 15.2px, so
+	   9px of gap puts their centres 24.2px apart, which is what SC 2.5.8's spacing clause asks
+	   for. Tightening this re-breaks the criterion the `::after` below exists to satisfy. */
 	.group {
 		display: flex;
 		align-items: center;
-		gap: 0.375rem;
+		gap: 0.5625rem;
 	}
 
 	.control {
+		position: relative;
 		display: grid;
 		place-items: center;
 		align-self: center;
@@ -170,6 +174,26 @@
 		box-shadow: var(--bevel-out);
 		cursor: pointer;
 		transition: all var(--dur-fast) var(--ez-standard);
+	}
+
+	/* WCAG 2.2 SC 2.5.8, Target Size (Minimum), which is a Level AA criterion and the one thing
+	   6.1's audit found that no amount of contrast checking would have.
+
+	   The glyph stays 15.2px, because a title bar control is drawn at the size the three skins
+	   were designed around and 24px of visible chrome is a different window. What grows is the
+	   target underneath it: a pseudo-element is part of its originating element for hit testing,
+	   so a press anywhere in here is a press on the button, and nothing about the drawing moves.
+
+	   24px rather than a rem, deliberately. The criterion is written in CSS pixels, so a token
+	   that tracks the skin would satisfy it in some skins and not others. */
+	.control::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 24px;
+		height: 24px;
+		translate: -50% -50%;
 	}
 
 	/* Greyscale on purpose. Retro's accent budget is the title bar's paint and the selection
