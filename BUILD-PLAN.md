@@ -1372,28 +1372,157 @@ something the press caused.
 
 ## Phase 6: Launch
 
-**~2 to 3 days.**
+**~2 to 3 days.** Run once mobashirmonim.com was pointed at the Worker.
 
-6.1 Lighthouse across the site: performance, accessibility, best practices, SEO.
+Every audit here was driven rather than read, and the phase found nine defects across five of its
+eight tasks. Two of them, the type scale and the missing tap, had been shipped and live. That is
+the argument for the phase: each was invisible to `bun run check`, to `bun test`, and to looking at
+the site.
 
-6.2 Manual accessibility audit. Keyboard only, then a screen reader. Not automated tooling
-alone, which misses most of what matters here.
+**Two renames landed first**, because they change what gets audited. The OS became **mobOS**, and
+the defaults became **glass / anthotype / night-scene**. See 1.2 and 1.3.
 
-6.3 JavaScript-disabled pass over every content route.
+- [x] 6.1 **Lighthouse across the site.** `/` on mobile, the heaviest page and the harsher preset,
+      plus six other routes and a desktop run. Content routes score 99 / 100 / 100 / 100.
 
-6.4 Cross-browser and real-device check, particularly drag on touch.
+      **The type scale was measured in itself.** `html` set `font-size: var(--fs-base)`, which
+      reads as declaring the body size and actually redefines the unit the scale is written in:
+      every `--fs-*` is a `rem`, so the scale multiplied itself and every other `rem` in the
+      codebase went with it. Modern declared a 14px base and rendered 12.25px, declared 11px and
+      rendered 9.63px. Lighthouse saw only the smallest symptom, one 11.25px selector. Everything
+      now renders what it declares, at the cost of the whole site growing 14% in modern and retro
+      and 7% in glass, proportionally, because every dimension moved together.
 
-6.5 Cloudflare Web Analytics. No Google Analytics, no consent banner needed.
+      **Window controls failed the 24px target minimum**, WCAG 2.2 SC 2.5.8, both ways: 15.2px
+      glyphs with centres 21.2px apart, which also fails the spacing clause. The glyph did not
+      move; a pseudo-element grows the target underneath it and the group gap went to 9px.
+      Lighthouse only caught this on `/styleguide`, which is worth remembering: the desktop opens
+      with no window on it by 1.8's call, so the page an audit points at by default has no title
+      bar to measure, and the defect was in every window on the site.
 
-6.6 Redirects from any old site URLs worth preserving.
+      `scripts/audit.ts` writes `src/lib/lighthouse.ts`, which System Info reads. That closes the
+      hole 4.5 left with a comment on it. Not run in CI, deliberately: Workers Builds has no Chrome
+      and no server to point one at.
 
-6.7 Ledger review: walk all 35 items in `CLAUDE.md` and confirm none returned.
+- [x] 6.2 **Accessibility audit**, axe over all 46 routes plus the shell in three skins with folder
+      windows, all four folder views, the launcher and three apps open, then the whole thing driven
+      from the keyboard.
 
-6.8 Structured data and index verification, which can only happen against the live host: Rich
-Results Test on one page of each JSON-LD type, Search Console connected with the sitemap
-submitted, and a check that the canonical host in the served HTML matches the host serving it.
-That last one is the failure `SITE_URL` is a constant to make loud, and it is the one to run
-first on the day mobashirmonim.com is pointed at the Worker.
+      **`--c-fg-3` was exempt from a background it sits on.** `tokens.test.ts` exists to make a
+      contrast failure impossible across 24 combinations, and it excused this pair in a comment:
+      muted body copy never sits on the desktop ground. `gen-palette.ts` and `app.css` carried the
+      same sentence. It was false, and axe found the consequence on 45 of 46 routes at 4.06:1: a
+      plain content route paints `surface-0` on `html` and puts the breadcrumb and every content
+      header's meta line straight onto it. One token, two contexts, and the context the exemption
+      did not consider is the JavaScript-off document. `fg-3` is now held to 4.5:1 on all four
+      surfaces, which cost 0.035 of lightness in the light ramp and nothing in the dark.
+
+      **An exemption written as a sentence about intent is only as true as its call sites**, and
+      nothing in that file reads the call sites. The lesson outlives the pair.
+
+      **The window body scrolls and did not take the keyboard**, so System Info could be scrolled
+      by pointer and by nothing else. `tabindex="0"` on the container, no handler and no role,
+      since arrow keys already scroll a focused overflow box. Svelte's a11y check and axe disagree
+      about that element and the heuristic is the one suppressed.
+
+      Keyboard half is clean in all three skins: 7 desktop stops, 30 in-window stops, a visible
+      indicator on every one, Enter opening a folder and landing focus inside, Close and Minimize
+      both reachable, Escape closing and handing focus back to the opening icon, and the launcher
+      tracking `aria-expanded` and returning focus to the dock.
+
+      **The screen reader half is not done and is the reviewer's**, which is the one part of this
+      task no harness can stand in for.
+
+- [x] 6.3 **JavaScript-disabled pass**, all 46 routes, checked for a title, an `h1`, prose or links
+      as the page's job demands, a way out, a canonical and JSON-LD, then a link actually followed.
+
+      **The seven index routes had no `h1`.** An index is the one node type whose body says nothing
+      of itself, since what a folder has to say is what it holds, so a reader with no JavaScript got
+      a breadcrumb and a bare list of links with nothing naming the page. Fixed in the route rather
+      than in `NodeBody`, which keeps it off the shell: a folder window is named by its own title
+      bar, and a second visible name inside every one of them is a composition change.
+
+      Two things the pass got wrong before it got the site right, both worth carrying. It read
+      `href` attributes and called every content page a dead end: SvelteKit 2 prerenders relative
+      hrefs, `paths.relative` defaults true, so home is `../` at one level and `../../` at two. And
+      it demanded prose of index pages, which owe links instead.
+
+- [x] 6.4 **Cross-browser**, the engines rather than the brands: Chromium, WebKit and Gecko.
+
+      **A tap opened nothing.** `CLAUDE.md` asks twice for tap-opens-directly on mobile and names
+      `matchMedia('(pointer: coarse)')` as the way to ask, and neither existed anywhere in the
+      source. The default click mode is double, so on a 390px viewport the only route into any
+      folder or document was a double-tap, which is also the browser's zoom gesture. The platform
+      wins that one. `activators` now treats a coarse pointer as a third way in, overriding the
+      setting rather than reading it. `pickers` deliberately gets no exception and says why.
+
+      Everything else clean: `backdrop-filter`, `color-mix`, container queries, `checkVisibility`,
+      `:has` and `setPointerCapture` in all three, and title-bar drag moving the window 120px in
+      all three. Firefox lacks `animation-timeline: scroll()`, which is not a defect: the case
+      study progress bar is already inside an `@supports` and correctly renders `display: none`
+      there, with the contents list and prose intact. Verified rather than assumed.
+
+      **Real hardware is the reviewer's half.** Touch here is emulated, which honestly covers the
+      claim 2.4 makes, that one pointer path serves a finger as well as a mouse, and nothing more.
+
+- [x] 6.5 **Cloudflare Web Analytics, enabled in the dashboard rather than in this repo.**
+      mobashirmonim.com is a Cloudflare zone, so Web Analytics injects its own beacon zone-wide
+      with no snippet, no token in git, and nothing to keep in sync. No Google Analytics and no
+      consent banner, which is ledger #34's other half: the old site injected GA through `{@html}`
+      with no consent gate.
+
+- [x] 6.6 **No redirects, and the reason is ledger #12.** The old site had exactly one route, `/`,
+      plus a favicon. Every piece of content lived in a window that mounted on click, so no URL
+      ever existed to preserve, and `/` still resolves to the desktop. The discoverability defect
+      and the absence of redirect work are the same fact.
+
+- [x] 6.7 **Ledger review**, all 35 items. **One had come back.**
+
+      **#23, `transition: all`**, in the dock slot, the title bar, the window control and the
+      desktop icon tile, two of them as a wrapped shorthand with `all` on its own line beside a
+      named property, which is how it reads as harmless. None was as bad as the original, since
+      each sat on one small element rather than on `body`, and that is exactly why it survived:
+      nothing looked wrong, so nothing looked. **The rule had no test, and a rule with no test is a
+      comment.** `motion.test.ts` now holds it, matching per line so the wrapped form cannot hide.
+
+      Three greps hit text rather than code and are noted rather than silently passed: the
+      styleguide quotes #4's `calc` inside a `<code>`, a test comment names `MediaQueryList` for
+      #28, and `Head.svelte`'s `{@html}` for #34 emits JSON-LD built from this repo's own data with
+      every `<` escaped, which is not the third-party analytics tag that item is about. #32 needed
+      judgement rather than a line count: `projects.ts` is 436 lines with no line over 110
+      characters, so it is 21 structured records, and the prose moved to markdown in 3.5.
+
+- [x] 6.8 **Structured data and canonical verification.** `SITE_URL` moved to mobashirmonim.com,
+      which 2.7 kept a constant precisely so the move would be one line, and it moved the canonical,
+      `og:url`, every sitemap `loc`, the `Sitemap:` directive and every `@id` with it.
+
+      **The failure that constant exists to make loud had already happened**: the domain was live
+      and every page served from it carried a canonical naming the workers.dev host, which is a
+      live site telling crawlers it is a copy of somewhere else.
+
+      Verified against the built output: 46 of 46 canonicals match their sitemap entry, every
+      JSON-LD parses, and no `@id` is referenced without being defined on the same page. All the
+      types 2.12 and 4.1 promised are present: `Person`, `WebSite`, `BreadcrumbList`, `CreativeWork`,
+      `CollectionPage`, `ItemList`, `Article`, `ProfilePage`, `DigitalDocument`, `ScholarlyArticle`,
+      `EducationalOccupationalCredential` and `OrganizationRole`.
+
+      **The live-host half is the reviewer's**: Rich Results Test on one page of each type, and
+      Search Console connected with the sitemap submitted. Both need a login, and both want the
+      deploy carrying this phase to be live first.
+
+### Open after phase 6
+
+- **`/` weighs 301 KB brotli, and mobile performance is 69.** Every other route is 99 and the
+  desktop preset is 97. The whole of it is that `Wallpaper.svelte` inlines every scene's art into
+  every page and CSS shows one, which is what buys zero-flash switching and a correct render with
+  JavaScript off. The `ponytail:` note in that file named this exact trigger, "the next scene, or
+  any real complaint about first paint", and phase 6 delivered both at once. Decision deferred to
+  the reviewer; the three options weighed were leaving it, server-rendering only the default scene
+  and inserting the rest on demand, and converting the bands to fetched CSS masks with the gradient
+  in CSS.
+
+- **The screen reader pass, a real device, Rich Results Test and Search Console**, all noted above
+  and all needing a human rather than a harness.
 
 ---
 
