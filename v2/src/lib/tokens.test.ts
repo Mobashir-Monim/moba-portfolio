@@ -395,7 +395,19 @@ describe('the wallpaper is a background, so it answers to the contrast contract'
 				continue;
 			}
 			const files = readdirSync(new URL(`${entry.name}/`, drawnDir));
-			for (const face of ['far', 'mid', 'near']) {
+			// `far` and `near` are the floor, not all three.
+			//
+			// `Wallpaper.svelte` argues for three planes, "because two have no middle: distance is
+			// read from how many planes stand between the eye and the horizon". That argument is
+			// about depth carried by *scale*, and it binds a landscape, where each plane is its own
+			// subject at its own size. It does not bind a scene that spends one scale across every
+			// plane and buys its depth from the ink ramp and the skin's haze instead, which
+			// `circuit-bottom` and `hive` already do and which `circuit-streak` arrived as: one
+			// drawing of wiring at two weights, exported as two layers.
+			//
+			// A back and a front is still a gap the eye can measure. One plane is not, and a folder
+			// with a `mid` and no `far` is the half-kept convention this test exists to catch.
+			for (const face of ['far', 'near']) {
 				if (!files.includes(`${face}.svg`))
 					wrong.push(`lib/wallpapers/${entry.name} has no ${face}.svg`);
 			}

@@ -906,6 +906,73 @@
 	--wall-ink-5: var(--c-shade-50);
 }
 
+/*
+   `circuit-streak` is the first scene with two bands rather than three, so its ink chain is four
+   stops and not five. Nothing had to be taught that: `bands()` reads the folder, so a scene with
+   no middle distance is expressed by not shipping a `mid.svg`, and the chain length follows.
+
+   Traces again, and `circuit-bottom`'s relatives, but drawn as long runs with junction dots rather
+   than as a filled board: two depths of the same wiring, the finer behind the heavier. One scale
+   for both planes, that scene's argument exactly, since a run leaves one layer and arrives in the
+   other and two scales would land every crossing somewhere else.
+
+   The export arrived with a full-frame white rect under it, which `paint-wallpaper.ts` now drops:
+   a drawn scene's ground is `--wall-sky` over the skin's own desktop, and a baked slab would seal
+   retro's dither and modern's graph paper underneath it. `hive` had the same slab.
+*/
+[data-wallpaper='circuit-streak'] {
+	--wall-show-circuit-streak: flex;
+
+	--wall-w-far: max(104%, 62rem, 175vh);
+	--wall-w-near: var(--wall-w-far);
+
+	--wall-sky: linear-gradient(var(--wall-ink-2), var(--wall-ink-1));
+	--wall-ink-1: var(--c-shade-50);
+	--wall-ink-2: var(--c-shade-100);
+	--wall-ink-3: var(--c-shade-300);
+	--wall-ink-4: var(--c-shade-400);
+}
+
+.dark[data-wallpaper='circuit-streak'] {
+	--wall-ink-1: var(--c-shade-400);
+	--wall-ink-2: var(--c-shade-300);
+	--wall-ink-3: var(--c-shade-100);
+	--wall-ink-4: var(--c-shade-50);
+}
+
+/*
+   `pixel-brush` is three bands and five stops, and it is the heaviest scene in the folder by a
+   wide margin: 1.44MB of markup against `night-scene`'s 339KB. It is also the only source whose
+   geometry ships exactly as authored, because it is not in the export dialect the rest are
+   (relative commands, arcs, quadratics), and `paint-wallpaper.ts` passes it through rather than
+   re-deriving curves it was not written to read. Those two facts are the same fact.
+
+   One scale across the three planes, and the frame kept, for the reason the two scenes above give:
+   this is one composition cut into depths rather than three distances.
+*/
+[data-wallpaper='pixel-brush'] {
+	--wall-show-pixel-brush: flex;
+
+	--wall-w-far: max(100%, 60rem, 162vh);
+	--wall-w-mid: var(--wall-w-far);
+	--wall-w-near: var(--wall-w-far);
+
+	--wall-sky: linear-gradient(var(--wall-ink-2), var(--wall-ink-1));
+	--wall-ink-1: var(--c-shade-50);
+	--wall-ink-2: var(--c-shade-100);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-300);
+	--wall-ink-5: var(--c-shade-400);
+}
+
+.dark[data-wallpaper='pixel-brush'] {
+	--wall-ink-1: var(--c-shade-400);
+	--wall-ink-2: var(--c-shade-300);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-100);
+	--wall-ink-5: var(--c-shade-50);
+}
+
 /* `none` is the opt-out, and the reason `--desktop-bg` survives: with no scene the skins are
    exactly the graph paper, the dither, and the wash they were. It sets no masks, and
    Wallpaper.svelte owns the rule that hides itself when there are none. */

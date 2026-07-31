@@ -27,6 +27,8 @@ export const WALLPAPERS = [
 	'circuit-bottom',
 	'hive',
 	'abstract-symbols-1',
+	'circuit-streak',
+	'pixel-brush',
 	'none'
 ] as const;
 

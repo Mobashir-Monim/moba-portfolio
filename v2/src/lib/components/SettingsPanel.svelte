@@ -50,6 +50,8 @@
 		'circuit-bottom': 'Board traces fanning out of the centre',
 		hive: 'A honeycomb assembling itself toward the right edge',
 		'abstract-symbols-1': 'Chevrons and drifts of small marks, top and bottom',
+		'circuit-streak': 'Long wiring runs and junction dots, at two depths',
+		'pixel-brush': 'Brushed strokes broken into pixels',
 		none: 'Plain ground, whatever the skin makes of it'
 	};
 

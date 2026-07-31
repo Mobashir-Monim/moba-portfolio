@@ -83,6 +83,19 @@ type Scene = {
 	 * in the export and the crop is the only thing that un-registers them.
 	 */
 	crop?: boolean;
+	/**
+	 * Whether to flatten and simplify the geometry, or pass every `d` through untouched.
+	 *
+	 * `flatten` speaks the absolute `M L H V C Z` subset a Figma layer export emits, and stops on
+	 * anything else rather than draw it wrong. That is the right default. It is the wrong one for
+	 * a source in a richer dialect: arcs, quadratics and relative commands are all legal SVG, and
+	 * teaching this parser to re-derive them is a arc-to-bezier routine in service of a weight
+	 * saving that may not even apply.
+	 *
+	 * Off means the curves ship exactly as authored, `tolerance` does nothing, and there is no
+	 * crest to crop to, so `crop` must be off with it.
+	 */
+	simplify?: boolean;
 };
 
 const SCENES: Scene[] = [
@@ -123,6 +136,34 @@ const SCENES: Scene[] = [
 		// Its layers interleave vertically instead of stacking: the marks of `far` are three rows
 		// across the top, `mid` is two rows across the bottom, and `near`'s chevrons cross both.
 		crop: false
+	},
+	{
+		name: 'circuit-streak',
+		width: 2807,
+		height: 1604,
+		// Two layers, not three. `bands()` reads the folder rather than a count, so a scene with no
+		// middle distance is expressed by not having a `mid.svg`, and its ink chain is four stops
+		// instead of five.
+		layers: { far: 'far', near: 'near' },
+		// Traces again, so `circuit-bottom`'s argument: the smallest marks here are junction dots a
+		// few units across, and a tolerance that reads as sub-pixel against a ridge turns one into
+		// a triangle.
+		tolerance: 0.5,
+		// One drawing cut into two depths, with runs crossing between them, so the frame is shared
+		// for the same reason `abstract-symbols-1` shares it.
+		crop: false
+	},
+	{
+		name: 'pixel-brush',
+		width: 2600,
+		height: 1600,
+		layers: { far: 'far', mid: 'mid', near: 'near' },
+		tolerance: 0,
+		crop: false,
+		// The one source so far that is not in the export dialect: relative commands, arcs,
+		// quadratics and smooth curves throughout. Its geometry ships as authored rather than
+		// re-derived through an arc-to-bezier routine written for one wallpaper.
+		simplify: false
 	}
 ];
 
@@ -275,6 +316,8 @@ function repaint(svg: string, scene: Scene, slot: string): { body: string; top: 
 	/** Set while inside a gradient, whose stops go out with it. See the drop below. */
 	let dropping = '';
 	let out = '';
+	/** Paths emitted, which is the only 'is anything here' signal a pass-through scene has. */
+	let drawn = 0;
 
 	for (const m of svg.matchAll(/<(\/?)([\w-]+)((?:"[^"]*"|[^>])*?)(\/?)>|([^<]+)/g)) {
 		const [whole, close, tag, attrs, selfClose, text] = m;
@@ -308,15 +351,41 @@ function repaint(svg: string, scene: Scene, slot: string): { body: string; top: 
 		rest = rest.replace(/url\(#([^)]*)\)/g, (_, raw) => `url(#${ns(raw)})`);
 
 		if (depth === 0 && SHAPES.has(tag)) {
+			// A full-frame rect at the top level is the export's baked ground, and note 1's argument
+			// applies to it whole: a drawn scene's ground is `--wall-sky` over the skin's own
+			// desktop, and keeping this would seal retro's dither and modern's graph paper under an
+			// opaque slab. `hive` had the same slab and it was removed by hand before the file
+			// arrived here. Anything else rectangular is art this script has not seen.
+			if (tag === 'rect') {
+				const w = Number(rest.match(/\swidth="([\d.]+)"/)?.[1]);
+				const h = Number(rest.match(/\sheight="([\d.]+)"/)?.[1]);
+				if (w >= scene.width && h >= scene.height) continue;
+				throw new Error(
+					`${id}: a ${w}x${h} rect is drawn, and only a full-frame ground is dropped`
+				);
+			}
 			if (tag !== 'path') throw new Error(`${id}: ${tag} is drawn, and only path is handled`);
 			const d = rest.match(/\sd="([^"]*)"/)?.[1];
 			if (!d) throw new Error(`${id}: a path with no d`);
+
+			// One fill for the layer, no opacity, no stroke: notes 1 and 3 at the top.
+			rest = rest.replace(/\s(?:fill|fill-opacity|opacity|stroke|stroke-width)="[^"]*"/g, '');
+
+			if (scene.simplify === false) {
+				// Geometry verbatim. `flatten` speaks absolute M, L, H, V, C and Z and stops on
+				// anything else rather than draw it wrong, which is the right default and the wrong
+				// one for a source in a richer dialect: arcs, quadratics and relative commands are
+				// all legal SVG this pipeline has no reason to re-derive. Passing `d` through keeps
+				// every curve exactly as authored and gives up only the weight simplification buys.
+				drawn++;
+				out += `<path${rest} fill="url(#${id})"/>`;
+				continue;
+			}
+
 			const subpaths = flatten(d).map((pts) => simplify(pts, scene.tolerance));
 			for (const pts of subpaths) for (const p of pts) if (p.y < top) top = p.y;
-			// One fill for the layer, no opacity, no stroke: notes 1 and 3 at the top.
-			rest = rest
-				.replace(/\s(?:fill|fill-opacity|opacity|stroke|stroke-width)="[^"]*"/g, '')
-				.replace(/\sd="[^"]*"/, ` d="${polygons(subpaths)}"`);
+			drawn++;
+			rest = rest.replace(/\sd="[^"]*"/, ` d="${polygons(subpaths)}"`);
 			out += `<path${rest} fill="url(#${id})"/>`;
 			continue;
 		}
@@ -339,7 +408,13 @@ function repaint(svg: string, scene: Scene, slot: string): { body: string; top: 
 		out += `<${tag}${rest}${selfClose}>`;
 	}
 
-	if (!Number.isFinite(top)) throw new Error(`${id}: nothing is drawn`);
+	// The crest doubles as the "is anything here" check when it is computed. A pass-through scene
+	// never computes one, so it counts paths instead: both catch a layer that produced no art.
+	if (scene.simplify === false) {
+		if (drawn === 0) throw new Error(`${id}: nothing is drawn`);
+	} else if (!Number.isFinite(top)) {
+		throw new Error(`${id}: nothing is drawn`);
+	}
 	return { body: out, top };
 }
 
