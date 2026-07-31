@@ -1,11 +1,20 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import Wallpaper from './Wallpaper.svelte';
 
 	let {
 		children,
 		masthead,
+		scene = false,
 		class: klass = ''
-	}: { children: Snippet; masthead?: Snippet; class?: string } = $props();
+	}: {
+		children: Snippet;
+		masthead?: Snippet;
+		/** Draw the wallpaper behind the grid. The real desktop wants it; the styleguide's
+		 *  thumbnail-sized desktops want the plain ground they are there to show. */
+		scene?: boolean;
+		class?: string;
+	} = $props();
 </script>
 
 <!--
@@ -22,7 +31,8 @@
 	were missing live on the links themselves. See `$lib/roving` for why a role would be a promise
 	the prerendered HTML cannot keep.
 -->
-<div class="desktop {klass}">
+<div class="desktop {klass}" class:scene>
+	{#if scene}<Wallpaper />{/if}
 	<div class="centre">
 		{@render masthead?.()}
 		{@render children()}
@@ -31,12 +41,24 @@
 
 <style>
 	.desktop {
+		position: relative;
 		display: grid;
 		place-items: center;
 		background: var(--desktop-bg);
 	}
 
+	/*
+	   Positioned, and deliberately without a `z-index`: the wallpaper is an earlier sibling, so
+	   painting order alone puts the grid over it, and that is the whole of the stacking this
+	   needs. A `z-index` here would raise the desktop out of document order and over the window
+	   layer, which is a later sibling of this component with no z-index of its own, so the icons
+	   would draw on top of every open window.
+
+	   Inside the wallpaper the mark is a layer between the sky and the ranges, so the ridges cut
+	   its base without anything out here knowing that.
+	*/
 	.centre {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -50,6 +72,39 @@
 	.centre :global(.grid) {
 		width: 100%;
 		justify-content: center;
+	}
+
+	/*
+	   Text on a wallpaper gets its own ground, which is the one thing a scene behind the desktop
+	   genuinely costs.
+
+	   The AA contract is not negotiable and neither is the arithmetic: `--c-fg-2` clears 4.5:1 on
+	   `--c-surface-0` by about 5.2:1 in the light palettes, so a ridge a few percent darker than
+	   the ground already fails, and a ridge dark enough to read as a ridge fails badly. There is
+	   no wallpaper worth having on the other side of that. So the label sits on a chip, which is
+	   what a desktop icon has done on every OS that ever shipped a photograph, and the pair
+	   table's own `fg on surface-1` guarantee carries it in all 24 combinations.
+
+	   The glyph above the label keeps no chip: it is non-text, so 3:1 is its bar, and
+	   src/lib/tokens.test.ts holds both ridge colours to it.
+
+	   Scoped to `.scene`, because the same icon renders inside folder windows, where there is no
+	   scene and a chip would be noise. `none` is a scene with nothing in it, so it opts out too.
+	*/
+	.desktop.scene :global(:where(.label, .masthead h1)) {
+		padding: 0.125rem 0.4375rem;
+		background: var(--c-surface-1);
+		border-radius: var(--r-xs);
+	}
+
+	/* Selection already is a ground, and a chip inside it would read as a second one. */
+	.desktop.scene :global(.tile.selected .label) {
+		background: none;
+	}
+
+	:global(html[data-wallpaper='none']) .desktop.scene :global(:where(.label, .masthead h1)) {
+		padding: 0;
+		background: none;
 	}
 
 	/*

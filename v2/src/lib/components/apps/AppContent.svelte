@@ -34,6 +34,7 @@
 		skin={settings.skin}
 		theme={settings.theme}
 		appearance={settings.appearance}
+		wallpaper={settings.wallpaper}
 		clickMode={settings.clickMode}
 		dark={isDark()}
 		onchange={update}

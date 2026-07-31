@@ -21,6 +21,8 @@ const staticDir = new URL('../../static/', import.meta.url);
 const SKINS = ['modern', 'retro', 'glass'] as const;
 const THEMES = ['ferrite', 'phosphor', 'cyanotype', 'anthotype'] as const;
 const MODES = ['light', 'dark'] as const;
+/** `none` names no masks, so it has no block to check. Every wallpaper that draws is listed. */
+const WALLPAPERS = ['ridge'] as const;
 
 /** `--name: value;` pairs from the block opened by `selector` at the start of a line. */
 function block(selector: string): Record<string, string> {
@@ -150,7 +152,12 @@ describe('skin blocks own shape', () => {
 			for (const [name, value] of Object.entries(skinTokens(skin))) {
 				// Shadow recipes carry their own black alpha. That is a shape recipe, not a palette.
 				if (name.startsWith('--elev-')) continue;
-				if (/#[0-9a-f]{3,8}\b/i.test(value)) literals.push(`${skin} ${name}: ${value}`);
+				// A bare keyword is the same defect as a hex, and the wallpaper is where one would
+				// be reached for: an absolute black reads as depth in the light palettes and as
+				// nothing at all in the dark ones.
+				if (/#[0-9a-f]{3,8}\b|\b(black|white)\b/i.test(value)) {
+					literals.push(`${skin} ${name}: ${value}`);
+				}
 			}
 		}
 		expect(literals).toEqual([]);
@@ -247,6 +254,94 @@ describe('accent budget across all 24 combinations', () => {
 		// Only glass is allowed to be unresolvable. If another skin shows up here, the accent
 		// budget has grown a hole the test cannot see.
 		expect(skipped.every((s) => s.startsWith('glass'))).toBe(true);
+	});
+});
+
+/**
+ * The wallpaper axis. A wallpaper is geometry, a skin is how the scene is lit, and the ridge
+ * colours are the one place the two meet, so this is where the meeting is checked.
+ *
+ * What sits on a ridge is the desktop icon's glyph, and nothing else: the label and the heading
+ * carry a `--c-surface-1` chip, which the pair table above already guarantees. See the note in
+ * Desktop.svelte for why that chip is not optional. A glyph is non-text, so 1.4.11's 3:1 is its
+ * bar, and it is the whole of what these two colours have to clear.
+ */
+describe('the wallpaper is a background, so it answers to the contrast contract', () => {
+	const WALL_LAYERS = ['--wall-far', '--wall-near'] as const;
+
+	/**
+	 * `color-mix(in srgb, var(--c-a) N%, var(--c-b))`, resolved against one theme ramp. Both
+	 *  sides are opaque hex, so a plain per-channel lerp is the whole of sRGB mixing.
+	 *
+	 * Every ridge is a step from `--c-surface-0` toward `--c-fg-1`, which is the one direction
+	 * that separates the scene from the ground in both polarities: darker than a light sky,
+	 * lighter than a dark one. Anything absolute would work in one and vanish in the other.
+	 */
+	function mix(recipe: string, ramp: Record<string, string>): string {
+		const m = recipe.match(
+			/^color-mix\(in srgb, var\((--c-[\w-]+)\) (\d+)%, var\((--c-[\w-]+)\)\)$/
+		);
+		if (!m) throw new Error(`not a resolvable two-token sRGB mix: ${recipe}`);
+		const [, a, pct, b] = m;
+		const p = +pct / 100;
+		const ch = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+		const out = [0, 1, 2].map((i) => Math.round(ch(ramp[a], i) * p + ch(ramp[b], i) * (1 - p)));
+		return `#${out.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+	}
+
+	test('every skin names both ridge layers as a mix this test can resolve', () => {
+		for (const skin of SKINS) {
+			for (const layer of WALL_LAYERS) {
+				expect(() => mix(skinTokens(skin)[layer], palette('ferrite', 'light'))).not.toThrow();
+			}
+		}
+	});
+
+	test('the icon glyph reaches 3:1 on both ridge layers, in all 24 combinations', () => {
+		const failures: string[] = [];
+		for (const skin of SKINS) {
+			for (const layer of WALL_LAYERS) {
+				const recipe = skinTokens(skin)[layer];
+				for (const theme of THEMES) {
+					for (const mode of MODES) {
+						const ramp = palette(theme, mode);
+						const ratio = contrast(ramp['--c-fg-1'], mix(recipe, ramp));
+						if (ratio < 3) {
+							failures.push(`${skin}/${theme}/${mode}: fg-1 on ${layer} is ${ratio.toFixed(2)}:1`);
+						}
+					}
+				}
+			}
+		}
+		expect(failures).toEqual([]);
+	});
+
+	test('every wallpaper names two masks, and both files are actually shipped', () => {
+		const missing: string[] = [];
+		for (const name of WALLPAPERS) {
+			const tokens = block(`[data-wallpaper='${name}']`);
+			for (const token of ['--wall-mask-far', '--wall-mask-near']) {
+				const url = tokens[token]?.match(/^url\('([^']+)'\)$/)?.[1];
+				if (!url) missing.push(`${name} ${token} is ${tokens[token] ?? '(unset)'}`);
+				else if (!existsSync(new URL(`.${url}`, staticDir))) missing.push(`${name}: ${url}`);
+			}
+		}
+		expect(missing).toEqual([]);
+	});
+
+	/**
+	 * The fourth axis crosses the same pre-paint boundary the other three do, and it is the one
+	 * that fails silently: a stale list here means the saved wallpaper is rejected as unknown and
+	 * every visitor who chose one quietly gets the default back on the next load.
+	 */
+	test('the allowed wallpapers and the default are the same on both sides of app.html', async () => {
+		const module = await Bun.file(new URL('./appearance.svelte.ts', import.meta.url)).text();
+		const inHtml = html.match(/pick\('mnemos\.wallpaper', \[([^\]]+)\], '([\w-]+)'\)/);
+		expect(inHtml).not.toBeNull();
+
+		const names = (s: string) => [...s.matchAll(/'([\w-]+)'/g)].map(([, v]) => v);
+		expect(names(inHtml![1])).toEqual(names(module.match(/WALLPAPERS = \[([^\]]+)\]/)![1]));
+		expect(inHtml![2]).toBe(module.match(/wallpaper: '([\w-]+)'/)![1]);
 	});
 });
 

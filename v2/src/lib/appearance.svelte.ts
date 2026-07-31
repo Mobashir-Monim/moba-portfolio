@@ -11,6 +11,15 @@ export const SKINS = ['modern', 'retro', 'glass'] as const;
 /** One theme per usable hue cluster in sRGB. The hues and the names are argued in gen-palette.ts. */
 export const THEMES = ['ferrite', 'phosphor', 'cyanotype', 'anthotype'] as const;
 export const APPEARANCES = ['light', 'dark', 'auto'] as const;
+/**
+ * The scene behind the desktop. A fourth axis rather than a skin or theme value, because it is
+ * neither shape nor colour: every wallpaper renders in all 24 combinations, and every skin
+ * dresses the same two masks its own way. `none` falls back to the skin's plain `--desktop-bg`.
+ *
+ * Adding one means a `[data-wallpaper='...']` block in app.css naming its two mask files, and
+ * the name here. Nothing else.
+ */
+export const WALLPAPERS = ['ridge', 'none'] as const;
 
 /**
  * Whether a desktop icon opens on one click or two. Persisted like the rest, but absent from
@@ -21,12 +30,14 @@ export const CLICK_MODES = ['single', 'double'] as const;
 export type Skin = (typeof SKINS)[number];
 export type Theme = (typeof THEMES)[number];
 export type Appearance = (typeof APPEARANCES)[number];
+export type Wallpaper = (typeof WALLPAPERS)[number];
 export type ClickMode = (typeof CLICK_MODES)[number];
 
 export type Settings = {
 	skin: Skin;
 	theme: Theme;
 	appearance: Appearance;
+	wallpaper: Wallpaper;
 	clickMode: ClickMode;
 };
 
@@ -34,12 +45,14 @@ const KEY = {
 	skin: 'mnemos.skin',
 	theme: 'mnemos.theme',
 	appearance: 'mnemos.appearance',
+	wallpaper: 'mnemos.wallpaper',
 	clickMode: 'mnemos.click-mode'
 };
 const DEFAULT: Settings = {
 	skin: 'modern',
 	theme: 'ferrite',
 	appearance: 'auto',
+	wallpaper: 'ridge',
 	clickMode: 'double'
 };
 
@@ -80,6 +93,7 @@ function initial(): Settings {
 		skin: pick(el.dataset.skin, SKINS, DEFAULT.skin),
 		theme: pick(el.dataset.theme, THEMES, DEFAULT.theme),
 		appearance: pick(read(KEY.appearance), APPEARANCES, DEFAULT.appearance),
+		wallpaper: pick(el.dataset.wallpaper, WALLPAPERS, DEFAULT.wallpaper),
 		clickMode: pick(read(KEY.clickMode), CLICK_MODES, DEFAULT.clickMode)
 	};
 }
@@ -126,6 +140,7 @@ export function update(patch: Partial<Settings>): void {
 	const el = document.documentElement;
 	el.dataset.skin = settings.skin;
 	el.dataset.theme = settings.theme;
+	el.dataset.wallpaper = settings.wallpaper;
 	el.classList.toggle('dark', isDark());
 
 	for (const key of Object.keys(patch) as (keyof Settings)[]) write(KEY[key], settings[key]);

@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en" data-skin="modern" data-theme="ferrite">
+<html lang="en" data-skin="modern" data-theme="ferrite" data-wallpaper="ridge">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<!--
-			Resolve all three display axes before the first paint. The attributes above are the
+			Resolve every display axis before the first paint. The attributes above are the
 			defaults, so the page is correctly dressed with JavaScript off; this script only
 			replaces them with the saved choice. The old site hardcoded a theme and applied the
 			saved one after mount, so every non-default visitor saw a flash.
@@ -34,6 +34,7 @@
 					['ferrite', 'phosphor', 'cyanotype', 'anthotype'],
 					'ferrite'
 				);
+				el.dataset.wallpaper = pick('mnemos.wallpaper', ['ridge', 'none'], 'ridge');
 				const appearance = pick('mnemos.appearance', ['light', 'dark', 'auto'], 'auto');
 				const dark =
 					appearance === 'auto'

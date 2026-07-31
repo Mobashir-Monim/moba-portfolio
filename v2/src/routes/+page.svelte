@@ -56,7 +56,7 @@
 <svelte:window {onkeydown} />
 
 <div class="shell">
-	<Desktop class="ground">
+	<Desktop class="ground" scene>
 		{#snippet masthead()}
 			<!--
 				The mark, and under it the heading the page owes anyway. It used to be visually hidden
@@ -111,10 +111,13 @@
 <Boot />
 
 <style>
+	/* `clip` rather than `hidden` for the reason spelled out in Window.svelte: a hidden box is
+	   still scrollable by script, so it can be scrolled out from under its own fixed dock by
+	   nothing more than focusing something inside a window. */
 	.shell {
 		position: relative;
 		min-height: 100dvh;
-		overflow: hidden;
+		overflow: clip;
 	}
 
 	/* The ground fills the shell so the dither and the wash cover the viewport, not just the
@@ -156,6 +159,12 @@
 		background: var(--c-fg-1);
 		border-radius: var(--r-lg);
 		box-shadow: var(--elev-1);
+	}
+
+	/* A wallpaper already draws the mark, at ten times this size and set into the scene. Two of
+	   them on one screen is one too many, so the tile stands down and the `h1` stays. */
+	:global(html:not([data-wallpaper='none'])) .mark {
+		display: none;
 	}
 
 	@media (min-width: 48rem) {

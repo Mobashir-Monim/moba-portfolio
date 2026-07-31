@@ -4,11 +4,13 @@
 		CLICK_MODES,
 		SKINS,
 		THEMES,
+		WALLPAPERS,
 		type Appearance,
 		type ClickMode,
 		type Settings,
 		type Skin,
-		type Theme
+		type Theme,
+		type Wallpaper
 	} from '$lib/appearance.svelte';
 	import SkinPreview from './SkinPreview.svelte';
 
@@ -16,6 +18,7 @@
 		skin,
 		theme,
 		appearance,
+		wallpaper,
 		clickMode,
 		dark = false,
 		onchange
@@ -23,6 +26,7 @@
 		skin: Skin;
 		theme: Theme;
 		appearance: Appearance;
+		wallpaper: Wallpaper;
 		clickMode: ClickMode;
 		/** Which polarity the theme swatches should render in. `auto` is not recoverable from
 		 *  the DOM, so the caller resolves it. */
@@ -38,6 +42,11 @@
 		light: 'Always light',
 		dark: 'Always dark',
 		auto: 'Follow the system'
+	};
+
+	const WALLPAPER_HINT: Record<Wallpaper, string> = {
+		ridge: 'A ridgeline, a treeline, and a lookout',
+		none: 'Plain ground, whatever the skin makes of it'
 	};
 
 	const CLICK_HINT: Record<ClickMode, string> = {
@@ -86,6 +95,26 @@
 					/>
 					<span class="swatch" data-theme={value} class:dark aria-hidden="true"></span>
 					<span class="name">{value}</span>
+				</label>
+			{/each}
+		</div>
+	</fieldset>
+
+	<fieldset class="field">
+		<legend>Wallpaper</legend>
+		<p class="hint">One scene, dressed by the skin and the colour above it.</p>
+		<div class="rows">
+			{#each WALLPAPERS as value (value)}
+				<label class="row" class:on={wallpaper === value}>
+					<input
+						type="radio"
+						name="{uid}-wallpaper"
+						{value}
+						checked={wallpaper === value}
+						onchange={() => onchange({ wallpaper: value })}
+					/>
+					<span class="name">{value}</span>
+					<span class="hint">{WALLPAPER_HINT[value]}</span>
 				</label>
 			{/each}
 		</div>
@@ -156,7 +185,9 @@
 		font-size: var(--fs-xs);
 	}
 
-	.skins .hint {
+	/* The intro line a field can carry, which is a direct child. A row's own hint is nested
+	   inside its label, so the child combinator is what keeps the two apart. */
+	.field > .hint {
 		margin-bottom: 0.5rem;
 	}
 
@@ -167,6 +198,7 @@
 	}
 
 	.tile {
+		position: relative;
 		display: grid;
 		gap: 0.375rem;
 		padding: 0.5rem;
@@ -182,6 +214,7 @@
 	}
 
 	.row {
+		position: relative;
 		display: flex;
 		align-items: baseline;
 		gap: 0.5rem;
@@ -191,7 +224,12 @@
 	}
 
 	/* The radio itself does the work and stays in the tab order; it is only moved off screen so
-	   the tile can be the control. `sr-only` would collapse it and take the focus ring with it. */
+	   the tile can be the control. `sr-only` would collapse it and take the focus ring with it.
+
+	   Its label is the containing block, which is what the two `position: relative` above are for.
+	   Without them the nearest positioned ancestor is the window, so the input keeps its static
+	   position against the window frame and does not move when the panel scrolls: the control you
+	   can see slides away and the 1px box you cannot stays where it was. */
 	input {
 		position: absolute;
 		width: 1px;

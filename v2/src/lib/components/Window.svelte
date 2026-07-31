@@ -148,7 +148,16 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
-		overflow: hidden;
+		/*
+		   `clip`, not `hidden`, and the difference is the whole of the bug it fixes.
+		   `overflow: hidden` still makes a scroll container: it only hides the scrollbars, and the
+		   box stays scrollable by script. Focusing a control scrolls every scrollable ancestor to
+		   bring it into view, not just the nearest one, so tabbing or clicking to a radio below the
+		   fold in a tall panel scrolled the window itself and carried its own title bar off the top.
+		   `clip` is not a scroll container at all, so there is nothing left to scroll, and it clips
+		   to the same rounded box.
+		*/
+		overflow: clip;
 		background: var(--window-bg);
 		backdrop-filter: blur(var(--bl-chrome));
 		color: var(--c-fg-1);

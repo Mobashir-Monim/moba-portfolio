@@ -22,13 +22,20 @@ import { contrast } from '../src/lib/contrast';
  * and nothing pops. Give the chrome its own hue and the accent has something to be different
  * from.
  *
- * Two rules on the pairing, and every row below follows both:
+ * The rule on the pairing:
  *
- *   far apart      at least 100 degrees, so the two never read as one hue at two saturations.
  *   chrome reads   grey, which in practice means the 250-265 band (cool grey) or the 70-90 band
  *                  (warm greige). Those are the two places a low-chroma cast still says "grey"
- *                  rather than naming a colour. `cyanotype` and `anthotype` sit in the warm band
- *                  because their accents are already cool, and the cool band is spoken for.
+ *                  rather than naming a colour.
+ *
+ * All four themes now sit in the cool band. The earlier split put `cyanotype` and `anthotype` on
+ * warm paper to keep every accent at least 100 degrees off its own ground, and that separation is
+ * genuinely gone: `cyanotype` runs a 245 accent over a 265 ground. The trade was taken on purpose.
+ * A cream ground is a strong statement of its own, and next to the other two themes it read as a
+ * different site rather than a different palette. One ground across all four means the theme
+ * switch changes the accent and nothing else, which is what a palette switch should do. The
+ * chroma on the surfaces is low enough (0.013 to 0.024) that the ground still reads grey rather
+ * than as a wash of the accent, so `cyanotype` is blue ink on cool paper, not blue on blue.
  *
  * The accent hues themselves were picked by sweeping all 360 degrees through the ramps below and
  * measuring how much of the authored chroma survives `fit()`. Contrast almost never decides this:
@@ -40,8 +47,10 @@ import { contrast } from '../src/lib/contrast';
 const THEMES = {
 	ferrite: { accent: 40, chrome: 250 }, // iron-oxide burnt orange on cool grey
 	phosphor: { accent: 140, chrome: 265 }, // P1 CRT green on cool grey
-	cyanotype: { accent: 245, chrome: 78 }, // Prussian blue on warm paper
-	anthotype: { accent: 328, chrome: 88 } // petal-juice magenta on warm greige
+	// The two cool-band chrome hues are reused rather than split further: each takes whichever of
+	// the pair sits further from its own accent, which is all the separation the band allows.
+	cyanotype: { accent: 245, chrome: 265 }, // Prussian blue on cool grey
+	anthotype: { accent: 328, chrome: 250 } // petal-juice magenta on cool grey
 } as const;
 
 /** Lightness and chroma per token. Hue comes from the theme. */
