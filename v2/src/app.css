@@ -1205,9 +1205,26 @@
 		color: var(--c-on-select);
 	}
 
-	/* Never removed without replacement, per the accessibility contract. */
+	/*
+	   Never removed without replacement, per the accessibility contract.
+
+	   3px rather than 2, which is 7.5 and the first visitor's second sentence: the ring was there,
+	   passed 3:1 against all four surfaces in all 24 combinations, and still read as a hairline.
+	   The contract's bar is a ratio, and a ratio says nothing about how much of the ring there is
+	   to see. Costs no layout, because an outline is drawn outside the box and outside flow.
+
+	   An `outline` and not a second `box-shadow`, deliberately and for the third time in this
+	   codebase: the shadow slot already holds retro's bevel on every button, the dock, the title
+	   bar controls, the launcher and four apps, so a focus rule writing to it would flatten the
+	   skin wherever focus lands. `Tiles.svelte` wrote the same sentence about its own grid.
+
+	   Which leaves the one ground an outline cannot argue with, art. A ring's outer edge over a
+	   wallpaper meets whatever the wallpaper is doing there, and the wallpapers are themed, so the
+	   colour behind an accent ring is in the accent's own family. That is answered where it
+	   happens, in `Desktop.svelte`, by giving a focused icon a real surface to be ringed against.
+	*/
 	:focus-visible {
-		outline: 2px solid var(--ring);
+		outline: 3px solid var(--ring);
 		outline-offset: 2px;
 	}
 }

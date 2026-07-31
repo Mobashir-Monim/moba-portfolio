@@ -99,6 +99,30 @@
 		background: none;
 	}
 
+	/*
+	   7.5. The focus ring is the same argument as the chip one line up, made about a ring instead
+	   of a label: everywhere else on the site the ring lands on a surface, and `tokens.test.ts`
+	   holds `focus` to 3:1 against all four of them in all 24 combinations. Here it lands on a
+	   photograph, and a themed one, so the colour behind an accent ring is in the accent's own
+	   family and the guarantee stops meaning anything.
+
+	   A focused icon takes a real surface, which is a ground the ring is already tested against.
+	   The tile's own translucent wash is not one: it is 5% of the foreground over whatever the art
+	   is doing there, so what the ring is actually against is still the art.
+
+	   A selected icon is excluded because it already has one: `--c-select` is a solid ground and
+	   overwriting it would trade a visible selection for a visible focus, which is not a trade
+	   worth making when the same icon can be both.
+
+	   ponytail: the inner edge only. The ring is drawn 2px outside the tile, so its outer edge
+	   still meets the wallpaper whatever the tile does. The honest fix for that is a two-tone
+	   ring, which needs the `box-shadow` slot that retro's bevels already own on every button in
+	   the site. A solid chip plus 3px is what one property can buy.
+	*/
+	.desktop.scene :global(.tile:focus-visible:not(.selected)) {
+		background: var(--c-surface-1);
+	}
+
 	:global(html[data-wallpaper='none'])
 		.desktop.scene
 		:global(:where(.label, .masthead h1, .masthead .tagline)) {

@@ -1663,7 +1663,32 @@ Three complaints, all separate and all correct:
       `onkeydown={move}` and `data-roving` together across every component, so a fifth view cannot
       ship with one and not the other. Mutated to confirm it bites.
 
-- [ ] 7.5 **A focus ring that survives the wallpaper.**
+- [x] 7.5 **A focus ring that survives the wallpaper.** The other half of complaint 3, and the
+      half no audit could have raised: the ring passed everything and still read as a hairline.
+
+      **A ratio says nothing about how much ring there is to see.** `tokens.test.ts` holds `focus`
+      to 3:1 against all four surfaces in all 24 combinations and 6.2 found no violation, because
+      there was none. It was 2px. It is 3px now, which costs no layout, since an outline draws
+      outside the box and outside flow.
+
+      **The shadow slot was not available**, and that is worth writing down because it is the third
+      time this codebase has reached for it and put it back. A two-tone ring, the one shape that
+      survives any ground, wants `box-shadow`. Retro's bevel is a `box-shadow` and it is on every
+      button on the site: the dock, the title bar controls, the launcher, the settings rows and
+      four apps. A focus rule writing to that slot flattens the skin wherever focus lands.
+      `Tiles.svelte:257` had already written the same sentence about its own grid.
+
+      **Which leaves art**, the one ground an outline cannot argue with. Everywhere else on the
+      site focus lands on a surface the ring is tested against; on the desktop it lands on a
+      photograph, and a themed one, so the colour behind an accent ring is in the accent's own
+      family. A focused icon now takes `--c-surface-1`, which is a ground the ring is already
+      tested against. The tile's own wash is not one: 5% of the foreground over whatever the art
+      is doing there is still the art. A selected icon is excluded, because `--c-select` is
+      already a solid ground and trading a visible selection for a visible focus is not a trade
+      worth making when one icon can be both.
+
+      Ceiling marked in the rule: this is the inner edge only. The ring draws 2px outside the tile,
+      so its outer edge meets the wallpaper whatever the tile does underneath it.
 
 ---
 
