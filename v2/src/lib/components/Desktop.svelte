@@ -88,7 +88,7 @@
 	   Scoped to `.scene`, because the same icon renders inside folder windows, where there is no
 	   scene and a chip would be noise. `none` is a scene with nothing in it, so it opts out too.
 	*/
-	.desktop.scene :global(:where(.label, .masthead h1)) {
+	.desktop.scene :global(:where(.label, .masthead h1, .masthead .tagline)) {
 		padding: 0.125rem 0.4375rem;
 		/* background: var(--c-surface-1); */
 		border-radius: var(--r-xs);
@@ -99,7 +99,9 @@
 		background: none;
 	}
 
-	:global(html[data-wallpaper='none']) .desktop.scene :global(:where(.label, .masthead h1)) {
+	:global(html[data-wallpaper='none'])
+		.desktop.scene
+		:global(:where(.label, .masthead h1, .masthead .tagline)) {
 		padding: 0;
 		background: none;
 	}

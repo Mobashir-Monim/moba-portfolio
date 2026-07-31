@@ -9,7 +9,7 @@
 	import WindowLayer from '$lib/components/WindowLayer.svelte';
 	import { app, APP_KIND, APPS, SETTINGS_ID } from '$lib/apps';
 	import { about } from '$lib/content/about';
-	import { OS_NAME } from '$lib/os';
+	import { OS_NAME, OS_VERSION } from '$lib/os';
 	import { graph, PERSON as person } from '$lib/seo';
 	import { node, nodes, root, summary } from '$lib/tree';
 	import { current, windows } from '$lib/windows.svelte';
@@ -69,10 +69,19 @@
 				boot screen already is, and repeating it here made the desktop read as a second boot
 				screen. The tile is where the skins differ, and the glyph is deliberately not skinned,
 				because the OS sits above the skin.
+
+				The line under the heading is 7.2, and it is one sentence answering the first thing the
+				first visitor said: nothing on the page told them what they were looking at, so four
+				folder icons under a name and a job title read as links to four pages, and a page that
+				opens a window instead read as a page that broke. It names the metaphor and stops
+				there. What to do about it is the welcome window's sentence, because that one has to
+				change with the click-mode setting and this one has to be true in every skin, in every
+				mode, forever.
 			-->
 			<div class="masthead">
 				<span class="mark"><Icon name="logo" label={OS_NAME} size="var(--logo-glyph)" /></span>
 				<h1>{person}, {about.title}</h1>
+				<p class="tagline">{OS_NAME} {OS_VERSION}, a desktop in your browser</p>
 			</div>
 		{/snippet}
 
@@ -172,6 +181,23 @@
 		font-family: var(--ff-ui);
 		font-size: var(--fs-sm);
 		font-weight: 400;
+		letter-spacing: var(--tracking-ui);
+	}
+
+	/*
+	   Smaller than the heading and quieter, because it is the caption to it and not a second
+	   heading. `--c-fg-2` rather than `--c-fg-3`: this line sits over the wallpaper, where 6.2's
+	   whole finding was that the muted token is the one that runs out of contrast first, and a
+	   sentence nobody can read explains nothing.
+
+	   The gap is tightened against the heading so the two read as one block rather than as a
+	   heading and an unrelated line under it.
+	*/
+	.masthead .tagline {
+		margin-top: -0.5rem;
+		color: var(--c-fg-2);
+		font-family: var(--ff-ui);
+		font-size: var(--fs-xs);
 		letter-spacing: var(--tracking-ui);
 	}
 

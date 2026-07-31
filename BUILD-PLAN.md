@@ -1607,7 +1607,23 @@ Three complaints, all separate and all correct:
       initial state, so flipping it turned two of them red. They set their own mode now, which is
       what they should always have done.
 
-- [ ] 7.2 **The desktop says what it is.**
+- [x] 7.2 **The desktop says what it is.** One sentence under the heading, and complaint 2.
+
+      The masthead was a mark, a name, and a job title, which is what every portfolio homepage on
+      the web is. Under it sat four folder icons, which on that page read as links to four pages.
+      So a click that opened a window instead of navigating did not read as an emulator being
+      strict; it read as a site that was broken. `mobOS 2.0, a desktop in your browser` is the
+      whole fix, and it names the metaphor without teaching it.
+
+      It says nothing about how to open anything, deliberately. That sentence has to change with
+      the click-mode setting, and it belongs in 7.3's window where it can; this one has to stay
+      true in three skins, two polarities, both click modes and on a phone, so it makes only the
+      claim that is always true.
+
+      It joins the same `:where()` group the icon labels and the heading are in, so whatever the
+      chip over a wallpaper ends up being, all three get it together. Worth noting in passing that
+      the chip's `background` is currently commented out in `Desktop.svelte:93` while the ridge
+      colours are being eyeballed, so the comment above it describes a rule that is not running.
 
 - [ ] 7.3 **A welcome window on first visit.**
 
