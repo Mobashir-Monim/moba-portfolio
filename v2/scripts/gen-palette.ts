@@ -236,7 +236,7 @@ const PAIRS: Pair[] = [
 	// every content header's meta line straight onto it. 4.06:1 in light, against 4.5 required.
 	//
 	// The exemption confused one token with one context. `surface-0` is the desktop ground *and*
-	// the page ground, and the page ground is the JS-off document CLAUDE.md requires to work.
+	// the page ground, and the page ground is the JS-off document the spec requires to work.
 	...['surface-0', 'surface-1', 'surface-2', 'surface-3'].map((bg): Pair => ['fg-3', bg, 4.5]),
 	['on-accent', 'accent', 4.5],
 	['on-accent', 'accent-hover', 4.5],

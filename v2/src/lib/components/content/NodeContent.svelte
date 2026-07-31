@@ -27,7 +27,7 @@
 <!--
 	The one component that stands between the content and how it is being looked at. A route
 	renders this and gets a document; a window renders the same call and gets the same document
-	inside chrome. That is the whole of the dual-render decision in `CLAUDE.md`, and it is why
+	inside chrome. That is the whole of the dual-render decision in the spec, and it is why
 	the tree carries its body rather than the shell keeping a second lookup keyed by the same ids.
 
 	The body is its own component so the gallery view can preview an item without recursing into

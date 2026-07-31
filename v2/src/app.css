@@ -980,7 +980,7 @@
 /* --------------------------------------------------------------------------
    Scoped skin rules: none, so far, and that is the point.
 
-   CLAUDE.md budgets for a handful of rules scoped to `[data-skin="..."]` for
+   The spec budgets for a handful of rules scoped to `[data-skin="..."]` for
    the things tokens genuinely cannot express: retro's pinstripe title bar,
    dithered desktop, inset bevels, and selection by inversion, and glass's
    backdrop blur. Every one of them turned out to be a token:

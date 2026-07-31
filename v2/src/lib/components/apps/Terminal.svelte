@@ -53,7 +53,7 @@
 	 * Not while there is a selection, or dragging across the output to copy it would end by
 	 * throwing the selection away.
 	 *
-	 * Pointer-only, the same call `CLAUDE.md` allows for drag and resize: Tab reaches the input in
+	 * Pointer-only, the same call the spec allows for drag and resize: Tab reaches the input in
 	 * one press, so nothing here is reachable only this way.
 	 */
 	function refocus(): void {
@@ -206,7 +206,7 @@
 	}
 
 	/* The outline is removed and replaced rather than just removed, which is what the contract in
-	   `CLAUDE.md` asks: a caret sitting in a prompt is the indicator a terminal has always used,
+	   the spec asks: a caret sitting in a prompt is the indicator a terminal has always used,
 	   and the prompt itself lights up with it. A ring drawn around a full-width bare input would
 	   be a box around the rest of the line. */
 	input:focus {

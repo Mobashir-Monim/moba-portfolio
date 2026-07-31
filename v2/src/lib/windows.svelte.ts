@@ -3,7 +3,7 @@ import type { Kind, View } from './os';
 /**
  * The one module that owns window state.
  *
- * Three rules from `CLAUDE.md` shape everything below, and each one is a defect the old site
+ * Three rules from the spec shape everything below, and each one is a defect the old site
  * actually shipped:
  *
  * - Array order is stacking order, and focus moves a record to the end. The old store searched

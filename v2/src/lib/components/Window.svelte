@@ -40,7 +40,7 @@
 		onminimize?: () => void;
 		onclose?: () => void;
 		/**
-		 * Raising the window. `CLAUDE.md` allows exactly this: a handler on a non-interactive
+		 * Raising the window. The spec allows exactly this: a handler on a non-interactive
 		 * element, rather than the old site's window-as-a-button (ledger #17). Both are here
 		 * because a pointer and a Tab key have to agree about what is in front.
 		 */
@@ -150,7 +150,7 @@
 	</div>
 
 	{#if grip}
-		<!-- Pointer-only and deliberately so, the same call `CLAUDE.md` allows for drag: nothing is
+		<!-- Pointer-only and deliberately so, the same call the spec allows for drag: nothing is
 		     reachable only through it, since size is presentation and the window is already fully
 		     operable by keyboard. It is not focusable, so it is not a keyboard trap either. -->
 		<div class="grip" {...grip} aria-hidden="true"></div>

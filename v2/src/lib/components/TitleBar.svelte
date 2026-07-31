@@ -108,7 +108,7 @@
 		font-family: var(--ff-ui);
 		font-size: var(--fs-sm);
 		letter-spacing: var(--tracking-ui);
-		/* Named, not `all`: ledger #23 and the hard rule in CLAUDE.md. Focus swaps `--_bg`, `--_fg`
+		/* Named, not `all`: ledger #23 and the hard rule in the spec. Focus swaps `--_bg`, `--_fg`
 		   and `--_pattern`, which reach the paint as background-color and color. The pattern is a
 		   background-image and does not interpolate in any browser, so listing it would be a
 		   promise the engine cannot keep; retro's pinstripes appear on the frame focus lands. */
@@ -177,7 +177,7 @@
 		border-radius: var(--r-xs);
 		box-shadow: var(--bevel-out);
 		cursor: pointer;
-		/* Named, not `all`: ledger #23 and the hard rule in CLAUDE.md. Hover repaints, active swaps
+		/* Named, not `all`: ledger #23 and the hard rule in the spec. Hover repaints, active swaps
 		   the bevel, disabled fades. Nothing else about a control moves. */
 		transition:
 			background-color var(--dur-fast) var(--ez-standard),

@@ -2,7 +2,7 @@
  * Arrow keys across a set of icons.
  *
  * The icons stay plain links rather than becoming a `role="grid"` or a `role="listbox"`, which is
- * the other pattern `CLAUDE.md` allows. A role is an attribute, so it ships in the prerendered
+ * the other pattern the spec allows. A role is an attribute, so it ships in the prerendered
  * HTML and is still there with JavaScript off, promising keyboard behaviour that nothing is around
  * to provide. A link promises nothing it does not already do: it is reachable, Enter opens it, and
  * this adds the movement on top of that. Ledger #20 was the opposite trade, a div with a keydown

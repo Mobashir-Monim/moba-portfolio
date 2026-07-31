@@ -186,7 +186,7 @@
 		box-shadow: var(--bevel-in);
 		cursor: pointer;
 		background: color-mix(in oklab, var(--c-fg-1) 8%, transparent);
-		/* Named, not `all`: ledger #23 and the hard rule in CLAUDE.md. These three are everything
+		/* Named, not `all`: ledger #23 and the hard rule in the spec. These three are everything
 		   the states below change, hover, active and disabled respectively. */
 		transition:
 			background-color var(--dur-fast) var(--ez-standard),

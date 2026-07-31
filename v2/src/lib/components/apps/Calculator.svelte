@@ -96,7 +96,7 @@
 	{#if paywall}
 		<!--
 			The gag, and the line it does not cross: there is no form here, no field, and nothing that
-			looks like one. `CLAUDE.md` is explicit, and the reason is not squeamishness. A convincing
+			looks like one. The spec is explicit, and the reason is not squeamishness. A convincing
 			payment form is how people get trained to type card numbers into whatever asks, and a joke
 			is not worth teaching that. Unlock leads to an in-world dead end and nowhere else.
 

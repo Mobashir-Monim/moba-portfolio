@@ -133,7 +133,7 @@ describe('motion the rule cannot reach', () => {
 	 * Ledger #23, and the reason it is asserted rather than trusted: it had already come back.
 	 *
 	 * The old site put `transition-all duration-300` on `body` and most of its children, which
-	 * animates layout properties and makes every state change a reflow. `CLAUDE.md` answers with a
+	 * animates layout properties and makes every state change a reflow. The spec answers with a
 	 * hard rule, "Transition specific properties. Never `transition-all`", and 6.7's walk found
 	 * `transition: all` in the dock, the title bar, the window controls and the desktop icon.
 	 *

@@ -1,5 +1,5 @@
 /**
- * The shapes more than one collection needs. Plain objects throughout: `CLAUDE.md` rules out
+ * The shapes more than one collection needs. Plain objects throughout: the spec rules out
  * the old site's `src/lib/models/` layer, eight classes that re-declared an interface and
  * assigned it in a constructor with no behavior (ledger #31).
  */

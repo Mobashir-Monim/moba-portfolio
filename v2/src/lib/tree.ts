@@ -158,7 +158,7 @@ for (const project of projectList)
  * work.
  *
  * The href repeats the words the slug already carries, `/projects/case-studies/busso-case-study`,
- * and that is the trade for the rule in `CLAUDE.md` that a slug is both the window id and the
+ * and that is the trade for the rule in the spec that a slug is both the window id and the
  * route segment. Ids are one flat namespace, so a study cannot be `busso`, and the last segment of
  * a document's href is its id.
  */

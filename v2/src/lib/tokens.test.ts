@@ -8,7 +8,7 @@ import { SHADE_STOPS } from '../../scripts/gen-palette';
  * The token contract, enforced against app.css itself rather than against a copy of it.
  *
  * "Colour contrast passes WCAG AA in every one of the themes, in both dark and light" is a
- * non-negotiable in CLAUDE.md. Eyeballing 24 skin/theme/mode combinations is not a control,
+ * non-negotiable in the spec. Eyeballing 24 skin/theme/mode combinations is not a control,
  * so this parses the real stylesheet and checks every pair that carries text or meaning.
  *
  * Failures are collected into a list and asserted empty, so a break names every offending pair

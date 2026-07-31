@@ -50,7 +50,7 @@
 	];
 	const MOTION = ['--dur-fast', '--dur-base', '--dur-slow', '--ez-standard', '--ez-out'];
 	const TEXT_META = ['--lh-tight', '--lh-normal', '--tracking-ui'];
-	/** The recipes that replaced the scoped skin rules CLAUDE.md budgeted for. */
+	/** The recipes that replaced the scoped skin rules the spec budgeted for. */
 	const CHROME = [
 		'--window-bg',
 		'--desktop-bg',
@@ -387,7 +387,7 @@
 	<section aria-labelledby="chrome" class="mb-12">
 		<h2 id="chrome" class="mb-4 text-xl font-semibold">Chrome recipes, skin-owned</h2>
 		<p class="mb-4 text-sm text-fg-2">
-			The five things <code>CLAUDE.md</code> budgeted a scoped
+			The five things the spec budgeted a scoped
 			<code>[data-skin]</code> rule for, and which all turned out to be tokens: retro's pinstripe,
 			its dithered desktop, its bevels, its selection by inversion, and glass's blur. There are no
 			scoped skin rules in <code>app.css</code> yet.

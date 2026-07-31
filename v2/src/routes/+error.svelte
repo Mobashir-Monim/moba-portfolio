@@ -4,7 +4,7 @@
 	import { OS_NAME } from '$lib/os';
 
 	/**
-	 * The one page `CLAUDE.md` asks for a voice in and no earlier task built. Until now a wrong URL
+	 * The one page the spec asks for a voice in and no earlier task built. Until now a wrong URL
 	 * got SvelteKit's bare error page, which reads to a crawler as a soft 404 and to a visitor as
 	 * a different site.
 	 *

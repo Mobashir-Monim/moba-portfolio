@@ -27,7 +27,7 @@ describe('chrome glyphs are skin-owned', () => {
 		expect(missing).toEqual([]);
 	});
 
-	test('the set covers the chrome CLAUDE.md names', () => {
+	test('the set covers the chrome glyphs the spec names', () => {
 		expect(CHROME_NAMES).toEqual([
 			'folder',
 			'folder-open',

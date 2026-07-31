@@ -17,13 +17,13 @@ export function claimed(event: MouseEvent): boolean {
 /**
  * Whether the pointer driving this event is a finger.
  *
- * `CLAUDE.md` asks for tap-opens-directly with no single/double distinction on mobile, and this
+ * The spec asks for tap-opens-directly with no single/double distinction on mobile, and this
  * is the whole of it. Double-tap is the browser's own zoom gesture, so double-click mode on a
  * phone competes with the platform for the same gesture and loses: 6.4 found a single tap opening
  * nothing at all on a 390px viewport.
  *
  * Read live inside the handler rather than held as state behind an `$effect`, which is what the
- * media-query note in `CLAUDE.md` is about and what `followSystemAppearance` does for the colour
+ * media-query note in the spec is about and what `followSystemAppearance` does for the colour
  * scheme. Nothing renders differently for a coarse pointer, so there is nothing to invalidate:
  * the only question is what kind of pointer just arrived, and asking at that moment is both
  * always current and free of a listener to unregister. A visitor who picks up a stylus mid-visit
