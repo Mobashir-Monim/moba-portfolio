@@ -86,8 +86,10 @@
 		text-decoration: none;
 		backdrop-filter: blur(8px);
 		background: color-mix(in oklab, var(--c-fg-1) 5%, transparent);
+		/* Named, not `all`: ledger #23 and the hard rule in CLAUDE.md. Hover and selection repaint
+		   the tile, selection and the open state repaint the label. That is the whole set. */
 		transition:
-			all var(--dur-fast) var(--ez-standard),
+			background-color var(--dur-fast) var(--ez-standard),
 			color var(--dur-fast) var(--ez-standard);
 	}
 

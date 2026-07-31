@@ -128,4 +128,38 @@ describe('motion the rule cannot reach', () => {
 
 		expect(guilty).toEqual([]);
 	});
+
+	/**
+	 * Ledger #23, and the reason it is asserted rather than trusted: it had already come back.
+	 *
+	 * The old site put `transition-all duration-300` on `body` and most of its children, which
+	 * animates layout properties and makes every state change a reflow. `CLAUDE.md` answers with a
+	 * hard rule, "Transition specific properties. Never `transition-all`", and 6.7's walk found
+	 * `transition: all` in the dock, the title bar, the window controls and the desktop icon.
+	 *
+	 * None of those was as bad as the original, since each sat on one small element rather than on
+	 * `body`. That is exactly why it survived: nothing looked wrong, so nothing looked at it. A
+	 * rule with no test is a comment.
+	 *
+	 * `all` is the only value forbidden. Listing several properties is the point, and a wrapped
+	 * shorthand puts each on its own line, so the check is per line and matches the keyword rather
+	 * than the declaration.
+	 */
+	test('no transition animates `all`', () => {
+		const guilty = sources.flatMap(([path, source]) =>
+			stripped(source)
+				.split('\n')
+				.map((line, i) => [line, i] as const)
+				.filter(
+					([line]) =>
+						/\btransition-all\b/.test(line) ||
+						/\btransition(-property)?\s*:\s*all\b/.test(line) ||
+						// The wrapped shorthand: `transition:` on one line, `all …,` on the next.
+						/^\s*all\s+var\(--dur|^\s*all\s+\d/.test(line)
+				)
+				.map(([line, i]) => `${path}:${i + 1} ${line.trim().slice(0, 60)}`)
+		);
+
+		expect(guilty).toEqual([]);
+	});
 });
