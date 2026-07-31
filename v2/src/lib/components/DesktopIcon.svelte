@@ -84,13 +84,15 @@
 		letter-spacing: var(--tracking-ui);
 		text-align: center;
 		text-decoration: none;
+		backdrop-filter: blur(8px);
+		background: color-mix(in oklab, var(--c-fg-1) 5%, transparent);
 		transition:
-			background-color var(--dur-fast) var(--ez-standard),
+			all var(--dur-fast) var(--ez-standard),
 			color var(--dur-fast) var(--ez-standard);
 	}
 
 	.tile:hover {
-		background: color-mix(in oklab, var(--c-fg-1) 8%, transparent);
+		background: color-mix(in oklab, var(--c-fg-1) 25%, transparent);
 	}
 
 	/* Selection is the one place every skin spends the accent, retro included, because this is

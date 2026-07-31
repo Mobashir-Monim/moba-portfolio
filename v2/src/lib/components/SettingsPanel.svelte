@@ -45,7 +45,9 @@
 	};
 
 	const WALLPAPER_HINT: Record<Wallpaper, string> = {
-		ridge: 'A ridgeline, a treeline, and a lookout',
+		grove: 'Ranges behind a deep pine forest, in haze',
+		'night-scene': 'A wind-bent tree against the sun, over low hills',
+		'circuit-bottom': 'Board traces fanning out of the centre',
 		none: 'Plain ground, whatever the skin makes of it'
 	};
 

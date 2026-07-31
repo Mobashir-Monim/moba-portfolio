@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-skin="modern" data-theme="ferrite" data-wallpaper="ridge">
+<html lang="en" data-skin="modern" data-theme="ferrite" data-wallpaper="grove">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -34,7 +34,11 @@
 					['ferrite', 'phosphor', 'cyanotype', 'anthotype'],
 					'ferrite'
 				);
-				el.dataset.wallpaper = pick('mnemos.wallpaper', ['ridge', 'none'], 'ridge');
+				el.dataset.wallpaper = pick(
+					'mnemos.wallpaper',
+					['grove', 'night-scene', 'circuit-bottom', 'none'],
+					'grove'
+				);
 				const appearance = pick('mnemos.appearance', ['light', 'dark', 'auto'], 'auto');
 				const dark =
 					appearance === 'auto'

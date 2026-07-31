@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import { existsSync, readdirSync } from 'node:fs';
 import { contrast } from './contrast';
-import { SCENES, draw } from '../../scripts/gen-wallpaper';
+import { inks, SLOTS as WALL_SLOTS, bands } from './wallpapers/bands';
+import { SHADE_STOPS } from '../../scripts/gen-palette';
 
 /**
  * The token contract, enforced against app.css itself rather than against a copy of it.
@@ -17,13 +18,27 @@ import { SCENES, draw } from '../../scripts/gen-wallpaper';
 const css = await Bun.file(new URL('../app.css', import.meta.url)).text();
 const html = await Bun.file(new URL('../app.html', import.meta.url)).text();
 const boot = await Bun.file(new URL('./components/Boot.svelte', import.meta.url)).text();
+const wallpaper = await Bun.file(new URL('./components/Wallpaper.svelte', import.meta.url)).text();
 const staticDir = new URL('../../static/', import.meta.url);
+/** The art is inlined rather than fetched, so it is source rather than a static asset. */
+const drawnDir = new URL('./wallpapers/', import.meta.url);
 
 const SKINS = ['modern', 'retro', 'glass'] as const;
 const THEMES = ['ferrite', 'phosphor', 'cyanotype', 'anthotype'] as const;
 const MODES = ['light', 'dark'] as const;
-/** `none` names no masks, so it has no block to check. Every wallpaper that draws is listed. */
-const WALLPAPERS = ['ridge'] as const;
+/** The slots a wallpaper's folder actually fills, in the order the scene draws them. */
+function slotsOf(dir: URL, name: string): string[] {
+	const files = readdirSync(new URL(`${name}/`, dir));
+	return WALL_SLOTS.filter((slot) => files.includes(`${slot}.svg`));
+}
+
+/** Every drawn wallpaper, which is every folder of inlined art and nothing else. */
+const DRAWN = readdirSync(drawnDir, { withFileTypes: true })
+	.filter((entry) => entry.isDirectory())
+	.map((entry) => entry.name);
+
+/** How long a drawn scene's ink ramp has to be, read off the folder it ships. */
+const rampLength = (name: string) => inks(slotsOf(drawnDir, name).length);
 
 /** `--name: value;` pairs from the block opened by `selector` at the start of a line. */
 function block(selector: string): Record<string, string> {
@@ -56,7 +71,8 @@ const COLOUR_TOKENS = [
 	'--c-on-accent',
 	'--c-select',
 	'--c-on-select',
-	'--c-focus'
+	'--c-focus',
+	...SHADE_STOPS.map((stop) => `--c-shade-${stop}`)
 ];
 
 /**
@@ -86,7 +102,21 @@ const PAIRS: [fg: string, bg: string, min: number][] = [
 	['focus', 'surface-0', 3],
 	['focus', 'surface-1', 3],
 	['focus', 'surface-2', 3],
-	['focus', 'surface-3', 3]
+	['focus', 'surface-3', 3],
+	// The shade contract, and the reason the ramp splits where it does. 50 to 400 are background
+	// stops and must carry body copy; 600 to 950 are foreground stops and must be readable on
+	// every surface a window is made of; 500 is neither, so it is held to 3:1 and belongs on a
+	// rule, an icon, or a meter fill rather than under text. `surface-0` is out of the text half
+	// for the same reason `fg-3` is: it is the desktop ground, and no text stop sits on it.
+	...[50, 100, 200, 300, 400].map((s) => ['fg-1', `shade-${s}`, 4.5] as [string, string, number]),
+	...[600, 700, 800, 900, 950].flatMap((s) =>
+		(['surface-1', 'surface-2', 'surface-3'] as const).map(
+			(bg) => [`shade-${s}`, bg, 4.5] as [string, string, number]
+		)
+	),
+	['shade-500', 'surface-1', 3],
+	['shade-500', 'surface-2', 3],
+	['shade-500', 'surface-3', 3]
 ];
 
 describe('theme blocks own colour', () => {
@@ -133,6 +163,65 @@ describe('theme blocks own colour', () => {
 			}
 		}
 		expect(failures).toEqual([]);
+	});
+});
+
+/**
+ * The shade ramp is a ramp, which is a stronger claim than "eleven colours are declared". Two
+ * things make it one, and neither is implied by the contrast pairs above: it has to be ordered,
+ * and its two polarities have to run in opposite directions, because the whole reason it is
+ * semantic rather than absolute is so a call site never writes a `dark:` variant to flip an index.
+ */
+describe('the shade ramp', () => {
+	/** Monotone in relative luminance. `contrast` against black is strictly increasing in it. */
+	const level = (hex: string) => contrast(hex, '#000000');
+
+	test('each ramp is strictly ordered, away from its own ground in both polarities', () => {
+		const wrong: string[] = [];
+		for (const theme of THEMES) {
+			for (const mode of MODES) {
+				const ramp = palette(theme, mode);
+				const levels = SHADE_STOPS.map((stop) => level(ramp[`--c-shade-${stop}`]));
+				for (let i = 1; i < levels.length; i++) {
+					// Light mode darkens as the index rises, dark mode lightens. Either way the ramp
+					// is walking away from the ground, which is what the index is supposed to mean.
+					const ordered = mode === 'dark' ? levels[i] > levels[i - 1] : levels[i] < levels[i - 1];
+					if (!ordered) {
+						wrong.push(
+							`${theme} ${mode}: shade-${SHADE_STOPS[i]} does not continue the ramp past shade-${SHADE_STOPS[i - 1]}`
+						);
+					}
+				}
+			}
+		}
+		expect(wrong).toEqual([]);
+	});
+
+	test('600 is the accent and 700 is its hover, so the ramp continues the palette', () => {
+		const drift: string[] = [];
+		for (const theme of THEMES) {
+			for (const mode of MODES) {
+				const ramp = palette(theme, mode);
+				for (const [stop, token] of [
+					[600, '--c-accent'],
+					[700, '--c-accent-hover']
+				] as const) {
+					if (ramp[`--c-shade-${stop}`] !== ramp[token]) {
+						drift.push(
+							`${theme} ${mode}: shade-${stop} is ${ramp[`--c-shade-${stop}`]}, ${token} is ${ramp[token]}`
+						);
+					}
+				}
+			}
+		}
+		expect(drift).toEqual([]);
+	});
+
+	test('every stop reaches Tailwind, so the ramp is usable as a utility', () => {
+		const bridge = block('@theme inline');
+		for (const stop of SHADE_STOPS) {
+			expect(bridge[`--color-shade-${stop}`]).toBe(`var(--c-shade-${stop})`);
+		}
 	});
 });
 
@@ -259,29 +348,21 @@ describe('accent budget across all 24 combinations', () => {
 });
 
 /**
- * The wallpaper axis. A wallpaper is geometry, a skin is how the scene is lit, and the ridge
- * colours are the one place the two meet, so this is where the meeting is checked.
+ * The wallpaper axis. A wallpaper is geometry, a skin is how the scene is lit, and the ink ramp is
+ * the one place the two meet, so this is where the meeting is checked.
  *
- * What sits on a ridge is the desktop icon's glyph, and nothing else: the label and the heading
+ * What sits on a band is the desktop icon's glyph, and nothing else: the label and the heading
  * carry a `--c-surface-1` chip, which the pair table above already guarantees. See the note in
  * Desktop.svelte for why that chip is not optional. A glyph is non-text, so 1.4.11's 3:1 is its
- * bar, and it is the whole of what these two colours have to clear.
+ * bar, and it is the whole of what these colours have to clear.
  */
 describe('the wallpaper is a background, so it answers to the contrast contract', () => {
-	const WALL_LAYERS = ['--wall-far', '--wall-mid', '--wall-near'] as const;
-
 	/**
 	 * `color-mix(in srgb, var(--c-a) N%, var(--c-b))`, resolved against one theme ramp. Both
 	 *  sides are opaque hex, so a plain per-channel lerp is the whole of sRGB mixing.
-	 *
-	 * Every ridge is a step from `--c-surface-0` toward `--c-fg-1`, which is the one direction
-	 * that separates the scene from the ground in both polarities: darker than a light sky,
-	 * lighter than a dark one. Anything absolute would work in one and vanish in the other.
 	 */
 	function mix(recipe: string, ramp: Record<string, string>): string {
-		const m = recipe.match(
-			/^color-mix\(in srgb, var\((--c-[\w-]+)\) (\d+)%, var\((--c-[\w-]+)\)\)$/
-		);
+		const m = recipe.match(/^color-mix\(in srgb, var\((--[\w-]+)\) (\d+)%, var\((--[\w-]+)\)\)$/);
 		if (!m) throw new Error(`not a resolvable two-token sRGB mix: ${recipe}`);
 		const [, a, pct, b] = m;
 		const p = +pct / 100;
@@ -290,25 +371,109 @@ describe('the wallpaper is a background, so it answers to the contrast contract'
 		return `#${out.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
 	}
 
-	test('every skin names both ridge layers as a mix this test can resolve', () => {
-		for (const skin of SKINS) {
-			for (const layer of WALL_LAYERS) {
-				expect(() => mix(skinTokens(skin)[layer], palette('ferrite', 'light'))).not.toThrow();
+	/**
+	 * One folder per wallpaper, named for the wallpaper, holding one file per slot named for the
+	 * slot. That is the shape every wallpaper added from here on takes, and it is worth a test
+	 * rather than a note because the failure mode is a slow one: a generator writes one file to the
+	 * old flat path, nothing breaks, and the convention is half-kept from then on. Every plane needs
+	 * a face, so `far`, `mid`, and `near` are the floor; reliefs are the scene's own business.
+	 */
+	test('every wallpaper is a folder of slot-named files, and every plane has a face', () => {
+		const wrong: string[] = [];
+		for (const entry of readdirSync(drawnDir, { withFileTypes: true })) {
+			// The root holds this convention's own module beside the folders it describes.
+			if (!entry.isDirectory()) {
+				if (entry.name.endsWith('.ts')) continue;
+				wrong.push(`lib/wallpapers/${entry.name} is a file, not a wallpaper folder`);
+				continue;
+			}
+			const files = readdirSync(new URL(`${entry.name}/`, drawnDir));
+			for (const face of ['far', 'mid', 'near']) {
+				if (!files.includes(`${face}.svg`))
+					wrong.push(`lib/wallpapers/${entry.name} has no ${face}.svg`);
+			}
+			for (const file of files) {
+				if (file.startsWith(`${entry.name}-`)) {
+					wrong.push(`lib/wallpapers/${entry.name}/${file} repeats its folder in its name`);
+				}
 			}
 		}
+		expect(wrong).toEqual([]);
 	});
 
-	test('the icon glyph reaches 3:1 on both ridge layers, in all 24 combinations', () => {
+	/**
+	 * A drawn wallpaper paints itself, so the thing that can silently break is the handoff rather
+	 * than the file list: a band draws with `var(--wall-band-crest)` and `var(--wall-band-base)`,
+	 * and if it is ever referenced through `url()` instead of inlined, those resolve in the band's
+	 * own document, find nothing, and the band disappears. That failure is invisible in the source
+	 * and total on the screen, so both halves are checked here: the file paints with the two tokens,
+	 * and `Wallpaper.svelte` reaches it through a glob wide enough to include it.
+	 */
+	test('every drawn band paints with the band tokens and is reachable by the glob', async () => {
+		const broken: string[] = [];
+		// The one string that has to hold for the whole folder: a glob over the drawn root, eager,
+		// as text. Any of the three missing and every band silently stops being inlined.
+		const glob = wallpaper.match(
+			/import\.meta\.glob\(\s*'\.\.\/wallpapers\/\*\/\*\.svg',\s*\{([^}]*)\}/
+		);
+		if (!glob) broken.push('Wallpaper.svelte does not glob the drawn wallpaper folder');
+		else {
+			for (const part of ["query: '?raw'", "import: 'default'", 'eager: true']) {
+				if (!glob[1].includes(part)) broken.push(`the glob is not \`${part}\``);
+			}
+		}
+
+		for (const name of DRAWN) {
+			for (const slot of slotsOf(drawnDir, name)) {
+				const path = `${name}/${slot}.svg`;
+				const svg = await Bun.file(new URL(path, drawnDir)).text();
+				for (const token of ['--wall-band-crest', '--wall-band-base']) {
+					if (!svg.includes(`var(${token})`)) broken.push(`${path} does not paint with ${token}`);
+				}
+				// The id is scoped by nothing, unlike the file name, so it carries the wallpaper too.
+				if (!svg.includes(`id="${name}-${slot}"`)) {
+					broken.push(`${path} does not scope its gradient id`);
+				}
+			}
+		}
+		expect(broken).toEqual([]);
+	});
+
+	/** One ink stop as hex: either a shade token outright or a two-token mix of two of them. */
+	function ink(
+		name: string,
+		i: number,
+		mode: (typeof MODES)[number],
+		ramp: Record<string, string>
+	): string {
+		const tokens = block(`${mode === 'dark' ? '.dark' : ''}[data-wallpaper='${name}']`);
+		const recipe = tokens[`--wall-ink-${i}`];
+		if (!recipe) throw new Error(`${name} ${mode} never declares --wall-ink-${i}`);
+		const direct = recipe.match(/^var\((--c-shade-\d+)\)$/);
+		return direct ? ramp[direct[1]] : mix(recipe, ramp);
+	}
+
+	/**
+	 * The ink ramp answers to the same 3:1 the nine mask shades do, and for the same reason: the
+	 * desktop's icon glyphs sit directly on it. `grove` reaches this on its own route, through nine
+	 * ink stops rather than through the plane tokens, so `wallRamp` above says nothing about it.
+	 *
+	 * The failure this catches is specific. Take the ramp's full width instead of its background
+	 * half and one end of the scene lands on a foreground stop, which is built to fail against
+	 * `--c-fg-1`. The reversal then puts that end at the sky in one polarity and at the near forest
+	 * in the other, so the glyphs go unreadable in exactly one of light and dark, which is the half
+	 * nobody is looking at while they tune the other.
+	 */
+	test('a drawn ink ramp holds the icon glyph at 3:1, in all eight theme and polarity pairs', () => {
 		const failures: string[] = [];
-		for (const skin of SKINS) {
-			for (const layer of WALL_LAYERS) {
-				const recipe = skinTokens(skin)[layer];
-				for (const theme of THEMES) {
-					for (const mode of MODES) {
-						const ramp = palette(theme, mode);
-						const ratio = contrast(ramp['--c-fg-1'], mix(recipe, ramp));
+		for (const name of DRAWN) {
+			for (const theme of THEMES) {
+				for (const mode of MODES) {
+					const ramp = palette(theme, mode);
+					for (let i = 1; i <= rampLength(name); i++) {
+						const ratio = contrast(ramp['--c-fg-1'], ink(name, i, mode, ramp));
 						if (ratio < 3) {
-							failures.push(`${skin}/${theme}/${mode}: fg-1 on ${layer} is ${ratio.toFixed(2)}:1`);
+							failures.push(`${name} ${theme}/${mode}: fg-1 on ink-${i} is ${ratio.toFixed(2)}:1`);
 						}
 					}
 				}
@@ -317,35 +482,95 @@ describe('the wallpaper is a background, so it answers to the contrast contract'
 		expect(failures).toEqual([]);
 	});
 
-	test('every wallpaper names a mask per layer, and every file is actually shipped', () => {
-		const missing: string[] = [];
-		for (const name of WALLPAPERS) {
-			const tokens = block(`[data-wallpaper='${name}']`);
-			for (const token of ['--wall-mask-far', '--wall-mask-mid', '--wall-mask-near']) {
-				const url = tokens[token]?.match(/^url\('([^']+)'\)$/)?.[1];
-				if (!url) missing.push(`${name} ${token} is ${tokens[token] ?? '(unset)'}`);
-				else if (!existsSync(new URL(`.${url}`, staticDir))) missing.push(`${name}: ${url}`);
+	/**
+	 * Depth is an ordering, and this is the one it has to be: palest at `1`, darkest at `9`, in both
+	 * polarities. Absolute, not relative to the ground, because that is the whole reason the ink
+	 * ramp exists rather than the bands reading `--c-shade-*` directly. Reading a landscape is
+	 * reading that the near thing is darker than the far one, and it is darker at noon and at
+	 * midnight; a scene that let the ramp's own polarity through would come out inside-out in dark,
+	 * with the foreground the palest thing on the screen.
+	 *
+	 * Luminance rather than a mix of hue and lightness, because `950` in one polarity and `50` in
+	 * the other are different colours and only their lightness is being claimed here.
+	 */
+	test('a drawn ink ramp runs palest to darkest in both polarities', () => {
+		const failures: string[] = [];
+		for (const name of DRAWN) {
+			for (const theme of THEMES) {
+				for (const mode of MODES) {
+					const ramp = palette(theme, mode);
+					// Contrast against black is monotone in luminance, so it orders without a second helper.
+					const lit = Array.from({ length: rampLength(name) }, (_, i) =>
+						contrast('#000000', ink(name, i + 1, mode, ramp))
+					);
+					lit.forEach((l, i) => {
+						if (i > 0 && l >= lit[i - 1]) {
+							failures.push(
+								`${name} ${theme}/${mode}: ink-${i + 1} at ${l.toFixed(3)} is no darker than ink-${i} at ${lit[i - 1].toFixed(3)}`
+							);
+						}
+					});
+				}
 			}
 		}
-		expect(missing).toEqual([]);
+		expect(failures).toEqual([]);
 	});
 
 	/**
-	 * The ridge masks are baked output, and baked output rots. Someone tunes a summit and does not
-	 * rerun the generator, or hand-edits a path in the file because it was quicker than reading the
-	 * script, and from then on the two disagree with nothing to say so: both halves still work, the
-	 * scene still draws, and the next honest rerun silently reverts whatever the hand edit was.
+	 * The chain the bands read the ink ramp through, checked against the folder each scene actually
+	 * ships rather than against a table restating it. Each band's crest is the ink its predecessor
+	 * ended on, which is what makes the bands one gradient instead of seven; a break in that chain
+	 * is a hard edge in the wash that no band's silhouette accounts for.
 	 *
-	 * Redrawing them here and comparing bytes is the whole check, and it is only possible because
-	 * the generator is seeded end to end.
+	 * The length is the part that cannot be seen by looking, and it is the one the scenes no longer
+	 * agree on: the ramp is as long as the art needs, so `app.css` has to declare exactly one stop
+	 * per band plus the sky's two. One short and the foreground band reads a stop that was never
+	 * declared, resolves to nothing, and paints black; one long and the ramp's darkest end is never
+	 * spent, which is a scene quietly shallower than the one it was tuned as. Neither shows up
+	 * anywhere but on the screen, so both are checked against the folder rather than a number.
 	 */
-	test('the shipped ridge masks are exactly what the generator draws', async () => {
-		const stale: string[] = [];
-		for (const scene of SCENES) {
-			const shipped = await Bun.file(new URL(`wallpapers/${scene.file}`, staticDir)).text();
-			if (shipped !== draw(scene)) stale.push(scene.file);
+	test('a drawn scene fills the ink chain end to end, one band per step', () => {
+		const wrong: string[] = [];
+		for (const name of DRAWN) {
+			const chain = bands(slotsOf(drawnDir, name));
+			let previous = 2;
+			for (const { slot, crest, base } of chain) {
+				if (crest !== previous)
+					wrong.push(`${name}/${slot} starts at ink ${crest}, not ${previous}`);
+				if (base !== crest + 1) wrong.push(`${name}/${slot} spans ink ${crest} to ${base}`);
+				previous = base;
+			}
+			for (const mode of MODES) {
+				const tokens = block(`${mode === 'dark' ? '.dark' : ''}[data-wallpaper='${name}']`);
+				const declared = Object.keys(tokens).filter((t) => /^--wall-ink-\d+$/.test(t)).length;
+				if (declared !== previous) {
+					wrong.push(
+						`${name} ${mode} declares ${declared} ink stops, and its chain ends at ${previous}`
+					);
+				}
+			}
 		}
-		expect(stale).toEqual([]);
+		expect(wrong).toEqual([]);
+	});
+
+	/**
+	 * The switch, which is the one thing a drawn scene cannot declare for itself. Every scene's
+	 * bands are in the DOM at once so that changing wallpaper cannot flash, and each offers a
+	 * `--wall-show-<name>` that only its own block in `app.css` answers. Unanswered, the scene is
+	 * shipped, inlined, and invisible, with nothing anywhere to say why.
+	 */
+	test('every drawn scene is switched on by its own block', () => {
+		const wrong: string[] = [];
+		for (const name of DRAWN) {
+			const tokens = block(`[data-wallpaper='${name}']`);
+			if (tokens[`--wall-show-${name}`] !== 'flex') {
+				wrong.push(`${name} never sets --wall-show-${name}: flex`);
+			}
+			if (!wallpaper.includes('var(--wall-show-{scene.name}, none)')) {
+				wrong.push('Wallpaper.svelte does not offer --wall-show-<name>');
+			}
+		}
+		expect(wrong).toEqual([]);
 	});
 
 	/**
@@ -355,7 +580,9 @@ describe('the wallpaper is a background, so it answers to the contrast contract'
 	 */
 	test('the allowed wallpapers and the default are the same on both sides of app.html', async () => {
 		const module = await Bun.file(new URL('./appearance.svelte.ts', import.meta.url)).text();
-		const inHtml = html.match(/pick\('mnemos\.wallpaper', \[([^\]]+)\], '([\w-]+)'\)/);
+		// Whitespace-tolerant, because the roster is long enough now that the formatter wraps the
+		// call across four lines and a one-line pattern would fail on a reformat rather than a defect.
+		const inHtml = html.match(/pick\(\s*'mnemos\.wallpaper',\s*\[([^\]]+)\],\s*'([\w-]+)'\s*\)/);
 		expect(inHtml).not.toBeNull();
 
 		const names = (s: string) => [...s.matchAll(/'([\w-]+)'/g)].map(([, v]) => v);

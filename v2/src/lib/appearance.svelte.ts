@@ -16,10 +16,12 @@ export const APPEARANCES = ['light', 'dark', 'auto'] as const;
  * neither shape nor colour: every wallpaper renders in all 24 combinations, and every skin
  * dresses the same masks its own way. `none` falls back to the skin's plain `--desktop-bg`.
  *
- * Adding one means a `[data-wallpaper='...']` block in app.css naming one mask file per depth
- * layer, and the name here. Nothing else.
+ * Adding one means a `[data-wallpaper='...']` block in app.css and the name here. Nothing else.
+ * The block answers the `--wall-show-<name>` its bands offer and declares the scene's ink ramp;
+ * the bands themselves are a folder under `lib/wallpapers/` that `Wallpaper.svelte` finds without
+ * being told.
  */
-export const WALLPAPERS = ['ridge', 'none'] as const;
+export const WALLPAPERS = ['grove', 'night-scene', 'circuit-bottom', 'none'] as const;
 
 /**
  * Whether a desktop icon opens on one click or two. Persisted like the rest, but absent from
@@ -52,7 +54,7 @@ const DEFAULT: Settings = {
 	skin: 'modern',
 	theme: 'ferrite',
 	appearance: 'auto',
-	wallpaper: 'ridge',
+	wallpaper: 'grove',
 	clickMode: 'double'
 };
 

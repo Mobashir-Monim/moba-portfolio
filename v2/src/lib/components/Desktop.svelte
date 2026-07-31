@@ -53,9 +53,6 @@
 	   needs. A `z-index` here would raise the desktop out of document order and over the window
 	   layer, which is a later sibling of this component with no z-index of its own, so the icons
 	   would draw on top of every open window.
-
-	   Inside the wallpaper the mark is a layer between the sky and the ranges, so the ridges cut
-	   its base without anything out here knowing that.
 	*/
 	.centre {
 		position: relative;

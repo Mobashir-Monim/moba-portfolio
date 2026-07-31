@@ -161,12 +161,6 @@
 		box-shadow: var(--elev-1);
 	}
 
-	/* A wallpaper already draws the mark, at ten times this size and set into the scene. Two of
-	   them on one screen is one too many, so the tile stands down and the `h1` stays. */
-	:global(html:not([data-wallpaper='none'])) .mark {
-		display: none;
-	}
-
 	@media (min-width: 48rem) {
 		.masthead {
 			--logo-glyph: 3.5rem;

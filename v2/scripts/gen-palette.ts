@@ -56,7 +56,12 @@ const THEMES = {
 /** Lightness and chroma per token. Hue comes from the theme. */
 type Spec = Record<string, [L: number, C: number]>;
 
-/** Tokens drawn from the theme's accent hue. Everything else takes the chrome hue. */
+/**
+ * Tokens drawn from the theme's accent hue. Everything else takes the chrome hue.
+ *
+ * The whole shade ramp is on the accent hue too, by prefix rather than by listing eleven names.
+ * See SHADE_LIGHT below for why a shade of a scheme is a shade of its accent.
+ */
 const ACCENT_TOKENS = new Set([
 	'accent',
 	'accent-hover',
@@ -65,6 +70,8 @@ const ACCENT_TOKENS = new Set([
 	'on-select',
 	'focus'
 ]);
+
+const onAccentHue = (name: string) => ACCENT_TOKENS.has(name) || name.startsWith('shade-');
 
 /*
  * Harshness is lightness, vibrancy is chroma, and separation is hue. Three axes, and every way
@@ -130,15 +137,99 @@ const LIGHT: Spec = {
 	focus: [0.53, 0.15]
 };
 
+/*
+ * The shade ramp: eleven stops of the theme's own accent hue, per mode.
+ *
+ * The four `--c-*` accent tokens name roles, which is right for chrome and useless the moment
+ * something wants a tint of the theme rather than the theme's one accent: a selected row, a chart
+ * series, a badge, a meter fill. This is that ramp, and it is the theme's accent hue throughout,
+ * because a "shade of the colour scheme" is a shade of what makes the scheme that scheme. The
+ * chrome hue already has its own ramp; it is called `--c-surface-*` and `--c-fg-*`.
+ *
+ * SEMANTIC, NOT ABSOLUTE. `--c-shade-50` is the faintest tint against whatever the ground
+ * currently is and `--c-shade-950` is the strongest, so in light mode the ramp runs light to dark
+ * and in dark mode it runs dark to light. That is the same contract every other token here keeps:
+ * `--c-surface-1` is near-white in light and near-black in dark, and nothing at a call site writes
+ * a `dark:` variant to cope. An absolute ramp would make the two modes identical and force every
+ * consumer to flip its own index.
+ *
+ * The two specs are deliberate mirrors, and both are anchored to tokens that already exist:
+ *
+ *   600  is exactly `--c-accent`, in both modes.
+ *   700  is exactly `--c-accent-hover`, in both modes.
+ *
+ * So the ramp is not a second palette sitting alongside the first, it is the first one continued
+ * in both directions, and `bg-shade-600` and the accent are the same pixel.
+ *
+ * Steps are perceptual and widen through the middle, which is what Tailwind's OKLCH ramps do and
+ * for the same reason: chroma is at its peak there and hides the wider lightness gap. Chroma
+ * itself peaks at 500-700 and falls off at both ends, because a near-ground tint carrying full
+ * accent chroma reads as a colour cast over the whole surface rather than as a tint of it.
+ *
+ * The dark ramp widens more than the light one does, and it is the contract below that makes it:
+ * 400 is pulled down until `--c-fg-1` clears 4.5:1 on it, 600 cannot move because it is the
+ * accent, and the gap between them has to be crossed in two steps. Light's 500 is likewise the
+ * one stop set by measurement rather than by spacing: it sits at 0.6 because 0.615 put phosphor
+ * at 2.98:1 on `surface-2`, two hundredths under the 3:1 it is held to.
+ *
+ * The contrast contract the ramp is held to, enforced in PAIRS below and in tokens.test.ts:
+ *
+ *   50 to 400    background stops. `--c-fg-1` on any of them clears 4.5:1.
+ *   500          the pivot, and the one stop that is neither. Non-text only, 3:1 on the surfaces.
+ *   600 to 950   foreground stops. Each clears 4.5:1 on surface-1, -2, and -3.
+ *
+ * `surface-0` is out of the text half of that contract for the same reason `--c-fg-3` is: it is
+ * the desktop ground, and no text stop sits directly on it.
+ */
+const SHADE_LIGHT: Spec = {
+	'shade-50': [0.975, 0.02],
+	'shade-100': [0.945, 0.038],
+	'shade-200': [0.895, 0.065],
+	'shade-300': [0.825, 0.095],
+	'shade-400': [0.715, 0.13],
+	'shade-500': [0.6, 0.15],
+	'shade-600': [0.515, 0.15],
+	'shade-700': [0.45, 0.16],
+	'shade-800': [0.39, 0.135],
+	'shade-900': [0.33, 0.105],
+	'shade-950': [0.25, 0.07]
+};
+
+const SHADE_DARK: Spec = {
+	'shade-50': [0.29, 0.03],
+	'shade-100': [0.34, 0.05],
+	'shade-200': [0.395, 0.075],
+	'shade-300': [0.45, 0.105],
+	'shade-400': [0.51, 0.145],
+	'shade-500': [0.635, 0.155],
+	'shade-600': [0.75, 0.145],
+	'shade-700': [0.83, 0.13],
+	'shade-800': [0.88, 0.09],
+	'shade-900': [0.925, 0.055],
+	'shade-950': [0.96, 0.025]
+};
+
+/** The stops, in ramp order. Exported so tokens.test.ts checks the same list this emits. */
+export const SHADE_STOPS = Object.keys(SHADE_LIGHT).map((k) => Number(k.slice(6)));
+
+/** What a theme block actually is, per polarity: the role tokens, then the ramp. */
+const SPECS: Record<'light' | 'dark', Spec> = {
+	light: { ...LIGHT, ...SHADE_LIGHT },
+	dark: { ...DARK, ...SHADE_DARK }
+};
+
 /**
  * Pairs that must pass. Text pairs need 4.5:1 (WCAG 1.4.3 AA, normal text);
  * non-text pairs need 3:1 (1.4.11). Kept in sync with tokens.test.ts by hand:
  * two short lists beat a shared module neither side reads.
  */
-const PAIRS: [fg: string, bg: string, min: number][] = [
-	...['surface-0', 'surface-1', 'surface-2', 'surface-3'].flatMap(
-		(bg) => [['fg-1', bg, 4.5] as [string, string, number], ['fg-2', bg, 4.5]] as const
-	),
+type Pair = [fg: string, bg: string, min: number];
+
+const PAIRS: Pair[] = [
+	...['surface-0', 'surface-1', 'surface-2', 'surface-3'].flatMap((bg): Pair[] => [
+		['fg-1', bg, 4.5],
+		['fg-2', bg, 4.5]
+	]),
 	// fg-3 is muted body copy, it never sits on the desktop ground.
 	['fg-3', 'surface-1', 4.5],
 	['fg-3', 'surface-2', 4.5],
@@ -157,7 +248,17 @@ const PAIRS: [fg: string, bg: string, min: number][] = [
 	['focus', 'surface-0', 3],
 	['focus', 'surface-1', 3],
 	['focus', 'surface-2', 3],
-	['focus', 'surface-3', 3]
+	['focus', 'surface-3', 3],
+	// The shade contract, and the reason the ramp is split where it is. Background stops carry
+	// body copy; foreground stops are readable on every surface a window is made of; 500 is
+	// neither and is held to 3:1 so it can still rule a line or fill a meter.
+	...[50, 100, 200, 300, 400].map((s): Pair => ['fg-1', `shade-${s}`, 4.5]),
+	...[600, 700, 800, 900, 950].flatMap((s): Pair[] =>
+		['surface-1', 'surface-2', 'surface-3'].map((bg): Pair => [`shade-${s}`, bg, 4.5])
+	),
+	['shade-500', 'surface-1', 3],
+	['shade-500', 'surface-2', 3],
+	['shade-500', 'surface-3', 3]
 ];
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -212,7 +313,7 @@ function build(spec: Spec, hues: { accent: number; chrome: number }): Record<str
 	return Object.fromEntries(
 		Object.entries(spec).map(([name, [L, C]]) => [
 			name,
-			hex(L, C, ACCENT_TOKENS.has(name) ? hues.accent : hues.chrome)
+			hex(L, C, onAccentHue(name) ? hues.accent : hues.chrome)
 		])
 	);
 }
@@ -220,13 +321,10 @@ function build(spec: Spec, hues: { accent: number; chrome: number }): Record<str
 function css(): string {
 	const out: string[] = [];
 	for (const [theme, hues] of Object.entries(THEMES)) {
-		// Compound, not descendant: `dark` and `data-theme` both live on <html>.
-		for (const [mode, spec] of [
-			['', LIGHT],
-			['.dark', DARK]
-		] as const) {
+		for (const [mode, spec] of Object.entries(SPECS)) {
 			const ramp = build(spec, hues);
-			out.push(`${mode}[data-theme='${theme}'] {`);
+			// Compound, not descendant: `dark` and `data-theme` both live on <html>.
+			out.push(`${mode === 'dark' ? '.dark' : ''}[data-theme='${theme}'] {`);
 			for (const [name, value] of Object.entries(ramp)) out.push(`\t--c-${name}: ${value};`);
 			out.push('}\n');
 		}
@@ -238,10 +336,7 @@ function report(): string {
 	const rows: string[] = [];
 	let failures = 0;
 	for (const [theme, hues] of Object.entries(THEMES)) {
-		for (const [mode, spec] of [
-			['light', LIGHT],
-			['dark', DARK]
-		] as const) {
+		for (const [mode, spec] of Object.entries(SPECS)) {
 			const ramp = build(spec, hues);
 			for (const [fg, bg, min] of PAIRS) {
 				const ratio = contrast(ramp[fg], ramp[bg]);

@@ -84,6 +84,28 @@
    lightnesses the gamut hands back all of the chroma the ramp asks for around
    320, most of it around 140, about three quarters in the warm band, and
    barely half through cyan and teal, which is why no theme lives there.
+
+   Each block closes with `--c-shade-50` through `--c-shade-950`, eleven stops
+   of the theme's own accent hue. The tokens above name roles, which is what
+   chrome wants and useless the moment something wants a tint of the theme
+   rather than the theme's one accent: a selected row, a chart series, a badge,
+   a meter fill. The ramp is semantic like every other token here, so `50` is
+   the faintest tint against whatever the ground currently is and `950` the
+   strongest, and the light and dark sets run in opposite directions. Nothing
+   at a call site writes a `dark:` variant to flip an index.
+
+   It is not a second palette. `600` is exactly `--c-accent` and `700` is
+   exactly `--c-accent-hover`, in all eight blocks, so the ramp is the accent
+   continued in both directions rather than a colour sitting next to it.
+
+   The contract, which tokens.test.ts holds:
+
+     50 to 400    background stops. `--c-fg-1` on any of them clears 4.5:1.
+     500          the pivot, neither one nor the other. 3:1 on the surfaces.
+     600 to 950   foreground stops, each clearing 4.5:1 on surface-1, -2, -3.
+
+   `surface-0` is out of the text half of that, for the same reason `--c-fg-3`
+   is: it is the desktop ground and no text stop sits directly on it.
    -------------------------------------------------------------------------- */
 
 [data-theme='ferrite'] {
@@ -102,6 +124,17 @@
 	--c-select: #ab4014;
 	--c-on-select: #fffbf9;
 	--c-focus: #b0451a;
+	--c-shade-50: #fff4f0;
+	--c-shade-100: #ffe7df;
+	--c-shade-200: #ffd0c0;
+	--c-shade-300: #fcb197;
+	--c-shade-400: #e78562;
+	--c-shade-500: #c85b32;
+	--c-shade-600: #ab4014;
+	--c-shade-700: #932f00;
+	--c-shade-800: #792500;
+	--c-shade-900: #5f1b00;
+	--c-shade-950: #3c1304;
 }
 
 .dark[data-theme='ferrite'] {
@@ -120,6 +153,17 @@
 	--c-select: #ad4216;
 	--c-on-select: #fffbf9;
 	--c-focus: #ff9874;
+	--c-shade-50: #392620;
+	--c-shade-100: #4e2f24;
+	--c-shade-200: #683726;
+	--c-shade-300: #853e24;
+	--c-shade-400: #a84117;
+	--c-shade-500: #d6643a;
+	--c-shade-600: #fa8b64;
+	--c-shade-700: #ffb297;
+	--c-shade-800: #ffcab7;
+	--c-shade-900: #ffded3;
+	--c-shade-950: #ffeee8;
 }
 
 [data-theme='phosphor'] {
@@ -138,6 +182,17 @@
 	--c-select: #2e7b19;
 	--c-on-select: #fafdf9;
 	--c-focus: #337f1f;
+	--c-shade-50: #f0faee;
+	--c-shade-100: #e0f4dc;
+	--c-shade-200: #c6e8bf;
+	--c-shade-300: #a5d59a;
+	--c-shade-400: #75b767;
+	--c-shade-500: #499537;
+	--c-shade-600: #2e7b19;
+	--c-shade-700: #1b6700;
+	--c-shade-800: #145400;
+	--c-shade-900: #0f4101;
+	--c-shade-950: #0c2905;
 }
 
 .dark[data-theme='phosphor'] {
@@ -156,6 +211,17 @@
 	--c-select: #307c1b;
 	--c-on-select: #f8fef7;
 	--c-focus: #83ce72;
+	--c-shade-50: #232f21;
+	--c-shade-100: #2a3e25;
+	--c-shade-200: #2f5028;
+	--c-shade-300: #326327;
+	--c-shade-400: #30791c;
+	--c-shade-500: #51a03f;
+	--c-shade-600: #7ac469;
+	--c-shade-700: #99dc8a;
+	--c-shade-800: #b8e7ae;
+	--c-shade-900: #d4f0cd;
+	--c-shade-950: #e9f6e6;
 }
 
 [data-theme='cyanotype'] {
@@ -174,6 +240,17 @@
 	--c-select: #006cac;
 	--c-on-select: #f9fcff;
 	--c-focus: #0071b3;
+	--c-shade-50: #f0f8ff;
+	--c-shade-100: #deefff;
+	--c-shade-200: #bfe1ff;
+	--c-shade-300: #91cdff;
+	--c-shade-400: #54aaef;
+	--c-shade-500: #0486d3;
+	--c-shade-600: #006cac;
+	--c-shade-700: #005990;
+	--c-shade-800: #004976;
+	--c-shade-900: #00385d;
+	--c-shade-950: #00243e;
 }
 
 .dark[data-theme='cyanotype'] {
@@ -192,6 +269,17 @@
 	--c-select: #006eaf;
 	--c-on-select: #f9fcff;
 	--c-focus: #71bfff;
+	--c-shade-50: #1f2d39;
+	--c-shade-100: #203b50;
+	--c-shade-200: #1e4a6c;
+	--c-shade-300: #115a8b;
+	--c-shade-400: #006baa;
+	--c-shade-500: #1391e1;
+	--c-shade-600: #59b6ff;
+	--c-shade-700: #95ceff;
+	--c-shade-800: #b5ddff;
+	--c-shade-900: #d2eaff;
+	--c-shade-950: #e7f4ff;
 }
 
 [data-theme='anthotype'] {
@@ -210,6 +298,17 @@
 	--c-select: #934292;
 	--c-on-select: #fefbfd;
 	--c-focus: #984697;
+	--c-shade-50: #fff2fe;
+	--c-shade-100: #fce4fa;
+	--c-shade-200: #f5cef3;
+	--c-shade-300: #e8b0e5;
+	--c-shade-400: #cf84cc;
+	--c-shade-500: #af5bad;
+	--c-shade-600: #934292;
+	--c-shade-700: #812a81;
+	--c-shade-800: #692269;
+	--c-shade-900: #501d50;
+	--c-shade-950: #331332;
 }
 
 .dark[data-theme='anthotype'] {
@@ -228,6 +327,17 @@
 	--c-select: #954394;
 	--c-on-select: #fffaff;
 	--c-focus: #e994e6;
+	--c-shade-50: #342633;
+	--c-shade-100: #462e45;
+	--c-shade-200: #5c375b;
+	--c-shade-300: #743e72;
+	--c-shade-400: #90428f;
+	--c-shade-500: #bb64ba;
+	--c-shade-600: #df8bdc;
+	--c-shade-700: #f5a8f2;
+	--c-shade-800: #f9c3f6;
+	--c-shade-900: #fbdaf9;
+	--c-shade-950: #fcecfb;
 }
 
 /* --------------------------------------------------------------------------
@@ -310,25 +420,9 @@
 	--path-prefix: '~/';
 	--sidebar-title-fg: var(--c-accent);
 
-	/* Wallpaper. The masks are shared, so a skin only says how the scene is lit. The sky is an
-	   overlay rather than a ground, which is what keeps the graph paper visible through it: crisp
-	   ranges under a thin accent wash, the technical read the skin is for.
-
-	   Three ranges, three steps toward the ink, and the steps are even because this is the skin
-	   that draws rather than the one that hazes: distance here is stated as tone, not blurred in.
-	   The near step is unchanged from when there were two layers, which keeps the worst case the
-	   contrast test measures exactly where it was. */
-	--wall-sky: linear-gradient(
-		180deg,
-		color-mix(in srgb, var(--c-accent) 16%, transparent) 0%,
-		color-mix(in srgb, var(--c-accent) 5%, transparent) 32%,
-		transparent 58%
-	);
-	--wall-far: color-mix(in srgb, var(--c-fg-1) 22%, var(--c-surface-0));
-	--wall-mid: color-mix(in srgb, var(--c-fg-1) 31%, var(--c-surface-0));
-	--wall-near: color-mix(in srgb, var(--c-fg-1) 40%, var(--c-surface-0));
-	--wall-mark: color-mix(in srgb, var(--c-accent) 18%, transparent);
-	--wall-mark-size: clamp(13rem, 44vmin, 34rem);
+	/* Wallpaper. The art is shared, so a skin only says how the scene is lit, and this is the skin
+	   that draws rather than the one that hazes: no focus falloff, no quantising, distance stated as
+	   tone and nothing else. The scene's own block owns the tone, so there is nothing left here. */
 	--wall-fx: none;
 	--wall-haze-far: none;
 	--wall-haze-mid: none;
@@ -427,23 +521,11 @@
 	   accent budget that stops at the title bar and the selection. */
 	--sidebar-title-fg: var(--c-fg-1);
 
-	/* Wallpaper. The masks are vector, so there is nothing in them to snap to a grid; `--wall-fx`
+	/* Wallpaper. The art is vector, so there is nothing in it to snap to a grid; `--wall-fx`
 	   quantises the composited scene to 6px blocks instead, which is the closest thing to drawing
-	   it on a machine that had one. No sky layer: the dither underneath is the sky, and a gradient
-	   over it would be a shade a 1-bit display could not make. Greyscale throughout, because a
-	   coloured horizon would be a third place retro spends a budget that stops at the title bar
-	   and the selection.
-
-	   The three steps are further apart here than in the other two skins and start higher up the
-	   ramp, because six-pixel blocks eat the difference between two adjacent tones: what survives
-	   quantising is separation, and a scene that reads on a 1-bit machine has to say distance in
-	   steps a dither could actually have made. Nothing hazes, for the same reason. */
-	--wall-sky: none;
-	--wall-far: color-mix(in srgb, var(--c-fg-1) 24%, var(--c-surface-0));
-	--wall-mid: color-mix(in srgb, var(--c-fg-1) 33%, var(--c-surface-0));
-	--wall-near: color-mix(in srgb, var(--c-fg-1) 42%, var(--c-surface-0));
-	--wall-mark: color-mix(in srgb, var(--c-fg-1) 11%, transparent);
-	--wall-mark-size: clamp(13rem, 44vmin, 34rem);
+	   it on a machine that had one. Nothing hazes, for the same reason six-pixel blocks are the
+	   point: what survives quantising is separation, and a graded blur under it is a shade a 1-bit
+	   display could not make. */
 	--wall-fx: url('#mnemos-pixel');
 	--wall-haze-far: none;
 	--wall-haze-mid: none;
@@ -519,33 +601,11 @@
 	--path-prefix: '';
 	--sidebar-title-fg: var(--c-accent);
 
-	/* Wallpaper. Aerial perspective spent as blur: the ranges go soft in proportion to how far away
+	/* Wallpaper. Aerial perspective spent as blur: the bands go soft in proportion to how far away
 	   they are and the near silhouette stays sharp, which is the same depth trick the chrome
-	   already plays with `--bl-chrome`. Two blurs rather than one is what a third layer buys here,
+	   already plays with `--bl-chrome`. Two blurs rather than one is what a third plane buys here,
 	   because a graded focus falloff is the thing photographs of distant ranges actually do and a
-	   single soft layer behind a single sharp one only ever reads as two.
-
-	   The sky is the skin's accent wash carried up into the scene, plus a low glow sitting behind
-	   the crests: gradient stops are this skin's whole accent budget, so the sun is spent from the
-	   same purse. The ridges keep the shallowest steps of the three skins so the scene reads as
-	   haze rather than as rock. */
-	--wall-sky:
-		radial-gradient(
-			72% 44% at 50% 60%,
-			color-mix(in srgb, var(--c-accent) 20%, transparent) 0%,
-			transparent 72%
-		),
-		linear-gradient(
-			180deg,
-			color-mix(in srgb, var(--c-accent) 28%, transparent) 0%,
-			color-mix(in srgb, var(--c-accent) 9%, transparent) 38%,
-			transparent 68%
-		);
-	--wall-far: color-mix(in srgb, var(--c-fg-1) 16%, var(--c-surface-0));
-	--wall-mid: color-mix(in srgb, var(--c-fg-1) 25%, var(--c-surface-0));
-	--wall-near: color-mix(in srgb, var(--c-fg-1) 34%, var(--c-surface-0));
-	--wall-mark: color-mix(in srgb, var(--c-accent) 22%, transparent);
-	--wall-mark-size: clamp(13rem, 44vmin, 34rem);
+	   single soft layer behind a single sharp one only ever reads as two. */
 	--wall-fx: none;
 	--wall-haze-far: blur(6px);
 	--wall-haze-mid: blur(2px);
@@ -566,26 +626,182 @@
    Wallpaper blocks: geometry, and nothing else.
 
    A wallpaper is a fourth axis, orthogonal to the other three: it names its
-   mask files and stops. The skin says how the scene is lit and the theme says
+   bands and their stops. The skin says how the scene is lit and the theme says
    in what colours, so one set of files dresses all 24 combinations and adding
-   a wallpaper costs three files and four lines.
+   a wallpaper costs a folder and two blocks.
 
-   The masks are white-on-transparent, and depth inside a file is fill-opacity
-   rather than a file per band. White plus alpha measures the same in an alpha
-   mask and in a luminance one, so `mask-mode` never has to be stated.
+   Three planes, and the third is the middle. Distance in a landscape is read
+   from how many planes are between the eye and the horizon, and two planes give
+   a foreground and a backdrop with nothing in between, so the eye has no scale
+   to measure against.
 
-   Three files rather than two, and the third is the middle. Distance in a
-   landscape is read from how many planes are between the eye and the horizon,
-   and two planes give a foreground and a backdrop with nothing in between, so
-   the eye has no scale to measure against. The bands inside a file cannot do
-   that job: they share one colour token, so they carry relief but not depth.
-   The masks themselves come out of `bun scripts/gen-wallpaper.ts`.
+   Each plane carries a face and up to two reliefs behind it, which is how a
+   scene gets detail without getting a fourth distance. A relief is a slope of
+   the same plane that clears the face in front of it: same distance, same haze,
+   its own shade. Nine slots in all, and a wallpaper names as many as it has.
+
+   Every band is its own opaque layer rather than a translucent one stacked
+   inside a file. A band at reduced alpha is not a second shade: it is the
+   band's own shade letting the sky and everything behind it through. It reads
+   as a wash, it drifts with whatever happens to sit behind it, and under glass,
+   where the plane behind is blurred, it drifts per pixel. A shade has to be a
+   colour, so a band has to be a layer.
+
+   `grove` comes out of `bun scripts/trace-wallpaper.ts`, which traces a stock
+   illustration's seven terrain bands into three faces and four reliefs.
+   `night-scene` comes out of `bun scripts/paint-wallpaper.ts`, which takes art
+   that arrived already separated by layer and takes its colour away: three
+   bands, one per plane, and no relief at all.
    -------------------------------------------------------------------------- */
 
-[data-wallpaper='ridge'] {
-	--wall-mask-far: url('/wallpapers/ridge-far.svg');
-	--wall-mask-mid: url('/wallpapers/ridge-mid.svg');
-	--wall-mask-near: url('/wallpapers/ridge-near.svg');
+/*
+   The two drawn wallpapers. Every band carries its own two-stop gradient and reads the blocks below
+   through `--wall-band-crest` and `--wall-band-base`, which `Wallpaper.svelte` sets per layer.
+
+   The ink ramp is the shade ramp with the polarity taken back out, and that is the whole of what
+   it is for. `--c-shade-*` is semantic: `50` is the faintest against whatever the ground currently
+   is and `950` the strongest, so the two sets run in opposite directions and nothing has to write
+   a `dark:` variant to flip an index. Depth is not semantic. A near ridge is darker than a far one
+   at noon and at midnight, and reading a landscape is reading that one fact, so a scene that took
+   the ramp at its word would come out inside-out in one of the two polarities: nearest palest,
+   horizon dark, the one cue the composition is built on running backwards.
+
+   So the scene names its own ordering, `1` palest to `9` darkest, and maps it onto the ramp in
+   whichever direction the polarity demands. One table, one reversal, and every band then picks an
+   ink index and never thinks about light or dark again.
+
+   The range is `50` to `400` and stops there, which is not a margin of taste. Those five are the
+   ramp's background half: the contract above holds them to carrying `--c-fg-1`, and `600` upward is
+   the foreground half, which is built to fail against it. A wallpaper is a background with the
+   desktop's icon glyphs sitting directly on it, so the scene has exactly the five stops a
+   background is allowed and no more. Taking the ramp's full width would have made the far sky a
+   foreground stop and the glyphs on it unreadable, in whichever polarity the reversal put it there,
+   which is the mistake this range exists to make impossible.
+
+   How many values come out of those five stops is the scene's own business, because the band count
+   is the art's: `grove` traces seven and `night-scene` is three, and a fixed ramp would mean
+   inventing terrain for one and discarding it from another. So a scene declares one stop per band
+   plus the sky's two, spread evenly from `50` to `400`, and the values between the shade stops are
+   whatever mix lands on the even spacing. Even is the point: an uneven step reads as a horizon,
+   which is a thing these scenes already have enough of.
+*/
+[data-wallpaper='grove'] {
+	/* The one line that makes a drawn wallpaper drawn, and the only place its name appears outside
+	   its own folder. `Wallpaper.svelte` puts every drawn scene's bands in the DOM and offers each
+	   one a `--wall-show-<name>`, because a selector can match a literal but cannot ask whether a
+	   band's scene is the document's scene; answering here is what shows these seven and no others. */
+	--wall-show-grove: flex;
+
+	/* The sky, and it is the scene's rather than the skin's on purpose, retro's dither included: a
+	   scene whose seven bands are all theme colour cannot sit on a greyscale ground without the
+	   horizon becoming the loudest edge on the screen. Two stops, the palest the scene has, so the
+	   far crest still has somewhere to be a step darker than. */
+	--wall-sky: linear-gradient(var(--wall-ink-2), var(--wall-ink-1));
+	--wall-ink-1: var(--c-shade-50);
+	--wall-ink-2: color-mix(in srgb, var(--c-shade-50) 50%, var(--c-shade-100));
+	--wall-ink-3: var(--c-shade-100);
+	--wall-ink-4: color-mix(in srgb, var(--c-shade-100) 50%, var(--c-shade-200));
+	--wall-ink-5: var(--c-shade-200);
+	--wall-ink-6: color-mix(in srgb, var(--c-shade-200) 50%, var(--c-shade-300));
+	--wall-ink-7: var(--c-shade-300);
+	--wall-ink-8: color-mix(in srgb, var(--c-shade-300) 50%, var(--c-shade-400));
+	--wall-ink-9: var(--c-shade-400);
+}
+
+.dark[data-wallpaper='grove'] {
+	--wall-ink-1: var(--c-shade-400);
+	--wall-ink-2: color-mix(in srgb, var(--c-shade-400) 50%, var(--c-shade-300));
+	--wall-ink-3: var(--c-shade-300);
+	--wall-ink-4: color-mix(in srgb, var(--c-shade-300) 50%, var(--c-shade-200));
+	--wall-ink-5: var(--c-shade-200);
+	--wall-ink-6: color-mix(in srgb, var(--c-shade-200) 50%, var(--c-shade-100));
+	--wall-ink-7: var(--c-shade-100);
+	--wall-ink-8: color-mix(in srgb, var(--c-shade-100) 50%, var(--c-shade-50));
+	--wall-ink-9: var(--c-shade-50);
+}
+
+/*
+   `night-scene` is three bands, so five stops, which is the five shade stops themselves and not a
+   mix anywhere. Two hills and a wind-bent tree, one per plane: it is the scene with no relief at
+   all, and it does not want one. The whole composition is a silhouette against a light, so a fourth
+   shape between the hills would be a fourth thing to read rather than more depth.
+
+   The light is the sun, and it is in the sky rather than in a band, because it is neither. A band
+   is bottom-anchored to the desktop's floor and spans its own height in ink; a sun has no crest to
+   anchor and no base to sit on. So it is a radial stop in `--wall-sky` at the palest ink the scene
+   has, which puts it exactly where the sky already is and costs no layer at all.
+
+   And it is the one scene that spends the sky at full strength. `grove` tints the skin's own ground
+   and lets the graph paper and the dither through at a quarter, which is right for a wash and wrong
+   for a light source: a sun at a quarter is a smudge. This one paints over the ground instead,
+   which is what a drawn night sky is.
+*/
+[data-wallpaper='night-scene'] {
+	--wall-show-night-scene: flex;
+
+	--wall-sky:
+		radial-gradient(circle at 42% 24%, var(--wall-ink-1) 0 11%, transparent 21%),
+		linear-gradient(var(--wall-ink-3), var(--wall-ink-1));
+	--wall-sky-opacity: 1;
+	--wall-ink-1: var(--c-shade-50);
+	--wall-ink-2: var(--c-shade-100);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-300);
+	--wall-ink-5: var(--c-shade-400);
+}
+
+.dark[data-wallpaper='night-scene'] {
+	--wall-ink-1: var(--c-shade-400);
+	--wall-ink-2: var(--c-shade-300);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-100);
+	--wall-ink-5: var(--c-shade-50);
+}
+
+/*
+   `circuit-bottom` is three bands and five stops like the one above it, and it is the scene that
+   shows the plane model was never about landscape. Traces fanning out of the centre and filling the
+   bottom half of the frame, split by weight rather than by terrain: hairline vias far, mid-weight
+   runs in the middle, the bold buses near. Depth here is line weight and nothing else, which is what
+   a board actually reads as, and it lands on the same ramp because the ramp only ever claimed that
+   nearer is darker.
+
+   The sky is `grove`'s, at the default quarter. A board has no sky, so what the token is doing here
+   is the other half of its job: keeping the empty top of the frame from being a flat slab, and
+   letting the skin's own ground through, which for the one skin whose desktop is graph paper is the
+   thing to do rather than the thing to avoid. A circuit over a grid is not an accident.
+*/
+[data-wallpaper='circuit-bottom'] {
+	--wall-show-circuit-bottom: flex;
+
+	/* One scale for all three planes, which is the whole of what makes this scene legible. The
+	   default fans them apart by ten points a plane, and on a landscape that reads as distance
+	   because no line has to cross from one range into the next. Here every line does: a trace
+	   leaves the far layer and arrives in the mid one, and at two different scales it arrives
+	   somewhere else, so the board comes apart into three drawings of a board. Depth is still here,
+	   it is just carried by the ink ramp and by glass's haze rather than by size.
+
+	   The value keeps the whole `max()` shape for the reason the default has it: percent frames a
+	   wide screen, `rem` catches a narrow one, `vh` catches a tall one. The board is wider relative
+	   to its height than a range is, so it needs less of all three to sit where the ranges sit. */
+	--wall-w-far: max(104%, 62rem, 145vh);
+	--wall-w-mid: var(--wall-w-far);
+	--wall-w-near: var(--wall-w-far);
+
+	--wall-sky: linear-gradient(var(--wall-ink-2), var(--wall-ink-1));
+	--wall-ink-1: var(--c-shade-50);
+	--wall-ink-2: var(--c-shade-100);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-300);
+	--wall-ink-5: var(--c-shade-400);
+}
+
+.dark[data-wallpaper='circuit-bottom'] {
+	--wall-ink-1: var(--c-shade-400);
+	--wall-ink-2: var(--c-shade-300);
+	--wall-ink-3: var(--c-shade-200);
+	--wall-ink-4: var(--c-shade-100);
+	--wall-ink-5: var(--c-shade-50);
 }
 
 /* `none` is the opt-out, and the reason `--desktop-bg` survives: with no scene the skins are
@@ -723,6 +939,21 @@
 	--color-select: var(--c-select);
 	--color-on-select: var(--c-on-select);
 	--color-focus: var(--c-focus);
+
+	/* The shade ramp, as `bg-shade-200`, `text-shade-700`, `border-shade-400`. Bridged one stop
+	   per line rather than through Tailwind's `--color-shade-*: initial` plus a namespace, because
+	   `inline` needs each utility to emit its own `var()` and there is no wildcard that does. */
+	--color-shade-50: var(--c-shade-50);
+	--color-shade-100: var(--c-shade-100);
+	--color-shade-200: var(--c-shade-200);
+	--color-shade-300: var(--c-shade-300);
+	--color-shade-400: var(--c-shade-400);
+	--color-shade-500: var(--c-shade-500);
+	--color-shade-600: var(--c-shade-600);
+	--color-shade-700: var(--c-shade-700);
+	--color-shade-800: var(--c-shade-800);
+	--color-shade-900: var(--c-shade-900);
+	--color-shade-950: var(--c-shade-950);
 
 	--font-ui: var(--ff-ui);
 	--font-body: var(--ff-body);
