@@ -68,6 +68,44 @@ describe('single-click mode', () => {
 	});
 });
 
+/**
+ * A finger, which is the third way an item opens and the one 6.4 found missing entirely. On a
+ * phone the only route into anything was a double-tap, which is also the browser's zoom gesture,
+ * so the platform won it and a single tap opened nothing at all.
+ *
+ * `matchMedia` is absent under `bun test`, which is the "not coarse" path every other case here
+ * already runs on, so these two stub it and put it back.
+ */
+describe('a coarse pointer', () => {
+	function withPointer<T>(kind: 'coarse' | 'fine', body: () => T): T {
+		const real = globalThis.matchMedia;
+		globalThis.matchMedia = ((q: string) => ({ matches: q.includes(kind) })) as typeof matchMedia;
+		try {
+			return body();
+		} finally {
+			globalThis.matchMedia = real;
+		}
+	}
+
+	test('one tap opens, whatever the click-mode setting says', () => {
+		update({ clickMode: 'double' });
+		withPointer('coarse', () => {
+			const a = counters();
+			a.onclick(click());
+			expect(a.seen).toEqual({ opened: 1, selected: 0 });
+		});
+	});
+
+	test('a fine pointer still honours the setting, so the override is the finger and not the fix', () => {
+		update({ clickMode: 'double' });
+		withPointer('fine', () => {
+			const a = counters();
+			a.onclick(click());
+			expect(a.seen).toEqual({ opened: 0, selected: 1 });
+		});
+	});
+});
+
 describe('the platform keeps its own clicks', () => {
 	test('a modified click is left to the browser in either mode', () => {
 		for (const mode of ['single', 'double'] as const) {
