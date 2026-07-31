@@ -1,34 +1,29 @@
 <script lang="ts">
+	import { ART } from '$lib/wallpapers/art';
 	import { bands } from '$lib/wallpapers/bands';
 
 	/**
-	 * Inlined rather than pointed at, and that is forced rather than chosen: these files paint with
-	 * `var(--wall-band-*)`, and a custom property resolves in the document that declares it. An SVG
-	 * behind a `url()` is a document of its own, with none of this site's tokens in it, so a
-	 * referenced band would draw with no fill at all. See note 4 in `trace-wallpaper.ts`.
+	 * Fetched as masks, not inlined. The art used to be `{@html}`'d into the page, because a band
+	 * paints with `var(--wall-band-crest)` and `var(--wall-band-base)` and a custom property does
+	 * not resolve in a document reached through `url()`, so a referenced band drew nothing.
 	 *
-	 * That is also why the drawn art sits in `src/lib` while the masks stay in `static`: one is
-	 * source the bundler reads, the other is an asset the browser fetches, and a glob over the
-	 * bundled folder is therefore the list of drawn wallpapers rather than a copy of it. Adding a
-	 * scene is dropping a folder there, naming it in `WALLPAPERS`, and giving it a block in
+	 * A mask needs no colour, which is the whole of the way out. Every band is one shape filled by
+	 * one two-stop vertical gradient spanning its own box, so the geometry goes to `static/` as flat
+	 * alpha and the two stops become the CSS gradient below, still live tokens. See
+	 * `scripts/mask-wallpaper.ts`, which does the split and writes `art.ts`.
+	 *
+	 * Both invariants the inlining was protecting survive, because none of this is script: the
+	 * pre-paint attribute still picks the scene before the first paint, so switching cannot flash,
+	 * and the desktop still renders with JavaScript off. What changes is that six of seven scenes
+	 * are never fetched, since a `display: none` band never asks for its mask.
+	 *
+	 * `ART` is generated from the folder, so adding a scene is still dropping a folder in
+	 * `lib/wallpapers/`, running that script, naming it in `WALLPAPERS`, and giving it a block in
 	 * `app.css`. Nothing in this file learns its name.
 	 */
-	const files = import.meta.glob('../wallpapers/*/*.svg', {
-		query: '?raw',
-		import: 'default',
-		eager: true
-	}) as Record<string, string>;
-
-	/** `.../<wallpaper>/<slot>.svg`, which is the whole of the naming convention. */
-	const art: Record<string, Record<string, string>> = {};
-	for (const [path, svg] of Object.entries(files)) {
-		const [, name, slot] = path.match(/([^/]+)\/([^/]+)\.svg$/)!;
-		(art[name] ??= {})[slot] = svg;
-	}
-
-	const scenes = Object.entries(art).map(([name, slots]) => ({
+	const scenes = Object.entries(ART).map(([name, slots]) => ({
 		name,
-		bands: bands(Object.keys(slots)).map((band) => ({ ...band, svg: slots[band.slot] }))
+		bands: bands(Object.keys(slots)).map((band) => ({ ...band, ...slots[band.slot] }))
 	}));
 </script>
 
@@ -39,11 +34,11 @@
 	divs and not an image: baking the art would mean one render per skin per theme per polarity,
 	which is 24 files for one wallpaper. Tokens dress all 24 from one set of files.
 
-	Every band is a shape with its own two-stop gradient in it, because the illustrations they come
-	from lighten every band toward its crest, and that haze is most of what makes their depth read.
-	An alpha channel could only say that by thinning, which is not a second shade, it is the band's
-	own shade letting whatever is behind it through. So the bands are drawn rather than masked, and
-	they are inlined, since a `var()` does not cross into a document fetched through `url()`.
+	Every band carries a two-stop gradient, because the illustrations they come from lighten every
+	band toward its crest, and that haze is most of what makes their depth read. A mask alone could
+	only say that by thinning, which is not a second shade, it is the band's own shade letting
+	whatever is behind it through. So the mask carries the geometry and CSS carries the two stops,
+	which is the same gradient the band was drawn with and not an approximation of it.
 
 	Three planes, because two have no middle. Distance is read from how many planes stand between
 	the eye and the horizon, and a foreground against a backdrop gives the eye nothing to measure
@@ -79,40 +74,35 @@
 		the chosen one would mean rendering the prerendered default and swapping at hydration, which
 		is defect #33 with a new name.
 
-		ponytail: that costs every scene's SVG in every page, and four scenes is 931KB of markup and
-		260KB over the wire for a page whose own content is a few kilobytes. Simplifying further will
-		not buy it back: `night-scene`'s tree is already as coarse as the crown survives, and
-		`circuit-bottom` is mask geometry rather than path detail, so a fourfold looser tolerance moves
-		it five percent. This is the ceiling, and it is reached. `hive` was the fourth and cost 59KB of
-		it, because a comb is a few dozen hexagons rather than a traced coastline, so the trigger has
-		not moved: the next scene, or any real complaint about first paint, is the point where each one
-		gets baked into one file per skin and fetched, which trades this weight for a request. Do that
-		rather than folding the choice into JavaScript, which takes the flash back.
-
-		`{@html}` is the payload half of the inlining above, and it is safe here for the one reason
-		that makes it ever safe: there is no input. These are `?raw` imports of files this repo
-		generates, resolved by the bundler at build time, so the string is fixed before the site
-		exists and nothing at runtime can reach it. That is the opposite of the old site's `{@html}`,
-		which injected a third-party analytics tag.
+		Every band of every scene is an element, and that is cheap now: a band is an empty div wearing
+		a mask, and a hidden element never fetches one. So the seven scenes cost seven scenes' worth
+		of divs and exactly one scene's worth of bytes, which is what this used to spend `{@html}` and
+		931KB of inlined markup to avoid spending on a flash.
 
 		A scene shows itself by name, through a property whose name carries the name, because that is
 		the one comparison CSS cannot make: a selector can match a literal but it cannot ask whether
 		a band's scene is the document's scene. So the band offers `--wall-show-<scene>` and the
 		scene's own block in `app.css` answers it, which puts the switch in the block that already
 		declares everything else about that wallpaper and keeps this file free of every scene's name.
+
+		The layer loop is `hive`'s alone: its cells carry a lit rim in the crest and a shadowed one in
+		the base over a gradient face, and three paints do not come out of one alpha channel. Every
+		other band has one layer and the loop runs once.
 	-->
-	<!-- eslint-disable svelte/no-at-html-tags -->
 	{#each scenes as scene (scene.name)}
 		{#each scene.bands as band (band.slot)}
 			<div
 				class="band p-{band.plane}"
 				style="display: var(--wall-show-{scene.name}, none); --wall-band-crest: var(--wall-ink-{band.crest}); --wall-band-base: var(--wall-ink-{band.base})"
 			>
-				{@html band.svg}
+				<span class="art" style="aspect-ratio: {band.w} / {band.h}">
+					{#each band.layers as layer (layer.href)}
+						<span class="paint {layer.paint}" style="--wall-mask: url('{layer.href}')"></span>
+					{/each}
+				</span>
 			</div>
 		{/each}
 	{/each}
-	<!-- eslint-enable svelte/no-at-html-tags -->
 
 	<!--
 		Retro's pixelation. A band is vector, so there is nothing to snap to a grid; this quantises
@@ -222,9 +212,11 @@
 	   The bands overflow their box on the sides by design, which is what the overshoot is; the
 	   clipping is `.wallpaper`'s, once, for all of them.
 	*/
-	/* `.wallpaper .band` rather than `.band`, because `.wallpaper > div` above is a class and a type
-	   and would otherwise win the `inset` outright and stand every band up to full height. */
-	.wallpaper .band {
+	/* `.wallpaper > .band` rather than `.band`, because `.wallpaper > div` above is a class and a
+	   type and would otherwise win the `inset` outright and stand every band up to full height. The
+	   child combinator is the second half of what the `ramp` rename below is about: a band is always
+	   a direct child here, so nothing nested inside one can ever be caught by this again. */
+	.wallpaper > .band {
 		inset: auto 0 0;
 		justify-content: center;
 		/* The band is the only child and is the box, so stretching it is the one thing this must not
@@ -233,16 +225,54 @@
 		align-items: flex-end;
 	}
 
-	.band :global(svg) {
+	/*
+	   The band's box, which an inline SVG used to be. It carried its own ratio and took its height
+	   from `height: auto`; a masked element has no intrinsic anything, so the source viewBox travels
+	   in `art.ts` and arrives as `aspect-ratio`. Positioned, because the layers stack inside it.
+	*/
+	.art {
+		position: relative;
 		flex: none;
-		height: auto;
+	}
+
+	/*
+	   One layer. The mask is the geometry and the background is the colour, which is the whole
+	   split: the two stops below are the same two the band was drawn with, read live, so the skin
+	   switcher still re-dresses a scene with no refetch and no flash.
+
+	   `-webkit-mask` alongside, for Safari before 15.4. The two are the same declaration and neither
+	   is a fallback for the other, so they stay adjacent.
+	*/
+	.paint {
+		position: absolute;
+		inset: 0;
+		mask: var(--wall-mask) no-repeat center / 100% 100%;
+		-webkit-mask: var(--wall-mask) no-repeat center / 100% 100%;
+	}
+
+	/* `ramp` and not `band`, which is what it is and also what it has to be: `.wallpaper .band`
+	   outranks `.paint`, so a layer called `band` took the band's own `inset: auto 0 0` and
+	   collapsed to no height. It rendered as a scene with no foreground, which reads as art that
+	   is too subtle rather than as a selector that matched twice. */
+	.paint.ramp {
+		background: linear-gradient(to bottom, var(--wall-band-crest), var(--wall-band-base));
+	}
+
+	/* Flat, and `hive`'s alone: a rim is one edge of a cell catching or losing the light, so it is
+	   one end of the ramp rather than a run along it. */
+	.paint.crest {
+		background: var(--wall-band-crest);
+	}
+
+	.paint.base {
+		background: var(--wall-band-base);
 	}
 
 	.p-far {
 		filter: var(--wall-haze-far);
 	}
 
-	.p-far :global(svg) {
+	.p-far .art {
 		width: var(--wall-w-far, max(132%, 74rem, 175vh));
 	}
 
@@ -250,11 +280,11 @@
 		filter: var(--wall-haze-mid);
 	}
 
-	.p-mid :global(svg) {
+	.p-mid .art {
 		width: var(--wall-w-mid, max(122%, 68rem, 162vh));
 	}
 
-	.p-near :global(svg) {
+	.p-near .art {
 		width: var(--wall-w-near, max(112%, 64rem, 149vh));
 	}
 </style>

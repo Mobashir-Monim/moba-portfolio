@@ -1512,14 +1512,66 @@ the defaults became **glass / anthotype / night-scene**. See 1.2 and 1.3.
 
 ### Open after phase 6
 
-- **`/` weighs 301 KB brotli, and mobile performance is 69.** Every other route is 99 and the
-  desktop preset is 97. The whole of it is that `Wallpaper.svelte` inlines every scene's art into
-  every page and CSS shows one, which is what buys zero-flash switching and a correct render with
-  JavaScript off. The `ponytail:` note in that file named this exact trigger, "the next scene, or
-  any real complaint about first paint", and phase 6 delivered both at once. Decision deferred to
-  the reviewer; the three options weighed were leaving it, server-rendering only the default scene
-  and inserting the rest on demand, and converting the bands to fetched CSS masks with the gradient
-  in CSS.
+- [x] **`/` weighed 768 KB brotli and mobile performance was 56.** Filed at 301 KB and 69, and three
+  scenes arrived after that reading: `pixel-brush` alone is 528 KB of the 761 KB. The art was
+  inlined into every page and shown one at a time by CSS, which is what bought zero-flash switching
+  and a correct render with JavaScript off, and it was paid twice, once in the HTML and again in a
+  773 KB hydration chunk. The `ponytail:` note in `Wallpaper.svelte` named this exact trigger.
+
+  **Resolved toward the third option, fetched masks.** The other two were leaving it and
+  server-rendering only the default scene with the rest inserted on demand. The second is cheap and
+  gives up the invariant the whole design exists for: the page is prerendered, so its HTML can only
+  hold the default scene, and a visitor who picked another one gets a bare desktop until hydration
+  puts theirs in. That is ledger #33 in a new costume, and the file's own note refuses it in as many
+  words.
+
+  **The split is exact, which is why it converts mechanically.** Every one of the 24 bands is
+  geometry filled by one two-stop vertical gradient spanning its whole viewBox, crest at the top.
+  So geometry goes to `static/wallpapers/` as flat alpha and the two stops become a
+  `linear-gradient` in the component, reading the same live tokens. No JavaScript is involved, so
+  switching still cannot flash and the scene still draws with scripting off; what changes is that a
+  `display: none` band never fetches its mask, so six of seven scenes cost nothing.
+
+  `scripts/mask-wallpaper.ts` does the split and writes `src/lib/wallpapers/art.ts`. The masks are
+  content-addressed, so `_headers` can call them immutable honestly and a re-trace busts its own
+  cache. It refuses rather than approximates: a gradient that does not span its box, one that opens
+  on the base, or a paint that is not one of the three throws instead of writing a mask that is
+  geometrically right and lit from the wrong end.
+
+  **`hive` is why a band has layers.** Its cells carry a lit rim in the crest and a shadowed one in
+  the base over a gradient face, and three paints do not come out of one alpha channel, so that
+  scene emits three masks per band that stack in document order. The other six emit one and the loop
+  collapses.
+
+  **One defect found by driving it, and it generalises.** The gradient layer was first classed
+  `band`, which is also the class of the element it sits inside. `.wallpaper .band` outranks
+  `.paint` on specificity, so the layer took the band's own `inset: auto 0 0` and collapsed to no
+  height: a scene with no foreground, which reads as art that is too subtle rather than as a
+  selector that matched twice. It is 5.3's `box-shadow` `none` and 5.4's `var()` animation name a
+  third time. The paint is `ramp` now, and the band rule took a child combinator so nothing nested
+  can be caught by it again.
+
+  `tokens.test.ts` re-derives every mask from its source and compares the content hash in the
+  filename, because a mask that is a version behind its art is otherwise invisible: the site builds,
+  the tests pass, the page renders, and the wallpaper is one re-trace old. Mutated to confirm it
+  bites. It also holds every mask free of colour and the component to the crest-to-base gradient,
+  which is the split itself.
+
+  **Measured.** `/` went from 2718 KB raw and 768 KB brotli to 35.7 KB and 6.1 KB, and the wallpaper
+  chunk from 773 KB brotli to nothing; the default scene then fetches 95 KB of masks, cached and
+  shared. Mobile Lighthouse on `/` went 56 to 96, with accessibility and SEO still 100.
+  Best-practices reads 96 and is unchanged: the pre-change build at the same commit scores 96 with
+  the identical `font-size` finding, so the 100 in `lighthouse.ts` was stale rather than lost. That
+  finding is a mobile type-scale question and is nobody's task yet.
+
+  Verified by driving headless Chrome over CDP against the preview build, in three skins across four
+  scenes plus `none`: only the chosen scene's masks are requested, 3 for `night-scene`, 7 for
+  `grove`, 9 for `hive`, 2 for `circuit-streak` and 0 for `none`, with no failed request, every band
+  boxed at its source ratio, and retro's pixel filter still over the whole layer. Then again with
+  script execution disabled, where the default scene still fetches and still paints. And the
+  rendering itself was pixel-diffed against a build of the same commit without this change: under
+  2% of pixels differ by more than 8/255, all of them hairlines tracing silhouettes, which is a
+  rasterised mask against inline vector geometry and not a band that moved.
 
 - **The screen reader pass, a real device, Rich Results Test and Search Console**, all noted above
   and all needing a human rather than a harness.

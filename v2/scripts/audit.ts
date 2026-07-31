@@ -73,7 +73,12 @@ export const LIGHTHOUSE = {
 	route: '${ROUTE}',
 	preset: '${PRESET}',
 	scores: {
-${CATEGORIES.map((key) => `\t\t'${key}': ${scores[key]}`).join(',\n')}
+${CATEGORIES.map(
+	// Quoted only where it has to be, which is `best-practices` and nothing else. Prettier's
+	// `quoteProps: as-needed` strips the rest, and a generated file that fails `bun run lint`
+	// the moment it is regenerated is a chore with no owner.
+	(key) => `\t\t${/^[a-z]+$/.test(key) ? key : `'${key}'`}: ${scores[key]}`
+).join(',\n')}
 	}
 } as const;
 `;

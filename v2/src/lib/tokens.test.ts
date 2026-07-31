@@ -1,8 +1,10 @@
 import { describe, expect, test } from 'bun:test';
 import { existsSync, readdirSync } from 'node:fs';
 import { contrast } from './contrast';
+import { ART } from './wallpapers/art';
 import { inks, SLOTS as WALL_SLOTS, bands } from './wallpapers/bands';
 import { SHADE_STOPS } from '../../scripts/gen-palette';
+import { masksFor } from '../../scripts/mask-wallpaper';
 
 /**
  * The token contract, enforced against app.css itself rather than against a copy of it.
@@ -20,7 +22,7 @@ const html = await Bun.file(new URL('../app.html', import.meta.url)).text();
 const boot = await Bun.file(new URL('./components/Boot.svelte', import.meta.url)).text();
 const wallpaper = await Bun.file(new URL('./components/Wallpaper.svelte', import.meta.url)).text();
 const staticDir = new URL('../../static/', import.meta.url);
-/** The art is inlined rather than fetched, so it is source rather than a static asset. */
+/** The drawn art is source the mask pass reads; the masks it emits live under `staticDir`. */
 const drawnDir = new URL('./wallpapers/', import.meta.url);
 
 const SKINS = ['modern', 'retro', 'glass'] as const;
@@ -421,27 +423,17 @@ describe('the wallpaper is a background, so it answers to the contrast contract'
 	});
 
 	/**
-	 * A drawn wallpaper paints itself, so the thing that can silently break is the handoff rather
-	 * than the file list: a band draws with `var(--wall-band-crest)` and `var(--wall-band-base)`,
-	 * and if it is ever referenced through `url()` instead of inlined, those resolve in the band's
-	 * own document, find nothing, and the band disappears. That failure is invisible in the source
-	 * and total on the screen, so both halves are checked here: the file paints with the two tokens,
-	 * and `Wallpaper.svelte` reaches it through a glob wide enough to include it.
+	 * A drawn band paints with `var(--wall-band-crest)` and `var(--wall-band-base)`, and a custom
+	 * property does not resolve in a document reached through `url()`. That is why the art was
+	 * inlined, and it is still why the mask that replaced it can be fetched: a mask is alpha, so it
+	 * needs no token, and the two stops moved into a CSS gradient in `Wallpaper.svelte`.
+	 *
+	 * What that leaves checkable is the source's half of the bargain, since `scripts/mask-wallpaper.ts`
+	 * reads exactly these three things off it and would otherwise convert a band into a mask that is
+	 * geometrically right and lit from the wrong end.
 	 */
-	test('every drawn band paints with the band tokens and is reachable by the glob', async () => {
+	test('every drawn band still carries the gradient the mask pass reads', async () => {
 		const broken: string[] = [];
-		// The one string that has to hold for the whole folder: a glob over the drawn root, eager,
-		// as text. Any of the three missing and every band silently stops being inlined.
-		const glob = wallpaper.match(
-			/import\.meta\.glob\(\s*'\.\.\/wallpapers\/\*\/\*\.svg',\s*\{([^}]*)\}/
-		);
-		if (!glob) broken.push('Wallpaper.svelte does not glob the drawn wallpaper folder');
-		else {
-			for (const part of ["query: '?raw'", "import: 'default'", 'eager: true']) {
-				if (!glob[1].includes(part)) broken.push(`the glob is not \`${part}\``);
-			}
-		}
-
 		for (const name of DRAWN) {
 			for (const slot of slotsOf(drawnDir, name)) {
 				const path = `${name}/${slot}.svg`;
@@ -456,6 +448,79 @@ describe('the wallpaper is a background, so it answers to the contrast contract'
 			}
 		}
 		expect(broken).toEqual([]);
+	});
+
+	/**
+	 * The masks on disk are the art, re-derived. This runs the same derivation the script does and
+	 * compares the content hash in every filename, which is the one failure the rest of the suite
+	 * cannot see: re-trace a scene, forget `bun scripts/mask-wallpaper.ts`, and the site builds, the
+	 * tests pass, the page renders, and the wallpaper is a version behind with nothing to say so.
+	 *
+	 * It also holds the two ends of the handoff together. The manifest has to name every slot the
+	 * folder ships, or a band silently stops being drawn, and every href has to be a file that is
+	 * actually there, or it is a fetch for a 404 and an invisible band.
+	 */
+	test('every mask on disk is the current art, and the manifest names all of them', async () => {
+		const stale: string[] = [];
+		for (const scene of DRAWN) {
+			const slots = slotsOf(drawnDir, scene);
+			const listed = Object.keys(ART[scene] ?? {});
+			if (listed.sort().join() !== [...slots].sort().join()) {
+				stale.push(
+					`art.ts lists ${listed.join(', ') || 'nothing'} for ${scene}, folder has ${slots.join(', ')}`
+				);
+				continue;
+			}
+			for (const slot of slots) {
+				const svg = await Bun.file(new URL(`${scene}/${slot}.svg`, drawnDir)).text();
+				const fresh = masksFor(scene, slot, svg);
+				const listedArt = ART[scene][slot];
+				const want = fresh.layers.map((l) => `${l.paint} /wallpapers/${scene}/${l.name}`);
+				const have = listedArt.layers.map((l) => `${l.paint} ${l.href}`);
+				if (want.join() !== have.join()) {
+					stale.push(`${scene}/${slot} is ${have.join(', ')}, re-derives to ${want.join(', ')}`);
+				}
+				if (listedArt.w !== fresh.w || listedArt.h !== fresh.h) {
+					stale.push(
+						`${scene}/${slot} is ${listedArt.w}x${listedArt.h}, source box is ${fresh.w}x${fresh.h}`
+					);
+				}
+				for (const layer of listedArt.layers) {
+					if (!existsSync(new URL(`.${layer.href}`, staticDir))) {
+						stale.push(`${layer.href} is in art.ts and not in static/`);
+					}
+				}
+			}
+		}
+		expect(stale).toEqual([]);
+	});
+
+	/**
+	 * A mask is read for its alpha, so a colour in one is either ignored or, if it is a `var()`,
+	 * nothing at all. Both are silent. This is the check that the split actually happened: geometry
+	 * in the file, colour in the stylesheet, and `Wallpaper.svelte` holding the two stops that the
+	 * gradient element used to.
+	 */
+	test('a mask carries no colour, and the component carries both stops', async () => {
+		const wrong: string[] = [];
+		for (const scene of DRAWN) {
+			for (const { layers } of Object.values(ART[scene] ?? {})) {
+				for (const { href } of layers) {
+					const svg = await Bun.file(new URL(`.${href}`, staticDir)).text();
+					if (svg.includes('var(')) wrong.push(`${href} still reads a custom property`);
+					if (svg.includes('<linearGradient')) wrong.push(`${href} still carries a gradient`);
+				}
+			}
+		}
+		if (
+			!wrong.length &&
+			!wallpaper.includes(
+				'linear-gradient(to bottom, var(--wall-band-crest), var(--wall-band-base))'
+			)
+		) {
+			wrong.push('Wallpaper.svelte no longer paints the band with the crest-to-base gradient');
+		}
+		expect(wrong).toEqual([]);
 	});
 
 	/** One ink stop as hex: either a shade token outright or a two-token mix of two of them. */

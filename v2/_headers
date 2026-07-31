@@ -5,3 +5,10 @@
 # file. See the @font-face block in src/app.css.
 /fonts/*.woff2
   Cache-Control: public, max-age=31536000, immutable
+
+# Wallpaper masks. Content-addressed by `scripts/mask-wallpaper.ts`, so re-tracing a
+# scene writes a new name and this rule stays honest without a step to remember.
+# The whole point of fetching them is that the six scenes nobody chose are never
+# asked for, and that the one they did choose is asked for once.
+/wallpapers/*
+  Cache-Control: public, max-age=31536000, immutable
