@@ -3,18 +3,22 @@
   The source of `static/og.png`, the one card every page shares. The bake recipe is in the
   `<desc>` below, because an XML comment cannot hold a command-line flag.
 
-  Drawn as the boot screen, in the default dress: `modern` skin, `ferrite` theme, dark. That is
+  Drawn as the boot screen, in the default dress: `glass` skin, `anthotype` theme, dark. That is
   the first thing a visitor sees, so it is the right thing for a link preview to promise, and
   every colour below is lifted from those two token blocks in `app.css` rather than picked.
+
+  The strings are the only part a test can hold, and `src/lib/og.test.ts` holds them: the
+  wordmark is `OS_NAME`, the two lines under the thermometer are `PERSON` and `about.title`, and
+  all three are what `Head.svelte` already promises in `og:image:alt`. This file went a whole
+  phase reading `Mnemos` in the old default dress because nothing checked. Re-bake after editing.
 -->
 <svg
 	xmlns="http://www.w3.org/2000/svg"
 	width="1200"
 	height="630"
 	viewBox="0 0 1200 630"
-	font-family="ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace"
 >
-	<title>Mobashir Monim, Full Stack Web Developer</title>
+	<title>Mobashir Monim, Senior Full Stack Engineer</title>
 	<desc>
 		Baked with the Chrome that is already on the machine, so there is no toolchain and no
 		dependency. Run from v2/:
@@ -22,60 +26,109 @@
 		"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless
 		--screenshot=static/og.png --window-size=1200,630 --hide-scrollbars scripts/og.svg
 
-		The monospace stack resolves against the baking machine, so a re-bake wants a Mac or a
-		lookalike face. The PNG is committed precisely so nobody has to care day to day.
+		Montserrat is loaded from `static/` below, so the wordmark bakes the same on any machine.
+		The monospace behind the version line still resolves against the baking machine, which
+		wants a Mac or a lookalike face. The PNG is committed precisely so nobody has to care day
+		to day.
 	</desc>
 
-	<defs>
-		<!-- The desktop-bg token, radial half: 120% 110% at 50% -10%, surface-1 to surface-3. -->
-		<radialGradient id="ground" cx="600" cy="-63" r="720" gradientUnits="userSpaceOnUse">
-			<stop offset="0" stop-color="#1d2630" />
-			<stop offset="0.68" stop-color="#0c151d" />
-			<stop offset="1" stop-color="#0c151d" />
-		</radialGradient>
+	<style>
+		/* The same file `app.css` serves, so the card is set in the face the site actually loads
+		   rather than in whatever the baking machine calls Montserrat. Relative to this file. */
+		@font-face {
+			font-family: 'Montserrat';
+			src: url('../static/fonts/montserrat-latin-var.woff2') format('woff2');
+			font-weight: 400 700;
+			font-style: normal;
+		}
 
-		<!-- The other half: graph paper at 32px in the c-line token at 30%. -->
-		<pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-			<path d="M0 0.5H32M0.5 0V32" stroke="#364250" stroke-opacity="0.3" stroke-width="1" />
-		</pattern>
+		/* `--ff-ui` and `--ff-body` in the glass block, and its `--tracking-ui`. */
+		.ui {
+			font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+			letter-spacing: -0.01em;
+		}
+
+		/* `--ff-mono`, which glass leaves at the system stack. */
+		.mono {
+			font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+		}
+	</style>
+
+	<defs>
+		<!--
+			The glass desktop-bg token: an accent wash falling off into the ground, 130% 100% at
+			50% 0%, c-accent mixed 20% into c-surface-0 in oklab, reaching plain c-surface-0 at 62%.
+
+			CSS sizes a radial gradient as an ellipse and SVG only draws circles, so the ellipse is
+			the x radius with the y axis scaled by 630/1560. The centre sits at y=0, which is what
+			lets that scale be taken about the origin with no translate to undo.
+
+			A token name here drops its two leading dashes on purpose: an XML comment may not
+			contain them, and a bake against a malformed file writes out the parser's error page.
+		-->
+		<radialGradient
+			id="ground"
+			cx="600"
+			cy="0"
+			r="1560"
+			gradientUnits="userSpaceOnUse"
+			gradientTransform="matrix(1 0 0 0.403846 0 0)"
+		>
+			<stop offset="0" stop-color="#383147" />
+			<stop offset="0.62" stop-color="#131d27" />
+			<stop offset="1" stop-color="#131d27" />
+		</radialGradient>
 	</defs>
 
 	<rect width="1200" height="630" fill="url(#ground)" />
-	<rect width="1200" height="630" fill="url(#grid)" />
 
 	<!-- The wordmark, in the chrome face at the scale the boot screen draws it. -->
 	<text
+		class="ui"
 		x="600"
 		y="248"
 		text-anchor="middle"
 		font-size="76"
 		font-weight="700"
-		letter-spacing="-0.4"
 		fill="#e7f0f9"
 	>
-		Mnemos
+		mobOS
 	</text>
 
-	<text x="600" y="288" text-anchor="middle" font-size="19" fill="#94a0ad">Version 2.0</text>
+	<text class="mono" x="600" y="288" text-anchor="middle" font-size="19" fill="#94a0ad">
+		Version 2.0
+	</text>
 
-	<!-- The thermometer, filled. c-select, which is inside every skin's accent budget. -->
+	<!--
+		The thermometer, filled. c-select, which is inside every skin's accent budget, on
+		c-surface-2 inside a c-line-strong hairline. Glass resolves bevel-in to `none`, so there is
+		no well to draw, and its r-sm is 8px.
+	-->
 	<rect
 		x="360.5"
 		y="330.5"
 		width="479"
 		height="19"
-		rx="4"
+		rx="8"
 		fill="#27313c"
 		stroke="#728293"
 		stroke-width="1"
 	/>
-	<rect x="361" y="331" width="478" height="18" rx="3.5" fill="#ad4216" />
+	<rect x="361" y="331" width="478" height="18" rx="7.5" fill="#954394" />
 
 	<!-- Where the POST lines run. A card has one job, and it is not reciting the memory check. -->
-	<text x="600" y="418" text-anchor="middle" font-size="32" font-weight="600" fill="#e7f0f9">
+	<text
+		class="ui"
+		x="600"
+		y="418"
+		text-anchor="middle"
+		font-size="32"
+		font-weight="600"
+		fill="#e7f0f9"
+	>
 		Mobashir Monim
 	</text>
-	<text x="600" y="456" text-anchor="middle" font-size="20" fill="#b4bfca">
-		Full Stack Web Developer
+	<text class="ui" x="600" y="456" text-anchor="middle" font-size="20" fill="#b4bfca">
+		Senior Full Stack Engineer
 	</text>
 </svg>
