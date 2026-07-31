@@ -1092,9 +1092,29 @@
 		background-color: var(--c-surface-0);
 		color: var(--c-fg-1);
 		font-family: var(--ff-body);
-		font-size: var(--fs-base);
+		/* No `font-size` here, and that is load-bearing rather than an omission.
+
+		   It used to read `font-size: var(--fs-base)`, which looks like it sets the body size and
+		   actually sets the unit the whole scale is measured in. Every `--fs-*` is a `rem`, and a
+		   `rem` on a descendant resolves against the root, so declaring the root in terms of one of
+		   them multiplied the entire scale by itself: modern's `--fs-base` said 0.875rem, meaning
+		   14px, and rendered 12.25px, and its `--fs-xs` said 11px and rendered 9.63px.
+
+		   Every other `rem` in the codebase went with it, so spacing, chrome heights, the window
+		   floor and the wallpaper's width floors were all reading a 14px unit while being written
+		   as though against 16. Found by Lighthouse in 6.1, which only saw the smallest symptom.
+
+		   The root stays at the browser's own size, which is also the visitor's: someone who has
+		   raised their default for readability now gets that raise applied once rather than
+		   discounted by 12.5%. A skin still sets its own body size, through `--fs-base` on `body`
+		   below, and that is the difference between declaring a base size and redefining the unit. */
 		line-height: var(--lh-normal);
 		-webkit-text-size-adjust: 100%;
+	}
+
+	/* The skin's body size, one element down, where it is a size rather than the unit. */
+	body {
+		font-size: var(--fs-base);
 	}
 
 	::selection {
