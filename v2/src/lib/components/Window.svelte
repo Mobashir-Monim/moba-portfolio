@@ -121,7 +121,29 @@
 	{/if}
 
 	<div class="body">
-		<div class="content">{@render children()}</div>
+		<!--
+			`tabindex="0"` because this is the scroll container, and a region that scrolls has to be
+			scrollable from the keyboard (WCAG 2.1.1). 6.2's axe pass caught it on System Info in all
+			three skins: that window is a description list and nothing in it is focusable, so its
+			content could be scrolled by pointer and by nothing else.
+
+			Unconditional rather than only where it is needed. Whether a window happens to contain a
+			link is a property of what was rendered into it, not of the container, and a rule that
+			holds only for the apps that exist today is one the next app has to remember. One extra
+			tab stop per window is the price, and it lands where the content starts.
+
+			No handler and no role: arrow keys and Page Up already scroll a focused overflow box, so
+			this is the platform's behaviour being made reachable rather than a widget being built.
+			A bare keydown here is exactly what the accessibility contract forbids.
+
+			The suppression below is two rules disagreeing, and the one being suppressed is the
+			heuristic. Svelte's check knows a `div` is not interactive and does not know it scrolls;
+			axe is testing 2.1.1 against a box it measured as scrollable. Snake's board carries the
+			same shape of exception for the same reason. If this element ever stops scrolling, the
+			`tabindex` and this comment both go.
+		-->
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<div class="content" tabindex="0">{@render children()}</div>
 		{#if sidebar}
 			<aside class="sidebar" aria-label="{title} info">{@render sidebar()}</aside>
 		{/if}
