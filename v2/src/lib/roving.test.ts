@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { readdirSync, readFileSync } from 'node:fs';
-import { nextIndex } from './roving';
+import { columnsOf, nextIndex } from './roving';
 
 /**
  * Seven icons in three columns: two full rows and a short one. The short row is where every
@@ -59,6 +59,38 @@ describe('nextIndex', () => {
 	test('does nothing when the key came from outside the set', () => {
 		expect(grid('ArrowDown', -1)).toBeUndefined();
 		expect(nextIndex('ArrowDown', 0, 0, 1)).toBeUndefined();
+	});
+});
+
+/**
+ * The measurement `nextIndex` is handed, which is where the second half of 7.4 went wrong: the
+ * first cut read `offsetTop`, and the HTML spec makes a `td` or a `th` an `offsetParent` whether
+ * or not it is positioned, so every link in the list view measured 0 from its own cell and the
+ * whole table read as one row. Found by driving it, not here.
+ */
+describe('columnsOf', () => {
+	const rows = (...tops: number[]) =>
+		tops.map((top) => ({ getBoundingClientRect: () => ({ top }) }));
+
+	test('a wrapping grid measures where the second row starts', () => {
+		expect(columnsOf(rows(0, 0, 0, 90, 90, 90, 180))).toBe(3);
+	});
+
+	test('a stack measures one, which is what makes the vertical arrows step a row', () => {
+		expect(columnsOf(rows(0, 24, 48, 72))).toBe(1);
+	});
+
+	test('a strip that never wraps measures the whole set', () => {
+		expect(columnsOf(rows(0, 0, 0, 0))).toBe(4);
+	});
+
+	test('sub-pixel tops on one row are still one row', () => {
+		// A viewport-relative top is fractional, and an equality test reads this as a wrap at 1.
+		expect(columnsOf(rows(96.5, 96.53125, 96.5, 186.5))).toBe(3);
+	});
+
+	test('an empty set still answers a number', () => {
+		expect(columnsOf([])).toBe(1);
 	});
 });
 

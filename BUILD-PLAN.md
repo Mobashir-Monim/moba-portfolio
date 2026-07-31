@@ -1663,6 +1663,17 @@ Three complaints, all separate and all correct:
       `onkeydown={move}` and `data-roving` together across every component, so a fifth view cannot
       ship with one and not the other. Mutated to confirm it bites.
 
+      **A second defect underneath the first, and only driving it found that one too.** With the
+      containers wired, the list view still did not move on Up or Down, while the gallery strip and
+      the icon grid both did. `columnsOf` measured with `offsetTop`, and the HTML spec makes a `td`
+      or a `th` an `offsetParent` in its own right, positioned or not. So every link in the table
+      was measured from the cell it sits in, every one of them reported 0, no top differed from the
+      first, and the function returned the whole set as one row: 22 columns of one row, and a
+      vertical step of 22 lands out of range and stays put. The reading comes off
+      `getBoundingClientRect` now, which is viewport-relative and has no opinion about tables, with
+      a 1px tolerance because a fractional top makes two links on one row differ in the last
+      decimal. `columnsOf` is exported and tested on its four layouts.
+
 - [x] 7.5 **A focus ring that survives the wallpaper.** The other half of complaint 3, and the
       half no audit could have raised: the ring passed everything and still read as a hairline.
 

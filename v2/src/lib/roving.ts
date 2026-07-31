@@ -56,17 +56,31 @@ export function nextIndex(
  * whole set, which puts every step on the horizontal arrows. The column view marks each of its
  * lists separately and each measures 1, like the list view.
  *
+ * **The top comes off the box and not off `offsetTop`**, which is not a preference. `offsetTop` is
+ * measured from the `offsetParent`, and the HTML spec makes a `td` or a `th` an `offsetParent` in
+ * its own right, with or without a `position`. So in the list view every row's link is measured
+ * from the cell it sits in and every one of them reports 0: no top differs, this returns the whole
+ * set, and the vertical arrows have nowhere to step. The first cut of 7.4 shipped exactly that and
+ * only driving it found it, because the arrows moved on the desktop and the same code moved
+ * nothing in a table.
+ *
+ * The tolerance goes with it. A viewport-relative top is fractional, and two links genuinely on
+ * one row can differ in the last decimal, which an equality test reads as a wrap.
+ *
  * ponytail: measuring only serves layouts whose rows are rows. The ceiling is the column view's
  * horizontal arrows, which step within one list rather than crossing into the next, because the
  * set they walk is one list by construction. Crossing needs the arrow to pick as it goes, since
  * the column to the right does not exist until something in this one is picked, and that is a
  * handler in `ColumnView` rather than anything this file can measure.
  */
-function columnsOf(items: HTMLElement[]): number {
-	const top = items[0]?.offsetTop;
-	const wrapped = items.findIndex((item) => item.offsetTop !== top);
+export function columnsOf(items: readonly Measurable[]): number {
+	const top = items[0]?.getBoundingClientRect().top ?? 0;
+	const wrapped = items.findIndex((item) => Math.abs(item.getBoundingClientRect().top - top) > 1);
 	return wrapped === -1 ? Math.max(items.length, 1) : wrapped;
 }
+
+/** All this needs of an element, which is also all a test has to hand it. */
+type Measurable = { getBoundingClientRect(): { top: number } };
 
 /**
  * The set a link moves within: every link inside the nearest ancestor carrying `data-roving`.
