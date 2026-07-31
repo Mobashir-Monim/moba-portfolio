@@ -77,20 +77,27 @@ const COLOUR_TOKENS = [
 
 /**
  * Text pairs need 4.5:1 (WCAG 1.4.3 AA, normal text). Non-text pairs carry meaning without
- * carrying letterforms, so they need 3:1 (1.4.11). `--c-fg-3` is muted body copy and never
- * sits on the desktop ground, so `surface-0` is not one of its backgrounds.
+ * carrying letterforms, so they need 3:1 (1.4.11).
+ *
+ * `--c-fg-3` was exempt from `surface-0` here until 6.2, on the stated grounds that muted body
+ * copy never sits on the desktop ground. The exemption was false and this file is the reason it
+ * survived: a plain content route paints `surface-0` on `html` and puts the breadcrumb and every
+ * content header's meta line straight onto it, at 4.06:1, on 45 of 46 routes. axe found it; this
+ * list had excused it. One token, two contexts, and `surface-0` is the page ground as much as it
+ * is the desktop's.
+ *
+ * The lesson generalises past this one pair: an exemption written as a sentence about intent is
+ * only as true as the call sites, and nothing here reads the call sites.
  */
 const PAIRS: [fg: string, bg: string, min: number][] = [
 	...(['surface-0', 'surface-1', 'surface-2', 'surface-3'] as const).flatMap(
 		(bg) =>
 			[
 				['fg-1', bg, 4.5],
-				['fg-2', bg, 4.5]
+				['fg-2', bg, 4.5],
+				['fg-3', bg, 4.5]
 			] as [string, string, number][]
 	),
-	['fg-3', 'surface-1', 4.5],
-	['fg-3', 'surface-2', 4.5],
-	['fg-3', 'surface-3', 4.5],
 	['on-accent', 'accent', 4.5],
 	['on-accent', 'accent-hover', 4.5],
 	['on-select', 'select', 4.5],

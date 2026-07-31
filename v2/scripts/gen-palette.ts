@@ -126,7 +126,7 @@ const LIGHT: Spec = {
 	'surface-3': [0.995, 0.007],
 	'fg-1': [0.27, 0.035],
 	'fg-2': [0.46, 0.034],
-	'fg-3': [0.525, 0.034],
+	'fg-3': [0.49, 0.034],
 	line: [0.89, 0.022],
 	'line-strong': [0.575, 0.03],
 	accent: [0.515, 0.15],
@@ -230,10 +230,14 @@ const PAIRS: Pair[] = [
 		['fg-1', bg, 4.5],
 		['fg-2', bg, 4.5]
 	]),
-	// fg-3 is muted body copy, it never sits on the desktop ground.
-	['fg-3', 'surface-1', 4.5],
-	['fg-3', 'surface-2', 4.5],
-	['fg-3', 'surface-3', 4.5],
+	// fg-3 is muted body copy, and this list used to exempt it from `surface-0` on the grounds
+	// that it never sits on the desktop ground. That was false, and 6.2's axe pass found it on 45
+	// of 46 routes: a plain content route paints `surface-0` on `html` and puts the breadcrumb and
+	// every content header's meta line straight onto it. 4.06:1 in light, against 4.5 required.
+	//
+	// The exemption confused one token with one context. `surface-0` is the desktop ground *and*
+	// the page ground, and the page ground is the JS-off document CLAUDE.md requires to work.
+	...['surface-0', 'surface-1', 'surface-2', 'surface-3'].map((bg): Pair => ['fg-3', bg, 4.5]),
 	['on-accent', 'accent', 4.5],
 	['on-accent', 'accent-hover', 4.5],
 	['on-select', 'select', 4.5],

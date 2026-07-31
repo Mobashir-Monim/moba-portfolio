@@ -104,8 +104,17 @@
      500          the pivot, neither one nor the other. 3:1 on the surfaces.
      600 to 950   foreground stops, each clearing 4.5:1 on surface-1, -2, -3.
 
-   `surface-0` is out of the text half of that, for the same reason `--c-fg-3`
-   is: it is the desktop ground and no text stop sits directly on it.
+   `surface-0` is out of the text half of that: it is the ground, and no shade
+   stop is spent as body copy on it.
+
+   `--c-fg-3` used to be excused from `surface-0` on the same grounds, and that
+   was wrong. 6.2's axe pass found it failing on 45 of 46 routes at 4.06:1: a
+   plain content route paints `surface-0` on <html> and puts the breadcrumb and
+   every content header's meta line directly onto it. The exemption had confused
+   one token with one context, since `surface-0` is the desktop ground *and* the
+   page ground, and the page is the JS-off document that has to work. `--c-fg-3`
+   is now held to 4.5:1 on all four surfaces, which cost it 0.035 of lightness
+   in the light ramp and nothing in the dark one.
    -------------------------------------------------------------------------- */
 
 [data-theme='ferrite'] {
@@ -115,7 +124,7 @@
 	--c-surface-3: #fcfeff;
 	--c-fg-1: #192837;
 	--c-fg-2: #4a5a6b;
-	--c-fg-3: #5c6c7e;
+	--c-fg-3: #526273;
 	--c-line: #d0dce9;
 	--c-line-strong: #6c7b8a;
 	--c-accent: #ab4014;
@@ -173,7 +182,7 @@
 	--c-surface-3: #fdfdff;
 	--c-fg-1: #1e2638;
 	--c-fg-2: #4f586c;
-	--c-fg-3: #616a7f;
+	--c-fg-3: #576074;
 	--c-line: #d4dbea;
 	--c-line-strong: #70798b;
 	--c-accent: #2e7b19;
@@ -231,7 +240,7 @@
 	--c-surface-3: #fdfdff;
 	--c-fg-1: #1e2638;
 	--c-fg-2: #4f586c;
-	--c-fg-3: #616a7f;
+	--c-fg-3: #576074;
 	--c-line: #d4dbea;
 	--c-line-strong: #70798b;
 	--c-accent: #006cac;
@@ -289,7 +298,7 @@
 	--c-surface-3: #fcfeff;
 	--c-fg-1: #192837;
 	--c-fg-2: #4a5a6b;
-	--c-fg-3: #5c6c7e;
+	--c-fg-3: #526273;
 	--c-line: #d0dce9;
 	--c-line-strong: #6c7b8a;
 	--c-accent: #934292;
