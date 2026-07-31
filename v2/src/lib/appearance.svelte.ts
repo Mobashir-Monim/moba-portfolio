@@ -61,10 +61,10 @@ const KEY = {
 	clickMode: 'mobos.click-mode'
 };
 const DEFAULT: Settings = {
-	skin: 'modern',
-	theme: 'ferrite',
+	skin: 'glass',
+	theme: 'anthotype',
 	appearance: 'auto',
-	wallpaper: 'grove',
+	wallpaper: 'night-scene',
 	clickMode: 'double'
 };
 

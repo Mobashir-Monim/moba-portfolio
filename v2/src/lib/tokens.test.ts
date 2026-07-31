@@ -574,21 +574,47 @@ describe('the wallpaper is a background, so it answers to the contrast contract'
 	});
 
 	/**
-	 * The fourth axis crosses the same pre-paint boundary the other three do, and it is the one
-	 * that fails silently: a stale list here means the saved wallpaper is rejected as unknown and
-	 * every visitor who chose one quietly gets the default back on the next load.
+	 * Every axis crosses the pre-paint boundary, and each one fails silently in its own way. A
+	 * stale roster means the saved choice is rejected as unknown and the visitor who made it
+	 * quietly gets the default back on the next load. A stale default means the site's dress
+	 * depends on which copy of it the browser reached first.
+	 *
+	 * The `<html>` attributes are the third copy and the one with no other witness: they are what
+	 * a visitor with JavaScript off sees, and nothing in a dev session ever reads them, because
+	 * the script overwrites all three before the first paint. Drift there is invisible until a
+	 * crawler or a reader with scripting disabled arrives dressed differently from everyone else.
+	 *
+	 * Appearance has only two copies. `auto` and `dark` both resolve to the same class, so there
+	 * is no attribute for it to be a third.
 	 */
-	test('the allowed wallpapers and the default are the same on both sides of app.html', async () => {
-		const module = await Bun.file(new URL('./appearance.svelte.ts', import.meta.url)).text();
-		// Whitespace-tolerant, because the roster is long enough now that the formatter wraps the
-		// call across four lines and a one-line pattern would fail on a reformat rather than a defect.
-		const inHtml = html.match(/pick\(\s*'mobos\.wallpaper',\s*\[([^\]]+)\],\s*'([\w-]+)'\s*\)/);
-		expect(inHtml).not.toBeNull();
+	const AXES = [
+		{ axis: 'skin', roster: 'SKINS', attr: 'data-skin' },
+		{ axis: 'theme', roster: 'THEMES', attr: 'data-theme' },
+		{ axis: 'wallpaper', roster: 'WALLPAPERS', attr: 'data-wallpaper' },
+		{ axis: 'appearance', roster: 'APPEARANCES', attr: null }
+	] as const;
 
-		const names = (s: string) => [...s.matchAll(/'([\w-]+)'/g)].map(([, v]) => v);
-		expect(names(inHtml![1])).toEqual(names(module.match(/WALLPAPERS = \[([^\]]+)\]/)![1]));
-		expect(inHtml![2]).toBe(module.match(/wallpaper: '([\w-]+)'/)![1]);
-	});
+	for (const { axis, roster, attr } of AXES) {
+		test(`the allowed ${axis} values and the default are the same on every side of app.html`, async () => {
+			const module = await Bun.file(new URL('./appearance.svelte.ts', import.meta.url)).text();
+			// Whitespace-tolerant, because the rosters are long enough now that the formatter wraps
+			// the call across four lines and a one-line pattern would fail on a reformat rather than
+			// on a defect.
+			const inScript = html.match(
+				new RegExp(`pick\\(\\s*'mobos\\.${axis}',\\s*\\[([^\\]]+)\\],\\s*'([\\w-]+)'\\s*\\)`)
+			);
+			expect(inScript).not.toBeNull();
+
+			const names = (s: string) => [...s.matchAll(/'([\w-]+)'/g)].map(([, v]) => v);
+			const inModule = module.match(new RegExp(`${roster} = \\[([^\\]]+)\\]`))!;
+			expect(names(inScript![1])).toEqual(names(inModule[1]));
+
+			const fallback = module.match(new RegExp(`\\b${axis}: '([\\w-]+)'`))![1];
+			expect(inScript![2]).toBe(fallback);
+
+			if (attr) expect(html).toContain(`${attr}="${fallback}"`);
+		});
+	}
 });
 
 /**

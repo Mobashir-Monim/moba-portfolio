@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-skin="modern" data-theme="ferrite" data-wallpaper="grove">
+<html lang="en" data-skin="glass" data-theme="anthotype" data-wallpaper="night-scene">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -28,16 +28,16 @@
 					}
 				};
 				const el = document.documentElement;
-				el.dataset.skin = pick('mobos.skin', ['modern', 'retro', 'glass'], 'modern');
+				el.dataset.skin = pick('mobos.skin', ['modern', 'retro', 'glass'], 'glass');
 				el.dataset.theme = pick(
 					'mobos.theme',
 					['ferrite', 'phosphor', 'cyanotype', 'anthotype'],
-					'ferrite'
+					'anthotype'
 				);
 				el.dataset.wallpaper = pick(
 					'mobos.wallpaper',
 					['grove', 'night-scene', 'circuit-bottom', 'hive', 'none'],
-					'grove'
+					'night-scene'
 				);
 				const appearance = pick('mobos.appearance', ['light', 'dark', 'auto'], 'auto');
 				const dark =
