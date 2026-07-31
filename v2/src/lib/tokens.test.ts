@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { existsSync, readdirSync } from 'node:fs';
 import { contrast } from './contrast';
+import { SCENES, draw } from '../../scripts/gen-wallpaper';
 
 /**
  * The token contract, enforced against app.css itself rather than against a copy of it.
@@ -267,7 +268,7 @@ describe('accent budget across all 24 combinations', () => {
  * bar, and it is the whole of what these two colours have to clear.
  */
 describe('the wallpaper is a background, so it answers to the contrast contract', () => {
-	const WALL_LAYERS = ['--wall-far', '--wall-near'] as const;
+	const WALL_LAYERS = ['--wall-far', '--wall-mid', '--wall-near'] as const;
 
 	/**
 	 * `color-mix(in srgb, var(--c-a) N%, var(--c-b))`, resolved against one theme ramp. Both
@@ -316,17 +317,35 @@ describe('the wallpaper is a background, so it answers to the contrast contract'
 		expect(failures).toEqual([]);
 	});
 
-	test('every wallpaper names two masks, and both files are actually shipped', () => {
+	test('every wallpaper names a mask per layer, and every file is actually shipped', () => {
 		const missing: string[] = [];
 		for (const name of WALLPAPERS) {
 			const tokens = block(`[data-wallpaper='${name}']`);
-			for (const token of ['--wall-mask-far', '--wall-mask-near']) {
+			for (const token of ['--wall-mask-far', '--wall-mask-mid', '--wall-mask-near']) {
 				const url = tokens[token]?.match(/^url\('([^']+)'\)$/)?.[1];
 				if (!url) missing.push(`${name} ${token} is ${tokens[token] ?? '(unset)'}`);
 				else if (!existsSync(new URL(`.${url}`, staticDir))) missing.push(`${name}: ${url}`);
 			}
 		}
 		expect(missing).toEqual([]);
+	});
+
+	/**
+	 * The ridge masks are baked output, and baked output rots. Someone tunes a summit and does not
+	 * rerun the generator, or hand-edits a path in the file because it was quicker than reading the
+	 * script, and from then on the two disagree with nothing to say so: both halves still work, the
+	 * scene still draws, and the next honest rerun silently reverts whatever the hand edit was.
+	 *
+	 * Redrawing them here and comparing bytes is the whole check, and it is only possible because
+	 * the generator is seeded end to end.
+	 */
+	test('the shipped ridge masks are exactly what the generator draws', async () => {
+		const stale: string[] = [];
+		for (const scene of SCENES) {
+			const shipped = await Bun.file(new URL(`wallpapers/${scene.file}`, staticDir)).text();
+			if (shipped !== draw(scene)) stale.push(scene.file);
+		}
+		expect(stale).toEqual([]);
 	});
 
 	/**

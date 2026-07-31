@@ -14,10 +14,10 @@ export const APPEARANCES = ['light', 'dark', 'auto'] as const;
 /**
  * The scene behind the desktop. A fourth axis rather than a skin or theme value, because it is
  * neither shape nor colour: every wallpaper renders in all 24 combinations, and every skin
- * dresses the same two masks its own way. `none` falls back to the skin's plain `--desktop-bg`.
+ * dresses the same masks its own way. `none` falls back to the skin's plain `--desktop-bg`.
  *
- * Adding one means a `[data-wallpaper='...']` block in app.css naming its two mask files, and
- * the name here. Nothing else.
+ * Adding one means a `[data-wallpaper='...']` block in app.css naming one mask file per depth
+ * layer, and the name here. Nothing else.
  */
 export const WALLPAPERS = ['ridge', 'none'] as const;
 

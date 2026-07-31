@@ -5,14 +5,19 @@
 <!--
 	The scene behind the desktop.
 
-	Geometry lives in two SVG files used as `mask-image`; colour lives in CSS tokens underneath.
-	That split is the whole reason this is four divs and not an image: baking the art would mean
+	Geometry lives in three SVG files used as `mask-image`; colour lives in CSS tokens underneath.
+	That split is the whole reason this is five divs and not an image: baking the art would mean
 	one render per skin per theme per polarity, which is 24 files for one wallpaper. A mask is
-	painted by whatever token sits behind it, so one file dresses all 24.
+	painted by whatever token sits behind it, so one set of files dresses all 24.
 
-	Depth inside the far mask is alpha, not colour: three ranges at .2 / .36 / .6, so the ramp
-	from haze to foreground is one paint of one token. The near mask is solid, and its slope, its
-	treeline, and the lookout are one silhouette for the same reason.
+	Three planes, because two have no middle. Distance is read from how many planes stand between
+	the eye and the horizon, and a foreground against a backdrop gives the eye nothing to measure
+	the gap with. The bands inside each file are alpha rather than colour, so a file can carry its
+	own relief in one paint of one token, but alpha cannot stand in for the third plane: the bands
+	share a token by definition, and it is the token that changes with distance.
+
+	The masks come out of `bun scripts/gen-wallpaper.ts`, which is where the summits, the treeline,
+	and the lookout are actually authored. Nothing here knows what shape they are.
 
 	The mark sits between the sky and the ranges, so the ridges cut its base. That is the whole
 	composition, and it is why the masthead's own mark hides when a wallpaper is on: two of them
@@ -25,6 +30,7 @@
 	<div class="sky"></div>
 	<div class="mark"><Icon name="logo" size="var(--wall-mark-size)" /></div>
 	<div class="far"></div>
+	<div class="mid"></div>
 	<div class="near"></div>
 
 	<!--
@@ -67,11 +73,21 @@
 	}
 
 	/* The opt-out. `none` is the one wallpaper that names no masks, so this is the rule that
-	   makes it mean plain ground rather than two empty layers over it. */
+	   makes it mean plain ground rather than three empty layers over it. */
 	:global(html[data-wallpaper='none']) .wallpaper {
 		display: none;
 	}
 
+	/*
+	   Every layer is one div painting one token through one mask, and that is the ceiling as much
+	   as it is the technique: each one is a viewport-sized composited surface, rasterised once
+	   because nothing here moves or scrolls.
+
+	   ponytail: three is comfortable and five would not be. If the scene ever wants more planes
+	   than this, the next move is to merge the layers that share a colour token back into one file
+	   as alpha bands, not to add divs, and the one after that is to bake the whole composite per
+	   skin rather than to reach for a canvas.
+	*/
 	.wallpaper > div {
 		position: absolute;
 		inset: 0;
@@ -84,27 +100,43 @@
 	}
 
 	/*
-	   Both layers overshoot the viewport width, for two reasons. A bare `100%` puts the whole
+	   All three layers overshoot the viewport width, for two reasons. A bare `100%` puts the whole
 	   scene inside the frame, which sounds right and is not: the ranges then sit as a shallow band
 	   along the bottom edge with two thirds of the screen empty above them. And on a phone that
 	   band collapses to a 70px sliver. Scaling past the frame raises the crest line to where the
 	   composition wants it and crops the sides instead, which is what a wallpaper does.
 
-	   The far range overshoots harder than the near one, so the two crests separate rather than
-	   tracking each other up the screen.
+	   Each layer overshoots harder than the one in front of it, so the three crests fan apart up
+	   the screen rather than tracking each other. Those percentages and the viewBox heights in
+	   gen-wallpaper.ts are one decision solved together: bottom-anchored, a crest lands at
+	   `mask width * (viewBox height - crest y) / 1600` above the bottom edge, so changing either
+	   half alone slides a range into the one behind it.
+
+	   The `rem` floors are what hold the composition together on a phone, where a percentage of
+	   375px is smaller than the scene needs to be.
 	*/
 	.far,
+	.mid,
 	.near {
 		mask-repeat: no-repeat;
 		mask-position: 50% 100%;
 	}
 
+	/* Aerial perspective, spent by the one skin whose whole idea is softness, and graded rather
+	   than switched: the far range takes more of it than the middle one, which is what a real
+	   focus falloff does and what one blurred layer behind one sharp one cannot say. */
 	.far {
 		background: var(--wall-far);
 		mask-image: var(--wall-mask-far);
 		mask-size: max(132%, 74rem) auto;
-		/* Aerial perspective, spent by the one skin whose whole idea is softness. */
-		filter: var(--wall-haze);
+		filter: var(--wall-haze-far);
+	}
+
+	.mid {
+		background: var(--wall-mid);
+		mask-image: var(--wall-mask-mid);
+		mask-size: max(122%, 68rem) auto;
+		filter: var(--wall-haze-mid);
 	}
 
 	.near {

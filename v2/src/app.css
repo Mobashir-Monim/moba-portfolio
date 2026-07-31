@@ -312,18 +312,26 @@
 
 	/* Wallpaper. The masks are shared, so a skin only says how the scene is lit. The sky is an
 	   overlay rather than a ground, which is what keeps the graph paper visible through it: crisp
-	   ranges under a thin accent wash, the technical read the skin is for. */
+	   ranges under a thin accent wash, the technical read the skin is for.
+
+	   Three ranges, three steps toward the ink, and the steps are even because this is the skin
+	   that draws rather than the one that hazes: distance here is stated as tone, not blurred in.
+	   The near step is unchanged from when there were two layers, which keeps the worst case the
+	   contrast test measures exactly where it was. */
 	--wall-sky: linear-gradient(
 		180deg,
-		color-mix(in srgb, var(--c-accent) 14%, transparent) 0%,
-		transparent 46%
+		color-mix(in srgb, var(--c-accent) 16%, transparent) 0%,
+		color-mix(in srgb, var(--c-accent) 5%, transparent) 32%,
+		transparent 58%
 	);
-	--wall-far: color-mix(in srgb, var(--c-fg-1) 26%, var(--c-surface-0));
+	--wall-far: color-mix(in srgb, var(--c-fg-1) 22%, var(--c-surface-0));
+	--wall-mid: color-mix(in srgb, var(--c-fg-1) 31%, var(--c-surface-0));
 	--wall-near: color-mix(in srgb, var(--c-fg-1) 40%, var(--c-surface-0));
 	--wall-mark: color-mix(in srgb, var(--c-accent) 18%, transparent);
 	--wall-mark-size: clamp(13rem, 44vmin, 34rem);
 	--wall-fx: none;
-	--wall-haze: none;
+	--wall-haze-far: none;
+	--wall-haze-mid: none;
 
 	/* Accent budget: everywhere. */
 	--titlebar-bg: var(--c-surface-2);
@@ -424,14 +432,21 @@
 	   it on a machine that had one. No sky layer: the dither underneath is the sky, and a gradient
 	   over it would be a shade a 1-bit display could not make. Greyscale throughout, because a
 	   coloured horizon would be a third place retro spends a budget that stops at the title bar
-	   and the selection. */
+	   and the selection.
+
+	   The three steps are further apart here than in the other two skins and start higher up the
+	   ramp, because six-pixel blocks eat the difference between two adjacent tones: what survives
+	   quantising is separation, and a scene that reads on a 1-bit machine has to say distance in
+	   steps a dither could actually have made. Nothing hazes, for the same reason. */
 	--wall-sky: none;
-	--wall-far: color-mix(in srgb, var(--c-fg-1) 30%, var(--c-surface-0));
+	--wall-far: color-mix(in srgb, var(--c-fg-1) 24%, var(--c-surface-0));
+	--wall-mid: color-mix(in srgb, var(--c-fg-1) 33%, var(--c-surface-0));
 	--wall-near: color-mix(in srgb, var(--c-fg-1) 42%, var(--c-surface-0));
 	--wall-mark: color-mix(in srgb, var(--c-fg-1) 11%, transparent);
 	--wall-mark-size: clamp(13rem, 44vmin, 34rem);
 	--wall-fx: url('#mnemos-pixel');
-	--wall-haze: none;
+	--wall-haze-far: none;
+	--wall-haze-mid: none;
 
 	/* Accent budget: title bar and selection only, the rest stays greyscale. */
 	--titlebar-bg: var(--c-surface-1);
@@ -504,21 +519,36 @@
 	--path-prefix: '';
 	--sidebar-title-fg: var(--c-accent);
 
-	/* Wallpaper. Aerial perspective spent as blur: the far ranges go soft and the near silhouette
-	   stays sharp, which is the same depth trick the chrome already plays with `--bl-chrome`. The
-	   sky is the skin's accent wash carried up into the scene, and the ridges keep the shallowest
-	   steps of the three skins so the whole thing reads as haze rather than as rock. */
-	--wall-sky: linear-gradient(
-		180deg,
-		color-mix(in srgb, var(--c-accent) 26%, transparent) 0%,
-		transparent 62%
-	);
-	--wall-far: color-mix(in srgb, var(--c-fg-1) 20%, var(--c-surface-0));
+	/* Wallpaper. Aerial perspective spent as blur: the ranges go soft in proportion to how far away
+	   they are and the near silhouette stays sharp, which is the same depth trick the chrome
+	   already plays with `--bl-chrome`. Two blurs rather than one is what a third layer buys here,
+	   because a graded focus falloff is the thing photographs of distant ranges actually do and a
+	   single soft layer behind a single sharp one only ever reads as two.
+
+	   The sky is the skin's accent wash carried up into the scene, plus a low glow sitting behind
+	   the crests: gradient stops are this skin's whole accent budget, so the sun is spent from the
+	   same purse. The ridges keep the shallowest steps of the three skins so the scene reads as
+	   haze rather than as rock. */
+	--wall-sky:
+		radial-gradient(
+			72% 44% at 50% 60%,
+			color-mix(in srgb, var(--c-accent) 20%, transparent) 0%,
+			transparent 72%
+		),
+		linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--c-accent) 28%, transparent) 0%,
+			color-mix(in srgb, var(--c-accent) 9%, transparent) 38%,
+			transparent 68%
+		);
+	--wall-far: color-mix(in srgb, var(--c-fg-1) 16%, var(--c-surface-0));
+	--wall-mid: color-mix(in srgb, var(--c-fg-1) 25%, var(--c-surface-0));
 	--wall-near: color-mix(in srgb, var(--c-fg-1) 34%, var(--c-surface-0));
 	--wall-mark: color-mix(in srgb, var(--c-accent) 22%, transparent);
 	--wall-mark-size: clamp(13rem, 44vmin, 34rem);
 	--wall-fx: none;
-	--wall-haze: blur(4px);
+	--wall-haze-far: blur(6px);
+	--wall-haze-mid: blur(2px);
 
 	/* Accent budget: gradient stops. */
 	--titlebar-bg: linear-gradient(
@@ -535,19 +565,26 @@
 /* --------------------------------------------------------------------------
    Wallpaper blocks: geometry, and nothing else.
 
-   A wallpaper is a fourth axis, orthogonal to the other three: it names two
+   A wallpaper is a fourth axis, orthogonal to the other three: it names its
    mask files and stops. The skin says how the scene is lit and the theme says
-   in what colours, so one pair of files dresses all 24 combinations and adding
-   a wallpaper costs two files and three lines.
+   in what colours, so one set of files dresses all 24 combinations and adding
+   a wallpaper costs three files and four lines.
 
-   The masks are white-on-transparent, and depth inside the far one is
-   fill-opacity rather than three separate files. White plus alpha measures the
-   same in an alpha mask and in a luminance one, so `mask-mode` never has to be
-   stated.
+   The masks are white-on-transparent, and depth inside a file is fill-opacity
+   rather than a file per band. White plus alpha measures the same in an alpha
+   mask and in a luminance one, so `mask-mode` never has to be stated.
+
+   Three files rather than two, and the third is the middle. Distance in a
+   landscape is read from how many planes are between the eye and the horizon,
+   and two planes give a foreground and a backdrop with nothing in between, so
+   the eye has no scale to measure against. The bands inside a file cannot do
+   that job: they share one colour token, so they carry relief but not depth.
+   The masks themselves come out of `bun scripts/gen-wallpaper.ts`.
    -------------------------------------------------------------------------- */
 
 [data-wallpaper='ridge'] {
 	--wall-mask-far: url('/wallpapers/ridge-far.svg');
+	--wall-mask-mid: url('/wallpapers/ridge-mid.svg');
 	--wall-mask-near: url('/wallpapers/ridge-near.svg');
 }
 
