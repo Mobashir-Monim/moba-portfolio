@@ -2,6 +2,7 @@
 	import { settings } from '$lib/appearance.svelte';
 	import { BUILT, STACK } from '$lib/build';
 	import { formatSize } from '$lib/fs';
+	import { LIGHTHOUSE } from '$lib/lighthouse';
 	import { OS_NAME, OS_VERSION } from '$lib/os';
 
 	/**
@@ -66,6 +67,25 @@
 		['Delivery', 'Prerendered static, hydrated'],
 		['Built', BUILT]
 	];
+
+	/**
+	 * The last Lighthouse run, from the module `bun scripts/audit.ts` generates.
+	 *
+	 * Committed rather than measured here, because an audit needs a browser driving the page and
+	 * this component is the page. The labels are capitalised for the window; the keys are
+	 * Lighthouse's own, so a category cannot be renamed on the way in.
+	 */
+	const LABEL: Record<keyof typeof LIGHTHOUSE.scores, string> = {
+		performance: 'Performance',
+		accessibility: 'Accessibility',
+		'best-practices': 'Best practices',
+		seo: 'SEO'
+	};
+
+	const audit: Row[] = Object.entries(LIGHTHOUSE.scores).map(([key, score]) => [
+		LABEL[key as keyof typeof LIGHTHOUSE.scores],
+		`${score} / 100`
+	]);
 </script>
 
 <div class="info">
@@ -80,11 +100,14 @@
 	{@render section('System', system)}
 	{@render section('Software', STACK)}
 	{@render section('This session', session)}
+	{@render section('Lighthouse', audit)}
 
-	<!--
-		Lighthouse waits for 6.1. A score cannot be pulled at build time without running Lighthouse
-		in the build, and a hardcoded 100 is exactly the number this window exists not to print.
-	-->
+	<!-- The route and the preset go under the scores rather than beside them, because they qualify
+	     all four at once. Without them the numbers are not readings, and the mobile run on the
+	     heaviest page is the one worth printing: see `scripts/audit.ts`. -->
+	<p class="hint">
+		{LIGHTHOUSE.route}, {LIGHTHOUSE.preset}, measured {LIGHTHOUSE.measured}.
+	</p>
 </div>
 
 {#snippet section(heading: string, rows: readonly Row[])}
