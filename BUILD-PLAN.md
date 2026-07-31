@@ -1737,6 +1737,26 @@ Three complaints, all separate and all correct:
       Ceiling marked in the rule: this is the inner edge only. The ring draws 2px outside the tile,
       so its outer edge meets the wallpaper whatever the tile does underneath it.
 
+- [x] 7.6 **Down and Up on a single row.** 7.4 called this correct and left it, and left is the
+      wrong answer.
+
+      The desktop holds five icons and a wide screen lays them in one row, so `columns` is the
+      whole set and a row-sized vertical step is always out of range. Down and Up stayed put, by
+      the same rule that stops Up from the top row of a grid landing sideways on item 0. Nobody
+      reads that as a grid with no second row. They read it as arrow keys that half work, which is
+      exactly what came back from the first visitor and then again from the owner.
+
+      When the set never wraps, every arrow steps one. The row-sized step collapses to its own
+      direction, `Math.sign` of what it already was, so the horizontal keys are untouched and a
+      grid that genuinely wraps still counts rows. Guarded on `columns >= count`, which is true
+      only when nothing wrapped.
+
+      There was no third option worth having. A vertical key in a single row has no second row to
+      mean instead, so the choice is a step of one or a dead key, and the purer reading of "rows
+      are the unit" buys nothing a visitor can see. Six cases cover it, including the phone, where
+      the same five icons wrap to two rows and Down has to go back to meaning a whole row: driven
+      at 390px, it steps About Me to Projects across three columns.
+
 ---
 
 ## Sequencing notes

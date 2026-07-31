@@ -43,6 +43,42 @@ describe('nextIndex', () => {
 		expect(list('ArrowDown', 3)).toBe(3);
 	});
 
+	/**
+	 * The desktop on a wide screen, and the gallery strip: one row, so `columns` is the whole set
+	 * and a row-sized vertical step is always out of range. Down and Up did nothing there, which
+	 * was correct and useless, and is what the first visitor reported as arrow keys that half work.
+	 */
+	describe('a set laid out in one row', () => {
+		const row = (key: string, index: number) => nextIndex(key, index, 5, 5);
+
+		test('the vertical arrows step one, because there is no second row to mean instead', () => {
+			expect(row('ArrowDown', 0)).toBe(1);
+			expect(row('ArrowUp', 3)).toBe(2);
+		});
+
+		test('and still stop at the ends', () => {
+			expect(row('ArrowUp', 0)).toBe(0);
+			expect(row('ArrowDown', 4)).toBe(4);
+		});
+
+		test('the horizontal arrows are unchanged', () => {
+			expect(row('ArrowRight', 1)).toBe(2);
+			expect(row('ArrowLeft', 1)).toBe(0);
+		});
+
+		test('a set of one goes nowhere in any direction', () => {
+			for (const key of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
+				expect([key, nextIndex(key, 0, 1, 1)]).toEqual([key, 0]);
+			}
+		});
+
+		test('a wrapping grid keeps counting rows', () => {
+			// The guard is `columns >= count`, so this must not catch a grid that genuinely wraps.
+			expect(grid('ArrowDown', 1)).toBe(4);
+			expect(grid('ArrowUp', 4)).toBe(1);
+		});
+	});
+
 	test('Home and End take the ends', () => {
 		expect(grid('Home', 5)).toBe(0);
 		expect(grid('End', 1)).toBe(6);

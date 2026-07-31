@@ -19,6 +19,14 @@
  * A step off the edge stays where it is rather than clamping into range: clamped, Up from the
  * top row lands on the first item, which is a sideways jump the key did not ask for. It still
  * counts as ours, so the arrow does not scroll the page instead.
+ *
+ * **One row is the exception, and it is the one a visitor meets first.** The desktop holds five
+ * icons and a wide screen lays them in a single row, so `columns` is the whole set and a vertical
+ * step of five is always out of range: Down and Up did nothing there, correctly and uselessly.
+ * Nobody reads that as a grid with no second row; they read it as arrow keys that half work, which
+ * is what the first visitor reported. When the set never wraps, every arrow steps one. There is no
+ * second row for Down to mean instead, so the alternative to this is not a purer behaviour, it is
+ * a dead key.
  */
 export function nextIndex(
 	key: string,
@@ -36,7 +44,10 @@ export function nextIndex(
 	};
 
 	if (key in step) {
-		const target = index + step[key];
+		// A set laid out in one row has no rows to count, so the row-sized step collapses to its
+		// direction. Horizontal keys are already ±1, so this changes nothing for them.
+		const delta = columns >= count ? Math.sign(step[key]) : step[key];
+		const target = index + delta;
 		return target >= 0 && target < count ? target : index;
 	}
 
