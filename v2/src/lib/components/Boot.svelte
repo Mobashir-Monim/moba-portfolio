@@ -17,6 +17,19 @@
 
 	const KEY = 'mobos.booted';
 
+	/**
+	 * Called once the desktop is the thing on screen, whether that took a boot sequence, a skip, or
+	 * nothing at all because this tab has already booted. 7.3 is its only caller: a window that
+	 * opens itself has to open onto a desktop somebody can see, and this component is the only one
+	 * that knows when that is.
+	 *
+	 * No timer between the two. A window that appears while you are already looking at the desktop
+	 * reads as the machine finishing what it was doing; one that arrives two seconds later reads as
+	 * something that jumped in front of what you had started doing. The frame's own 160ms scale is
+	 * the whole of the arrival, and reduced motion takes even that.
+	 */
+	let { onready }: { onready?: () => void } = $props();
+
 	let step = $state(0);
 	let done = $state(false);
 
@@ -32,11 +45,15 @@
 		}
 		// Drop the attribute so the CSS that was showing this stops, even mid-outro.
 		document.documentElement.removeAttribute('data-boot');
+		onready?.();
 	}
 
 	$effect(() => {
 		if (!document.documentElement.hasAttribute('data-boot')) {
 			done = true;
+			// The returning tab, the reduced-motion visitor, and anyone whose storage refused the
+			// session key. All three are already looking at the desktop.
+			onready?.();
 			return;
 		}
 

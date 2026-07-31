@@ -20,6 +20,20 @@ export type App = {
 };
 
 /**
+ * The window that explains the desktop, and the one thing on this list that opens itself.
+ *
+ * An app rather than a content node, which was a real fork. A `README` sitting on the desktop is
+ * good metaphor and it would prerender, but it is chrome and not portfolio: it has nothing to say
+ * to a search engine, no place in the sitemap, and no business in `Person` or `CreativeWork`. It
+ * is also the only thing here whose copy changes with a setting.
+ *
+ * An app rather than a modal for a plainer reason: it is a window explaining windows. A visitor
+ * who reads it has already dragged one, closed one with Escape, and found it again on the
+ * launcher, which is more than the paragraph inside it can teach.
+ */
+export const WELCOME_ID = 'app:welcome';
+
+/**
  * Settings is a window like every other window, not a modal over a hidden desktop: it changes how
  * the desktop looks, so covering the desktop while you change it is the wrong shape.
  */
@@ -43,8 +57,16 @@ export const MINES_ID = 'app:mines';
 
 export const CALCULATOR_ID = 'app:calculator';
 
-/** Declaration order is launcher order: the tools first, then the toys. */
+/**
+ * Declaration order is launcher order: the tools first, then the toys. Read Me leads, because a
+ * launcher is also where somebody goes when they cannot work out what they are looking at.
+ *
+ * Its glyph is `document` rather than a mark of its own. It is a read me, and every OS that ever
+ * shipped one gave it the file icon: a new glyph would need three skin variants drawn to say
+ * something the document icon already says.
+ */
 export const APPS: readonly App[] = [
+	{ id: WELCOME_ID, name: 'Read Me', icon: 'document' },
 	{ id: SETTINGS_ID, name: 'Settings', icon: 'settings' },
 	{ id: TERMINAL_ID, name: 'Terminal', icon: 'terminal' },
 	{ id: SYSINFO_ID, name: 'System Info', icon: 'sysinfo' },

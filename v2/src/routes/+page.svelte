@@ -7,11 +7,12 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import IconGrid from '$lib/components/IconGrid.svelte';
 	import WindowLayer from '$lib/components/WindowLayer.svelte';
-	import { app, APP_KIND, APPS, SETTINGS_ID } from '$lib/apps';
+	import { app, APP_KIND, APPS, SETTINGS_ID, WELCOME_ID } from '$lib/apps';
 	import { about } from '$lib/content/about';
 	import { OS_NAME, OS_VERSION } from '$lib/os';
 	import { graph, PERSON as person } from '$lib/seo';
 	import { node, nodes, root, summary } from '$lib/tree';
+	import { markWelcomed, needsWelcome } from '$lib/welcome';
 	import { current, windows } from '$lib/windows.svelte';
 
 	/** Desktop selection. Purely a view state, and the desktop has no sidebar to feed. */
@@ -24,6 +25,21 @@
 	 */
 	function onkeydown(event: KeyboardEvent): void {
 		if (event.key === 'Escape') selected = undefined;
+	}
+
+	/**
+	 * 7.3. The one window that opens itself, once, on the first visit this browser has made.
+	 *
+	 * Held back until the boot screen is out of the way, because a window that opens behind a
+	 * full-screen overlay is a window nobody saw open, and the arrival is most of what it says: it
+	 * demonstrates the thing it is explaining before the first sentence is read.
+	 *
+	 * The visit is marked here rather than by the button inside, which `$lib/welcome` argues.
+	 */
+	function ready(): void {
+		if (!needsWelcome()) return;
+		markWelcomed();
+		windows.open(WELCOME_ID, APP_KIND);
 	}
 
 	const aboutNode = nodes[about.slug];
@@ -117,7 +133,7 @@
 
 <!-- Over the desktop, never instead of it: the content beneath already exists in the DOM, which
      is the whole of ledger #12 held to even here. -->
-<Boot />
+<Boot onready={ready} />
 
 <style>
 	/* `clip` rather than `hidden` for the reason spelled out in Window.svelte: a hidden box is

@@ -7,11 +7,13 @@
 		SNAKE_ID,
 		SYSINFO_ID,
 		TERMINAL_ID,
-		TILES_ID
+		TILES_ID,
+		WELCOME_ID
 	} from '$lib/apps';
 	import SettingsPanel from '../SettingsPanel.svelte';
 	import Calculator from './Calculator.svelte';
 	import Mines from './Mines.svelte';
+	import ReadMe from './ReadMe.svelte';
 	import Snake from './Snake.svelte';
 	import SystemInfo from './SystemInfo.svelte';
 	import Terminal from './Terminal.svelte';
@@ -29,7 +31,11 @@
 	settings panel is driven by the store and System Info takes none. `apps.test.ts` is what holds
 	this file to the roster, since a missing case here is an empty window rather than an error.
 -->
-{#if id === SETTINGS_ID}
+{#if id === WELCOME_ID}
+	<!-- The one app that is handed its own id: the button at the end of it closes the window it is
+	     in, and asking the frame for that is shorter than importing the constant back. -->
+	<ReadMe {id} />
+{:else if id === SETTINGS_ID}
 	<SettingsPanel
 		skin={settings.skin}
 		theme={settings.theme}

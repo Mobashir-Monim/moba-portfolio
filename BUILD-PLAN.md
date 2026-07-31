@@ -1625,7 +1625,43 @@ Three complaints, all separate and all correct:
       the chip's `background` is currently commented out in `Desktop.svelte:93` while the ridge
       colours are being eyeballed, so the comment above it describes a rule that is not running.
 
-- [ ] 7.3 **A welcome window on first visit.**
+- [x] 7.3 **A welcome window on first visit.** The window that explains the desktop, which is the
+      part of complaint 1 that a default cannot carry and the whole of complaint 3.
+
+      **An app, not a modal and not a content node**, and both halves of that were a real fork. A
+      `README` on the desktop would prerender and it is good metaphor, but it is chrome rather than
+      portfolio: nothing to say to a crawler, no place in the sitemap, no business in `Person` or
+      `CreativeWork`, and it is the only thing on the site whose copy changes with a setting. A
+      modal was the other wrong shape: this is a window explaining windows, so the visitor who
+      reads it has already dragged one, closed one with Escape, and found it again on the launcher,
+      which is more than the paragraph inside it can teach. Being an app also means it cost almost
+      no new machinery: `WindowFrame` already focuses a window when it opens, closes it on Escape,
+      goes full-screen on a phone, and hands focus back on the way out.
+
+      **It opens when the boot screen finishes**, and not on a timer after it. `Boot` now takes an
+      `onready`, which fires on completion, on skip, and immediately for a tab that has already
+      booted or prefers reduced motion. A window that arrives while you are already looking at the
+      desktop reads as the machine finishing what it was doing; one that arrives two seconds later
+      interrupts whatever you had started. The frame's own 160ms scale is the whole of the arrival.
+
+      **The visit is marked on open, not on the button.** Dismissal-driven would mean a visitor who
+      read it and closed it with Escape or the title bar control gets it again next time, and a
+      window that keeps coming back until it is dismissed one correct way is a cookie banner. The
+      cost is a reload in the first few seconds losing it, and that cost is covered by it being on
+      the launcher permanently.
+
+      **The copy that can go stale is derived.** The opening line reads `settings.clickMode` rather
+      than describing a default, because this window outlives whatever gets set in Settings ten
+      seconds later. The four keys it lists are four promises this codebase keeps: Escape is two
+      lines in `WindowFrame`, the arrows are `$lib/roving` and 7.4, and Enter and Tab are the
+      platform's own, which is why every icon is an `<a>`.
+
+      Driven headless against the preview build, 23 checks: it opens on a first visit and takes
+      focus, "Got it" closes it, the next load does not bring it back, it is on the launcher, the
+      copy follows the click-mode setting, it goes full-screen at 390px with its content intact,
+      and with JavaScript off it does not exist while the tagline still does. Sized so the button
+      at the end of it lands above the fold at the default window size, which is the one thing a
+      window that explains itself owes.
 
 - [x] 7.4 **The arrow keys reach the other three views.** A real defect, and 6.2 walked straight
       past it.
